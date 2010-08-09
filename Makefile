@@ -18,7 +18,7 @@ libwheel.a: $(OBJS)
 	$(AR) rscu $@ $^
 
 clean:
-	$(RM) libwheel.a
+	$(RM) libwheel.a libwheel.so
 	$(RM) $(OBJS)
 
 # vim:ft=make
