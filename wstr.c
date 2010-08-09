@@ -229,3 +229,10 @@ w_str_double(const char *str, double *val)
 }
 #endif /* HUGE_VAL */
 
+static inline char *
+w_strncpy(char *dest, const char *src, size_t n)
+{
+	(void) strncpy(dest,src,n);
+	dest[n-1]='\0';
+}
+

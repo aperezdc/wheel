@@ -17,6 +17,7 @@
 
 W_EXPORT char* w_strfmtv(const char *fmt, va_list argl);
 W_EXPORT char* w_strfmt (const char *fmt, ...);
+W_EXPORT char* w_strncpy(char *dest, char *orig, size_t n);
 
 W_EXPORT unsigned w_hashstrn(const char *str, size_t len);
 W_EXPORT unsigned w_hashstr (const char *str);
