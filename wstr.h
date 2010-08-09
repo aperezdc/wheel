@@ -17,7 +17,6 @@
 
 W_EXPORT char* w_strfmtv(const char *fmt, va_list argl);
 W_EXPORT char* w_strfmt (const char *fmt, ...);
-W_EXPORT char* w_strncpy(char *dest, char *orig, size_t n);
 
 W_EXPORT unsigned w_hashstrn(const char *str, size_t len);
 W_EXPORT unsigned w_hashstr (const char *str);
@@ -74,6 +73,15 @@ w_strcasecmp(const char *s1, const char *s2)
 	return ((*s1 == '\0') && (*s2 == '\0')) ? 0 : ((c1 < c2) ? -1 : 1);
 }
 #endif /* __GLIBC__ */
+
+
+static inline char*
+w_strncpy(char *dst, const char *src, size_t n)
+{
+	char *result = strncpy(dst, src, n);
+	dst[n-1] = '\0';
+	return result;
+}
 
 
 #endif /* !__wstr_h__ */
