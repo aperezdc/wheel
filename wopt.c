@@ -106,6 +106,15 @@ W_OPT_STRING(const w_opt_context_t *context)
 }
 
 
+static inline const char*
+_program_name (const char *str)
+{
+  /* FIXME Using a slash literal Unixish! */
+  const char *slash = strrchr (str, '/');
+  return (slash == NULL) ? str : (slash + 1);
+}
+
+
 static inline size_t
 _longest_option_width(const w_opt_t *opt)
 {
@@ -281,7 +290,7 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
         ? _opt_lookup_long(opt, &argv[i][2])
         : ((argv[i][2] == '\0')
             ? _opt_lookup_shrt(opt,  argv[i][1])
-            : _opt_lookup_fuzz(opt, &argv[i][1], argv[0])
+            : _opt_lookup_fuzz(opt, &argv[i][1], _program_name(argv[0]))
           );
 
       if (context.option == NULL) {
@@ -336,13 +345,13 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 			if (context.option == NULL)
 				fprintf(stderr, "%s: unknown option \"%s\"\n"
 						"Try \"%s --help\" for more information.\n",
-						argv[0], argv[i], argv[0]);
+						_program_name(argv[0]), argv[i], _program_name(argv[0]));
 			else
 				fprintf(stderr, "%s: %s --%s\nTry \"%s --help\" for more information.\n",
-						argv[0], (status == W_OPT_BAD_ARG)
+						_program_name (argv[0]), (status == W_OPT_BAD_ARG)
 							? "bad argument passed to"
 							: "missing argument(s) to",
-						context.option->string, argv[0]);
+						context.option->string, _program_name(argv[0]));
 			/* fall-through */
 		case W_OPT_EXIT_FAIL: /* Exit with the given status hint. */
 			exit(EXIT_FAILURE);
