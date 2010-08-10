@@ -1,7 +1,9 @@
 *.o
 *.so
 *.a
+*.la
 *~
 *.patch
 *.orig
 *.old
+.*.sw[op]
