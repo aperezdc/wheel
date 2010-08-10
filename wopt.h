@@ -82,7 +82,7 @@ M_(W_OPT_STRING);
 
 
 W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*);
-W_EXPORT void w_opt_help(const w_opt_t opt[], FILE *out);
+W_EXPORT void w_opt_help(const w_opt_t opt[], FILE *out, const char *progname);
 W_EXPORT void w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
     void *context, int argc, const char **argv);
 

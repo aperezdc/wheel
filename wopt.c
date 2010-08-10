@@ -185,28 +185,37 @@ _print_lspaced(FILE *f, const char *s, int l)
 
 
 void
-w_opt_help(const w_opt_t *opt, FILE *out)
+w_opt_help(const w_opt_t *opt, FILE *out, const char *progname)
 {
 	int width;
+	const char *format = NULL;
 	w_assert(opt != NULL);
 	w_assert(out != NULL);
 
 	width = (int) _longest_option_width(opt);
-	fprintf(out, "command line options:\n");
+	fprintf(out, "Usage: %s [options] [...]\n", progname);
+	fprintf(out, "Command line options:\n\n");
 
 	for (; opt->string != NULL; opt++) {
+
+		if (opt->letter && opt->string)
+			format = "  -%c, --%-*s ";
+		else if (opt->string)
+			format = "       --%-*s ";
+		else
+			format = "  -%c         ";
+
+		w_assert(format != NULL);
+		fprintf(out, format, opt->letter, width, opt->string);
+
 		switch (opt->narg) {
-			case 0:
-				fprintf(out, "  -%c         --%-*s  ", opt->letter, width, opt->string);
-				break;
-			case 1:
-				fprintf(out, "  -%c arg     --%-*s  ", opt->letter, width, opt->string);
-				break;
-			default:
-				fprintf(out, "  -%c arg...  --%-*s  ", opt->letter, width, opt->string);
+			case  0: fprintf(out, "      "); break;
+			case  1: fprintf(out, "ARG   "); break;
+			default: fprintf(out, "ARG...");
 		}
 		_print_lspaced(out, opt->info, 11 + width);
 	}
+	fputc('\n', out);
 }
 
 
@@ -249,11 +258,11 @@ _opt_lookup_fuzz(const w_opt_t *opt, const char *str, const char *prg)
     return ret;
 
   /* ...otherwise, we are in trouble. */
-  fprintf(stderr, "%s: option \"%s\" is ambiguous:\n", prg, str);
+  fprintf(stderr, "%s: option '%s' is ambiguous, possibilities:\n", prg, str);
   for (; ret->string != NULL; ret++)
     if (!strncmp(ret->string, str, len))
-      fprintf(stderr, "    -%s\n", ret->string);
-  fprintf(stderr, "Try \"%s --help\" for more information.\n", prg);
+      fprintf(stderr, "    --%s\n", ret->string);
+  fprintf(stderr, "Hint: try '%s --help'\n", prg);
 
   exit(EXIT_FAILURE);
   return NULL; /* Never reached -- but keeps compiler happy =) */
@@ -298,7 +307,7 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 				break;
 			}
 			if (context.option->letter == 'h') {
-				w_opt_help(opt, stdout);
+				w_opt_help(opt, stdout, _program_name(argv[0]));
 				status = W_OPT_EXIT_OK;
 				break;
 			}
@@ -343,9 +352,8 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 		case W_OPT_BAD_ARG: /* Handle errors. */
 		case W_OPT_MISSING_ARG:
 			if (context.option == NULL)
-				fprintf(stderr, "%s: unknown option \"%s\"\n"
-						"Try \"%s --help\" for more information.\n",
-						_program_name(argv[0]), argv[i], _program_name(argv[0]));
+				fprintf(stderr, "%s: unknown option '%s'\nHint: try '%s --help'\n",
+                _program_name(argv[0]), argv[i], _program_name(argv[0]));
 			else
 				fprintf(stderr, "%s: %s --%s\nTry \"%s --help\" for more information.\n",
 						_program_name (argv[0]), (status == W_OPT_BAD_ARG)
