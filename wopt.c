@@ -320,7 +320,8 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 		}
 		else {
 			if (file_fun != NULL)
-				(*file_fun)((void*) argv[i++], ctx);
+				(*file_fun)((void*) argv[i], ctx);
+			i++;
 		}
 	}
 
