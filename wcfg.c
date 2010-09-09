@@ -329,3 +329,65 @@ w_cfg_del(w_cfg_t *cf, const char *key)
 }
 
 
+
+#define W_CFG_DUMP_INDENT(_l, _o)  \
+    do {                           \
+        unsigned __tmp = (_l) * 4; \
+        while (__tmp--)            \
+            fputc (' ', (_o));     \
+    } while (0)
+
+
+
+static wbool
+_w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
+{
+	w_iterator_t i;
+	w_cfg_node_t *node;
+
+	w_assert (cf != NULL);
+	w_assert (out != NULL);
+
+    for (i = w_dict_first (cf); i != NULL; i = w_dict_next (cf, i)) {
+        W_CFG_DUMP_INDENT (indent, out);
+
+        node = (w_cfg_node_t*) *i;
+
+        fprintf (out, "%s = ", w_dict_iterator_get_key (i));
+
+        switch (node->kind & W_CFG_TYPE_MASK) {
+            case W_CFG_NODE:
+                fprintf (out, "{\n");
+                _w_cfg_dump_cfg (node->node, out, indent + 1);
+                W_CFG_DUMP_INDENT (indent, out);
+                fprintf (out, "};\n");
+                break;
+            case W_CFG_STRING:
+                break;
+                fprintf (out, "\"%s\";\n", node->string);
+            case W_CFG_NUMBER:
+                fprintf (out, "%lf;\n", node->number);
+                break;
+            default:
+                break;
+        }
+    }
+
+    return W_YES;
+}
+
+
+/*
+ * TODO Better error checking of IO functions.
+ */
+wbool
+w_cfg_dump (const w_cfg_t *cf, FILE *output)
+{
+    w_assert (cf != NULL);
+    w_assert (output != NULL);
+
+    return (fprintf (output, "{\n") == 1 &&
+            _w_cfg_dump_cfg (cf, output, 1) &&
+            fprintf (output, "};\n") == 1);
+}
+

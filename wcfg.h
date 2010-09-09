@@ -10,6 +10,7 @@
 
 #include "wdef.h"
 #include "wdict.h"
+#include <stdio.h>
 
 typedef w_dict_t w_cfg_t;
 
@@ -46,6 +47,7 @@ W_EXPORT wbool w_cfg_del(w_cfg_t *cf, const char *key);
 W_EXPORT wbool w_cfg_set(w_cfg_t *cf, ...);
 W_EXPORT wbool w_cfg_get(const w_cfg_t *cf, ...);
 W_EXPORT w_cfg_type_t w_cfg_type(const w_cfg_t *cf, const char *key);
+W_EXPORT wbool w_cfg_dump(const w_cfg_t *cf, FILE *output);
 
 #define w_cfg_set_string(cf, key, val) \
 	w_cfg_set(cf, W_CFG_STRING, key, val, W_CFG_END)
