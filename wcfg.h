@@ -76,5 +76,7 @@ _G( node,   W_CFG_NODE,   w_cfg_t*    )
 #define w_cfg_isnumber(cf, key)  (W_CFG_NUMBER == w_cfg_type(cf, key))
 #define w_cfg_isstring(cf, key)  (W_CFG_STRING == w_cfg_type(cf, key))
 
+#include "wcfg-parser.h"
+
 #endif /* !__wcfg_h__ */
 
