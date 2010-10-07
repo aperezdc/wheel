@@ -253,7 +253,7 @@ w_parse_string (w_parse_t *p)
 
     w_assert (p != NULL);
 
-    for (; chr != '"'; chr = fgetc (p->input)) {
+    for (; chr != '"' && !feof (p->input); chr = fgetc (p->input)) {
         if (chr == '\\') {
             /* escaped sequences */
             switch ((chr = fgetc (p->input))) {
