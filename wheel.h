@@ -296,10 +296,9 @@ W_EXPORT void w_opt_parse(const w_opt_t  *opt,
                           int            argc,
                           const char   **argv);
 
-W_EXPORT void w_opt_parse_file(const w_opt_t *opt,
-                               w_action_fun_t err_fun,
-                               void          *context,
-                               FILE          *input);
+W_EXPORT wbool w_opt_parse_file(const w_opt_t *opt,
+                                FILE          *input,
+                                char         **msg);
 
 
 /*---------------------------------[ simple, piece-based LL parsers ]-----*/

@@ -47,6 +47,9 @@ _MAKE_CONVERTER( W_OPT_DOUBLE, double       , w_str_double )
 #define OPT_LETTER(_c) \
         ((_c) & ~W_OPT_CLI_ONLY)
 
+#define CLI_LETTER(_c) \
+        (((_c) & W_OPT_CLI_ONLY) == W_OPT_CLI_ONLY)
+
 
 w_opt_status_t
 w_opt_files_action(const w_opt_context_t *ctx)
@@ -367,3 +370,124 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 }
 
 
+
+#ifndef W_OPT_PARSE_ARG_CHUNK
+#define W_OPT_PARSE_ARG_CHUNK 5
+#endif /* W_OPT_PARSE_ARG_CHUNK */
+
+
+static void
+_w_opt_parse_file (w_parse_t *p, void *ctx)
+{
+    w_opt_status_t status;
+    const w_opt_t *options = (w_opt_t*) ctx;
+    const w_opt_t *opt;
+    char *token;
+    char **args;
+    unsigned maxarg = 0;
+    unsigned narg = 0;
+
+    w_assert (p != NULL);
+    w_assert (options != NULL);
+
+    while (!feof (p->input)) {
+        if ((token = w_parse_ident (p)) == NULL) {
+            w_parse_error (p, "%u:%u: identifier expected",
+                           p->line, p->lpos);
+        }
+
+        opt = _opt_lookup_long (options, token);
+
+        if (opt == NULL || CLI_LETTER (opt->letter)) {
+            w_parse_ferror (p, "%u:%u: no such option '%s'",
+                            p->line, p->lpos, token);
+            w_free (token);
+            w_parse_rerror (p);
+        }
+
+        if (opt->narg > 0) {
+            narg   = 0;
+            maxarg = W_OPT_PARSE_ARG_CHUNK;
+            args   = w_alloc (char*, maxarg);
+
+            while (narg < opt->narg && !feof (p->input)) {
+                if (narg >= maxarg) {
+                    maxarg += W_OPT_PARSE_ARG_CHUNK;
+                    args    = w_resize (args, char*, maxarg);
+                }
+                args[narg++] = (p->look == '"')
+                             ? w_parse_string (p)
+                             : w_parse_word (p);
+            }
+
+            /* Not enough arguments given */
+            if (feof (p->input) && narg < opt->narg) {
+                unsigned i;
+                for (i = 0; i < narg; i++)
+                    w_free (args[i]);
+                w_free (args);
+
+                w_parse_ferror (p, "%u:%u: Insufficient arguments to '%s'",
+                                p->line, p->lpos, token);
+                w_free (token);
+                w_parse_rerror (p);
+            }
+
+            {
+                /* Ok, arguments gathered, now let's try to invoke the action */
+                w_opt_context_t oc = { narg,
+                    (const char**) args, opt, NULL,
+                    (const char**) args
+                };
+                status = (*opt->action) (&oc);
+            }
+
+            /* Clean up after ourselves */
+            for (narg = 0; narg < opt->narg; narg++)
+                w_free (args[narg]);
+            w_free (args);
+
+        }
+        else {
+            w_opt_context_t oc = { 0, NULL, opt, NULL, NULL };
+            status = (*opt->action) (&oc);
+        }
+
+        /* Did something go wrong? Notify error */
+        if (status != W_OPT_OK) {
+            w_parse_ferror (p, "%u:%u: arguments to '%s' are invalid",
+                            p->line, p->lpos, token);
+            w_free (token);
+            w_parse_rerror (p);
+        }
+    }
+}
+
+
+wbool
+w_opt_parse_file(const w_opt_t *opt,
+                 FILE          *input,
+                 char         **msg)
+{
+    char *errmsg;
+    wbool ret;
+
+    w_parse_t parser;
+
+    w_assert (opt != NULL);
+    w_assert (input != NULL);
+
+    w_parse_run (&parser, input, '#',
+                 _w_opt_parse_file,
+                 (void*) opt, &errmsg);
+
+
+    ret = (errmsg == NULL);
+
+    if (msg == NULL)
+        w_free (errmsg);
+    else
+        *msg = errmsg;
+
+    return ret;
+}
