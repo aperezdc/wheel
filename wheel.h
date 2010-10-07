@@ -326,6 +326,9 @@ W_EXPORT void* w_parse_run    (w_parse_t    *p,
                                void         *context,
                                char         **msg);
 
+W_EXPORT void  w_parse_error   (w_parse_t *p, const char *fmt, ...);
+W_EXPORT void  w_parse_ferror  (w_parse_t *p, const char *fmt, ...);
+W_EXPORT void  w_parse_rerror  (w_parse_t *p);
 W_EXPORT void  w_parse_getchar (w_parse_t *p);
 W_EXPORT void  w_parse_skip_ws (w_parse_t *p);
 W_EXPORT char* w_parse_string  (w_parse_t *p);

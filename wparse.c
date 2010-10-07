@@ -40,14 +40,36 @@ w_parse_getchar (w_parse_t *p)
                     p->look = EOF;
             ungetc ('\n', p->input);
         }
-    } while (p->comment && p->look == p->comment);
+    } while (p->look != EOF && p->comment && p->look == p->comment);
 }
 
 
 void
-w_parse_error (w_parse_t  *p,
-               const char *fmt,
-               ...)
+w_parse_ferror (w_parse_t  *p,
+                const char *fmt,
+                ...)
+{
+    va_list args;
+
+    w_assert (p != NULL);
+    w_assert (fmt != NULL);
+
+    va_start (args, fmt);
+    p->error = w_strfmtv (fmt, args);
+    va_end (args);
+}
+
+
+void
+w_parse_rerror (w_parse_t *p)
+{
+    w_assert (p != NULL);
+    longjmp (p->jbuf, 1);
+}
+
+
+void
+w_parse_error (w_parse_t *p, const char *fmt, ...)
 {
     va_list args;
 
@@ -58,7 +80,7 @@ w_parse_error (w_parse_t  *p,
     p->error = w_strfmtv (fmt, args);
     va_end (args);
 
-    longjmp (p->jbuf, 1);
+    w_parse_rerror (p);
 }
 
 
