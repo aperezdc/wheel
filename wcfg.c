@@ -360,8 +360,8 @@ _w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
                 fprintf (out, "};\n");
                 break;
             case W_CFG_STRING:
-                break;
                 fprintf (out, "\"%s\";\n", node->string);
+                break;
             case W_CFG_NUMBER:
                 fprintf (out, "%lf;\n", node->number);
                 break;
@@ -383,9 +383,9 @@ w_cfg_dump (const w_cfg_t *cf, FILE *output)
     w_assert (cf != NULL);
     w_assert (output != NULL);
 
-    return (fprintf (output, "{\n") == 1 &&
+    return (fprintf (output, "{\n") >= 0 &&
             _w_cfg_dump_cfg (cf, output, 1) &&
-            fprintf (output, "};\n") == 1);
+            fprintf (output, "};\n") >= 0);
 }
 
 
