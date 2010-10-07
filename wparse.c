@@ -237,6 +237,8 @@ w_parse_run (w_parse_t    *p,
     }
     else {
         /* Do parsing */
+        w_parse_getchar (p);
+        w_parse_skip_ws (p);
         (*parse_fun) (p, context);
     }
     return p->result;
