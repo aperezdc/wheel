@@ -6,14 +6,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wdef.h"
-#include "wopt.h"
-#include "werr.h"
-#include "wstr.h"
-#include "wtty.h"
-#include <string.h>
-#include <stddef.h>
-#include <stdio.h>
+#include "wheel.h"
 #include <ctype.h>
 
 

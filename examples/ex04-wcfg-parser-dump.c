@@ -5,8 +5,8 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wmem.h"
-#include "wcfg.h"
+#include "wheel.h"
+#include "wheel-private.h"
 #include <stdio.h>
 #include <stdlib.h>
 

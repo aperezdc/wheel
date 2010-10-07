@@ -6,9 +6,7 @@
  */
 
 #define _GNU_SOURCE /* Required for HUGE_VAL macros */
-#include "wstr.h"
-#include "wmem.h"
-#include "werr.h"
+#include "wheel.h"
 #include <limits.h>
 #include <stdlib.h>
 #include <errno.h>

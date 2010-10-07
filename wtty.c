@@ -6,8 +6,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wtty.h"
-
+#include "wheel.h"
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <termios.h>

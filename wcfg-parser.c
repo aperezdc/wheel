@@ -5,9 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wcfg-parser.h"
-#include "wstr.h"
-#include "wmem.h"
+#include "wheel-private.h"
 #include <stdarg.h>
 #include <ctype.h>
 

@@ -5,9 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wdef.h"
-#include "wopt.h"
-#include "werr.h"
+#include "wheel.h"
 #include <stdlib.h>
 #include <limits.h>
 #include <stdio.h>

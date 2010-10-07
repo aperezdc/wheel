@@ -1,18 +1,17 @@
 /*
- * wcfg-parser.h
+ * wheel-private.h
  * Copyright (C) 2010 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
-#ifndef __wcfg_parse_h__
-#define __wcfg_parse_h__
+#ifndef __wheel_private_h__
+#define __wheel_private_h__
 
-#include "wdef.h"
-#include "wcfg.h"
+
+#include "wheel.h"
 #include <stdio.h>
 #include <setjmp.h>
-
 
 
 /*
@@ -139,6 +138,5 @@ void   w_cfg_parser_get_cfg     (w_cfg_parser_t *self,
                                  w_cfg_t        *cfg);
 
 
-
-#endif /* !__wcfg_parse_h__ */
+#endif /* !__wheel_private_h__ */
 

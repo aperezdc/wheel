@@ -5,11 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wcfg.h"
-#include "wmem.h"
-#include "wstr.h"
-#include <string.h>
-#include <stdarg.h>
+#include "wheel.h"
 
 
 typedef struct w_cfg_node w_cfg_node_t;

@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wmem.h"
+#include "wheel.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

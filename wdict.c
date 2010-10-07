@@ -5,9 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wdict.h"
-#include "wmem.h"
-#include "wstr.h"
+#include "wheel.h"
 #include <string.h>
 
 #ifndef W_DICT_DEFAULT_SIZE
