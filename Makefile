@@ -3,7 +3,7 @@
 # Adrian Perez, 2010-08-09 20:45
 #
 
-CFLAGS += -W -Wall -Werror -fPIC
+CFLAGS += -Os -g -W -Wall -Werror -fPIC
 
 SRCS  := $(wildcard *.c)
 OBJS  := $(patsubst %.c,%.o,$(SRCS))
