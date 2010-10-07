@@ -6,7 +6,6 @@
  */
 
 #include "wheel.h"
-#include "wheel-private.h"
 
 
 typedef struct w_cfg_node w_cfg_node_t;
@@ -389,6 +388,25 @@ w_cfg_dump (const w_cfg_t *cf, FILE *output)
 }
 
 
+wbool
+w_cfg_dump_file (const w_cfg_t *cf, const char *path)
+{
+    FILE *fp;
+    wbool ret;
+
+    w_assert (cf != NULL);
+    w_assert (path != NULL);
+
+    if ((fp = fopen (path, "wb")) == NULL)
+        return W_NO;
+
+    ret = w_cfg_dump (cf, fp);
+    fclose (fp);
+    return ret;
+}
+
+
+#if 0
 w_cfg_t*
 w_cfg_load (FILE *input, char **pmsg)
 {
@@ -412,23 +430,6 @@ w_cfg_load (FILE *input, char **pmsg)
 }
 
 
-wbool
-w_cfg_dump_file (const w_cfg_t *cf, const char *path)
-{
-    FILE *fp;
-    wbool ret;
-
-    w_assert (cf != NULL);
-    w_assert (path != NULL);
-
-    if ((fp = fopen (path, "wb")) == NULL)
-        return W_NO;
-
-    ret = w_cfg_dump (cf, fp);
-    fclose (fp);
-    return ret;
-}
-
 
 w_cfg_t*
 w_cfg_load_file (const char *path, char **msg)
@@ -445,4 +446,4 @@ w_cfg_load_file (const char *path, char **msg)
     fclose (fp);
     return ret;
 }
-
+#endif
