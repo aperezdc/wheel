@@ -243,7 +243,7 @@ typedef w_opt_status_t (*w_opt_action_t)(const w_opt_context_t*);
 struct w_opt
 {
 	unsigned       narg;
-	char           letter;
+	unsigned char  letter;
 	const char    *string;
 	w_opt_action_t action;
 	void          *extra;
@@ -252,13 +252,14 @@ struct w_opt
 
 typedef struct w_opt w_opt_t;
 
+#define W_OPT_CLI_ONLY  0x80
 
 #define W_OPT_REMAINING_AS_FILES \
-	{ 0, '-', "files", w_opt_files_action, NULL, \
-		"Process remaining arguments as files." },  \
+	{ 0, '-' | W_OPT_CLI_ONLY, "files", w_opt_files_action, NULL, \
+		"Process remaining arguments as files." },                \
 
 #define W_OPT_END \
-	{ 0, 'h', "help", NULL, NULL,                  \
+	{ 0, 'h' | W_OPT_CLI_ONLY, "help", NULL, NULL,    \
 		"Shows a summary of command line options." }, \
 	{ 0, '\0', NULL, NULL, NULL, NULL }
 

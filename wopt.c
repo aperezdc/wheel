@@ -44,6 +44,10 @@ _MAKE_CONVERTER( W_OPT_FLOAT , float        , w_str_float  )
 _MAKE_CONVERTER( W_OPT_DOUBLE, double       , w_str_double )
 
 
+#define OPT_LETTER(_c) \
+        ((_c) & ~W_OPT_CLI_ONLY)
+
+
 w_opt_status_t
 w_opt_files_action(const w_opt_context_t *ctx)
 {
@@ -181,7 +185,6 @@ void
 w_opt_help(const w_opt_t *opt, FILE *out, const char *progname)
 {
 	int width;
-	const char *format = NULL;
 	w_assert(opt != NULL);
 	w_assert(out != NULL);
 
@@ -191,15 +194,17 @@ w_opt_help(const w_opt_t *opt, FILE *out, const char *progname)
 
 	for (; opt->string != NULL; opt++) {
 
-		if (opt->letter && opt->string)
-			format = "  -%c, --%-*s ";
-		else if (opt->string)
-			format = "       --%-*s ";
-		else
-			format = "  -%c         ";
-
-		w_assert(format != NULL);
-		fprintf(out, format, opt->letter, width, opt->string);
+		if (OPT_LETTER(opt->letter) && opt->string) {
+		    fprintf (out, "  -%c, --%-*s ",
+		             OPT_LETTER(opt->letter),
+		             width, opt->string);
+        }
+		else if (opt->string) {
+			fprintf (out, "       --%-*s ", width, opt->string);
+        }
+		else {
+			fprintf (out, "  -%c         ", opt->letter);
+        }
 
 		switch (opt->narg) {
 			case  0: fprintf(out, "      "); break;
@@ -217,7 +222,7 @@ _opt_lookup_shrt(const w_opt_t *opt, char chr)
 {
   w_assert(opt != NULL);
   for (; opt->string != NULL; opt++)
-    if (chr == opt->letter) return opt;
+    if (chr == OPT_LETTER(opt->letter)) return opt;
   return NULL;
 }
 
@@ -299,7 +304,7 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 				status = W_OPT_BAD_ARG;
 				break;
 			}
-			if (context.option->letter == 'h') {
+			if (OPT_LETTER(context.option->letter) == 'h') {
 				w_opt_help(opt, stdout, _program_name(argv[0]));
 				status = W_OPT_EXIT_OK;
 				break;
