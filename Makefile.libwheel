@@ -1,0 +1,36 @@
+
+# XXX This Makefile snippet is not meant to be used directly.
+#     Please include it from a top-level Makefile instead.
+#     Works fine with GNU Make, YMMV.
+#
+
+ifeq ($(strip $(libwheel_PATH)),)
+  libwheel_PATH := .
+endif
+
+libwheel_SRCS := wcfg.c   \
+                 wdict.c  \
+                 werr.c   \
+                 wmem.c   \
+                 wopt.c   \
+                 wparse.c \
+                 wstr.c   \
+                 wtty.c
+
+CPPFLAGS      += -I$(libwheel_PATH)
+libwheel      := $(libwheel_PATH)/libwheel.a
+libwheel_SRCS := $(addprefix $(libwheel_PATH)/,$(libwheel_SRCS))
+libwheel_OBJS := $(patsubst %.c,%.o,$(libwheel_SRCS))
+
+$(libwheel_OBJS): $(libwheel_PATH)/wheel.h
+$(libwheel): $(libwheel_OBJS)
+	$(AR) rscu $@ $(libwheel_OBJS)
+
+libwheel-clean:
+	$(RM) $(libwheel_OBJS)
+	$(RM) $(libwheel)
+
+clean: libwheel-clean
+
+.PHONY: libwheel-clean
+
