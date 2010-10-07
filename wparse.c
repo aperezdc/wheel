@@ -95,7 +95,7 @@ w_parse_ident (w_parse_t *p)
     w_assert (p != NULL);
 
     if (!isalpha (p->look) && p->look != '_')
-        w_parse_error (p, "%u:%u: identifier expected", p->line, p->lpos);
+        return NULL;
 
     buf = w_alloc (char, sz);
     while (isalnum (p->look) || p->look == '_') {
