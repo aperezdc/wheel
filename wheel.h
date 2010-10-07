@@ -77,8 +77,14 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
 #define w_new(_t) \
 	((_t *) w_malloc(sizeof(_t)))
 
+#define w_new0(_t) \
+    ((_t *) memset (w_new (_t), 0x00, sizeof (_t)))
+
 #define w_alloc(_t, _n) \
 	((_t *) w_malloc(sizeof(_t) * (_n)))
+
+#define w_alloc0(_t, _n) \
+    ((_t *) memset (w_alloc ((_t), (_n)), 0x00, sizeof (_t) * (_n)))
 
 #define w_resize(_p, _t, _n) \
 	((_t *) w_realloc(_p, sizeof(_t) * (_n)))
