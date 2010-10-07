@@ -15,7 +15,7 @@ w_parse_skip_ws (w_parse_t *p)
 {
     w_assert (p != NULL);
 
-    while (isspace (p->look))
+    while (isspace (p->look) && !feof (p->input))
         w_parse_getchar (p);
 }
 
