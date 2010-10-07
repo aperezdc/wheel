@@ -62,6 +62,7 @@ typedef enum w_bool wbool;
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <setjmp.h>
 #include <stdio.h>
 
 
@@ -288,8 +289,50 @@ _W_M_(W_OPT_STRING);
 
 W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*);
 W_EXPORT void w_opt_help(const w_opt_t opt[], FILE *out, const char *progname);
-W_EXPORT void w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
-    void *context, int argc, const char **argv);
+
+W_EXPORT void w_opt_parse(const w_opt_t  *opt,
+                          w_action_fun_t file_fun,
+                          void          *context,
+                          int            argc,
+                          const char   **argv);
+
+W_EXPORT void w_opt_parse_file(const w_opt_t *opt,
+                               w_action_fun_t err_fun,
+                               void          *context,
+                               FILE          *input);
+
+
+/*---------------------------------[ simple, piece-based LL parsers ]-----*/
+
+struct w_parse_s {
+    unsigned line;
+    unsigned lpos;
+    int      look;
+    int      comment;
+    FILE    *input;
+    char    *error;
+    void    *result;
+    jmp_buf  jbuf;
+};
+typedef struct w_parse_s w_parse_t;
+
+typedef void (*w_parse_fun_t) (w_parse_t*, void*);
+
+
+W_EXPORT void* w_parse_run    (w_parse_t    *p,
+                               FILE         *input,
+                               int           comment,
+                               w_parse_fun_t parse_fun,
+                               void         *context,
+                               char         **msg);
+
+W_EXPORT void  w_parse_getchar (w_parse_t *p);
+W_EXPORT void  w_parse_skip_ws (w_parse_t *p);
+W_EXPORT char* w_parse_string  (w_parse_t *p);
+W_EXPORT char* w_parse_ident   (w_parse_t *p);
+W_EXPORT wbool w_parse_double  (w_parse_t *p, double *value);
+W_EXPORT wbool w_parse_ulong   (w_parse_t *p, unsigned long *value);
+W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
 
 
 /*---------------------------------------------------[ config files ]-----*/
