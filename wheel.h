@@ -333,6 +333,7 @@ W_EXPORT void  w_parse_getchar (w_parse_t *p);
 W_EXPORT void  w_parse_skip_ws (w_parse_t *p);
 W_EXPORT char* w_parse_string  (w_parse_t *p);
 W_EXPORT char* w_parse_ident   (w_parse_t *p);
+W_EXPORT char* w_parse_word    (w_parse_t *p);
 W_EXPORT wbool w_parse_double  (w_parse_t *p, double *value);
 W_EXPORT wbool w_parse_ulong   (w_parse_t *p, unsigned long *value);
 W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);

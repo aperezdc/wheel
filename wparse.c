@@ -246,6 +246,32 @@ w_parse_run (w_parse_t    *p,
 
 
 char*
+w_parse_word (w_parse_t *p)
+{
+    unsigned long pos = 0;
+    unsigned long sz  = 32;
+    char         *buf = w_alloc (char, sz);
+
+    w_assert (p != NULL);
+
+    while (!isspace (p->look) && !feof (p->input)) {
+        buf[pos++] = p->look;
+        if (pos >= sz) {
+            sz += 32;
+            buf = w_resize (buf, char, sz);
+        }
+        w_parse_getchar (p);
+    }
+
+    w_parse_getchar (p);
+    w_parse_skip_ws (p);
+
+    buf[pos] = '\0';
+    return buf;
+}
+
+
+char*
 w_parse_string (w_parse_t *p)
 {
     unsigned long pos = 0;
