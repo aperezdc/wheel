@@ -6,6 +6,7 @@
  */
 
 #include "wheel.h"
+#include "wheel-private.h"
 
 
 typedef struct w_cfg_node w_cfg_node_t;
@@ -385,5 +386,63 @@ w_cfg_dump (const w_cfg_t *cf, FILE *output)
     return (fprintf (output, "{\n") == 1 &&
             _w_cfg_dump_cfg (cf, output, 1) &&
             fprintf (output, "};\n") == 1);
+}
+
+
+w_cfg_t*
+w_cfg_load (FILE *input, char **pmsg)
+{
+    w_cfg_parser_t parser;
+    char *msg;
+
+    w_assert (input != NULL);
+
+    w_cfg_parser_init (&parser, input);
+    msg = w_cfg_parser_parse (&parser);
+
+    if (msg != NULL) {
+        if (pmsg)
+            *pmsg = msg;
+        else
+            w_free (msg);
+        return NULL;
+    }
+
+    return parser.result;
+}
+
+
+wbool
+w_cfg_dump_file (const w_cfg_t *cf, const char *path)
+{
+    FILE *fp;
+    wbool ret;
+
+    w_assert (cf != NULL);
+    w_assert (path != NULL);
+
+    if ((fp = fopen (path, "wb")) == NULL)
+        return W_NO;
+
+    ret = w_cfg_dump (cf, fp);
+    fclose (fp);
+    return ret;
+}
+
+
+w_cfg_t*
+w_cfg_load_file (const char *path, char **msg)
+{
+    FILE *fp;
+    w_cfg_t *ret;
+
+    w_assert (path != NULL);
+
+    if ((fp = fopen (path, "rb")) == NULL)
+        return NULL;
+
+    ret = w_cfg_load (fp, msg);
+    fclose (fp);
+    return ret;
 }
 
