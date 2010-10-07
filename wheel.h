@@ -343,6 +343,37 @@ W_EXPORT wbool w_parse_double  (w_parse_t *p, double *value);
 W_EXPORT wbool w_parse_ulong   (w_parse_t *p, unsigned long *value);
 W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
 
+/*!
+ * Checks the next character in the input, cleaning up if needed. If the
+ * character is not matched, the given statement is ran, then an error is
+ * generated.
+ *
+ * \param _p Pointer to a \c w_parse_t.
+ * \param _c Character to be matched.
+ * \param _statement Cleanup statement.
+ */
+#define w_parse_match_with_cleanup(_p, _c, _statement)              \
+    do {                                                            \
+        if ((_c) == (_p)->look) {                                   \
+            w_parse_getchar (_p);                                   \
+            w_parse_skip_ws (_p);                                   \
+        } else {                                                    \
+            _statement;                                             \
+            w_parse_error ((_p), "%u:%u: character '%c' expected,", \
+                           (_p)->line, (_p)->lpos, (_c));           \
+        }                                                           \
+    } while (0)
+
+/*!
+ * Checks the next character in the input. If the character is not matched,
+ * then an error is generated.
+ *
+ * \param _p Pointer to a \c w_parse_t.
+ * \param _c Character to be matched.
+ */
+#define w_parse_match(_p, _c) \
+        w_parse_match_with_cleanup((_p), (_c), (void)0)
+
 
 /*---------------------------------------------------[ config files ]-----*/
 
