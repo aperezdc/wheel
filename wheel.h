@@ -141,13 +141,19 @@ w_strdup(const char *str)
 #endif
 
 #if defined(__GNUC__)
-# define w_strndup(str, len) ({ __typeof__(len) __l = (len)+1; \
-		(char*) memcpy(w_alloc(char, __l), (str), __l); })
+# define w_strndup(str, len) ({ \
+        __typeof__(len) __l = (len); \
+	    char *__r = (char*) memcpy(w_alloc(char, __l + 1), (str), __l); \
+	    __r[__l] = '\0'; \
+	    __r; \
+	})
 #else
 static inline char*
 w_strndup(const char *str, size_t len)
 {
-	return (char*) memcpy(w_alloc(char, ++len), str, len);
+    char *r = (char*) memcpy(w_alloc(char, len + 1), str, len);
+    r[len] = '\0';
+    return r;
 }
 #endif
 
