@@ -1,5 +1,5 @@
-/*
- * wheel.h
+/*!
+ * \file wheel.h
  * Copyright (C) 2010 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
@@ -71,6 +71,11 @@ typedef enum w_bool wbool;
 W_EXPORT void* w_malloc(size_t sz);
 W_EXPORT void* w_realloc(void *ptr, size_t sz);
 
+/*!
+ * Frees memory and sets the pointer to \c NULL.
+ *
+ * \param _x A pointer.
+ */
 #define w_free(_x) \
 	(free(_x), (_x) = NULL)
 
@@ -309,28 +314,30 @@ W_EXPORT wbool w_opt_parse_file(const w_opt_t *opt,
 
 /*---------------------------------[ simple, piece-based LL parsers ]-----*/
 
-struct w_parse_s {
-    unsigned line;
-    unsigned lpos;
-    int      look;
-    int      comment;
-    FILE    *input;
-    char    *error;
-    void    *result;
-    jmp_buf  jbuf;
+/*!
+ * Auxiliary structure for parsers.
+ */
+struct w_parse_t
+{
+    unsigned line;    /*!< Current line number.                      */
+    unsigned lpos;    /*!< Current position in line (column number). */
+    int      look;    /*!< Look-ahead character.                     */
+    int      comment; /*!< Comment character.                        */
+    FILE    *input;   /*!< Input file stream.                        */
+    char    *error;   /*!< Error message.                            */
+    void    *result;  /*!< Parsing result.                           */
+    jmp_buf  jbuf;    /*!< Jump buffer (used when raising errors).   */
 };
-typedef struct w_parse_s w_parse_t;
+typedef struct w_parse_t w_parse_t;
 
 typedef void (*w_parse_fun_t) (w_parse_t*, void*);
 
-
-W_EXPORT void* w_parse_run    (w_parse_t    *p,
-                               FILE         *input,
-                               int           comment,
-                               w_parse_fun_t parse_fun,
-                               void         *context,
-                               char         **msg);
-
+W_EXPORT void* w_parse_run     (w_parse_t    *p,
+                                FILE         *input,
+                                int           comment,
+                                w_parse_fun_t parse_fun,
+                                void         *context,
+                                char         **msg);
 W_EXPORT void  w_parse_error   (w_parse_t *p, const char *fmt, ...);
 W_EXPORT void  w_parse_ferror  (w_parse_t *p, const char *fmt, ...);
 W_EXPORT void  w_parse_rerror  (w_parse_t *p);
