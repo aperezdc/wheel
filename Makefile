@@ -49,7 +49,12 @@ clean-tests:
 	$(RM) $(libwheel_TESTRUN)
 	$(RM) $(libwheel_TESTS)
 
-.PHONY: tests clean-tests
+run-tests: tests
+	@for test in $(libwheel_TESTRUN) ; do \
+		"$${test}" || break ; \
+	done
+
+.PHONY: tests clean-tests run-tests
 
 
 # vim:ft=make
