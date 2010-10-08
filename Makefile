@@ -47,6 +47,7 @@ clean: clean-tests
 
 clean-tests:
 	$(RM) $(libwheel_TESTRUN)
+	$(RM) $(libwheel_TESTS:.c=.o)
 	$(RM) $(libwheel_TESTS)
 
 run-tests: tests
@@ -56,6 +57,7 @@ run-tests: tests
 
 .PHONY: tests clean-tests run-tests
 
+.SECONDARY:
 
 # vim:ft=make
 #
