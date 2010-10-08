@@ -1,0 +1,66 @@
+#! /bin/bash
+set -e
+
+set -- "$1" "$(basename "$1")"
+
+suite_of_filename ()
+{
+	local n=${1#check-}
+	echo "${n%.c}"
+}
+
+
+pick_test_names () {
+	sed -e '/^START_TEST/s/START_TEST[[:space:]]*(\([^)]\+\)).*/\1/p' \
+		  -e d "$1"
+}
+
+
+suite=$(suite_of_filename "$2")
+
+
+cat <<EOF
+#include "$1"
+
+static Suite*
+make_suite (void)
+{
+    Suite *s = suite_create ("${suite}");
+    TCase *c = NULL;
+EOF
+
+oldtcase=''
+while read -r testname ; do
+	funcname=${testname}
+	testname=${testname#test_}
+	testcase=${testname#*_}
+	testcase=${testcase%%_*}
+
+	if [[ ${oldtcase} != ${testcase} ]] ; then
+		echo "    if (c) suite_add_tcase (s, c);"
+		echo "    c = tcase_create (\"${testcase}\");"
+	fi
+	echo "    tcase_add_test (c, ${funcname});"
+
+done < <( pick_test_names "$1" | sort)
+
+echo "    if (c) suite_add_tcase (s, c);"
+
+cat <<EOF
+    return s;
+}
+
+int main (void)
+{
+    int nfail;
+    Suite *s = make_suite ();
+    SRunner *r = srunner_create (s);
+
+    srunner_run_all (r, CK_NORMAL);
+    nfail = srunner_ntests_failed (r);
+    srunner_free (r);
+
+    return (nfail == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+EOF
+

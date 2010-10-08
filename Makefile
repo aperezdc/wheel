@@ -30,6 +30,28 @@ clean-examples:
 
 .PHONY: examples clean-examples
 
+
+## Unit tests
+
+libwheel_CHECKS  := $(wildcard tests/check-*.c)
+libwheel_TESTS   := $(patsubst tests/check-%.c,tests/test-%.c,$(libwheel_CHECKS))
+libwheel_TESTRUN := $(patsubst %.c,%,$(libwheel_TESTS))
+
+tests/test-%.c: tests/check-%.c
+	tests/maketest $< > $@
+
+tests: $(libwheel_TESTRUN)
+$(libwheel_TESTRUN): $(libwheel) -lcheck
+
+clean: clean-tests
+
+clean-tests:
+	$(RM) $(libwheel_TESTRUN)
+	$(RM) $(libwheel_TESTS)
+
+.PHONY: tests clean-tests
+
+
 # vim:ft=make
 #
 
