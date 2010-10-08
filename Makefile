@@ -42,6 +42,7 @@ tests/test-%.c: tests/check-%.c
 
 tests: $(libwheel_TESTRUN)
 $(libwheel_TESTRUN): $(libwheel) -lcheck
+$(libwheel_TESTS): $(libwheel_PATH)/wheel.h
 
 clean: clean-tests
 
