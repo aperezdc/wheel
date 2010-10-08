@@ -7,3 +7,4 @@
 *.orig
 *.old
 .*.sw[op]
+tests/test-*
