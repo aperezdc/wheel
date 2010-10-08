@@ -127,35 +127,26 @@ W_EXPORT wbool w_str_float (const char *str, float *val);
 W_EXPORT wbool w_str_double(const char *str, double *val);
 
 
-#if defined(__GNUC__)
-# define w_strdup(str) ({ \
-		__typeof__(str) __s = (str); \
-	  w_strndup(__s, strlen(__s)); \
-	})
-#else
-static inline char*
-w_strdup(const char *str)
-{
-	return w_strndup(str, strlen(str));
-}
-#endif
-
-#if defined(__GNUC__)
-# define w_strndup(str, len) ({ \
-        __typeof__(len) __l = (len); \
-	    char *__r = (char*) memcpy(w_alloc(char, __l + 1), (str), __l); \
-	    __r[__l] = '\0'; \
-	    __r; \
-	})
-#else
 static inline char*
 w_strndup(const char *str, size_t len)
 {
-    char *r = (char*) memcpy(w_alloc(char, len + 1), str, len);
+    char *r;
+    if (str == NULL)
+        return NULL;
+    r = (char*) memcpy(w_alloc(char, len + 1), str, len);
     r[len] = '\0';
     return r;
 }
-#endif
+
+
+static inline char*
+w_strdup(const char *str)
+{
+	if (str == NULL)
+	    return NULL;
+	return w_strndup(str, strlen(str));
+}
+
 
 
 #ifdef __GLIBC__
@@ -182,7 +173,7 @@ static inline char*
 w_strncpy(char *dst, const char *src, size_t n)
 {
 	char *result = strncpy(dst, src, n);
-	dst[n-1] = '\0';
+	dst[n] = '\0';
 	return result;
 }
 
