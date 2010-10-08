@@ -23,7 +23,7 @@ cat <<EOF
 #include "$1"
 
 static Suite*
-make_suite (void)
+make_${suite}_suite (void)
 {
     Suite *s = suite_create ("${suite}");
     TCase *c = NULL;
@@ -50,10 +50,12 @@ cat <<EOF
     return s;
 }
 
+
+#ifndef TEST_NO_MAIN
 int main (void)
 {
     int nfail;
-    Suite *s = make_suite ();
+    Suite *s = make_${suite}_suite ();
     SRunner *r = srunner_create (s);
 
     srunner_run_all (r, CK_NORMAL);
@@ -62,5 +64,6 @@ int main (void)
 
     return (nfail == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
+#endif /* !TEST_NO_MAIN */
 EOF
 
