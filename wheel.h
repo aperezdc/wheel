@@ -1,5 +1,7 @@
 /*!
  * \file wheel.h
+ * \brief Main include file for libwheel.
+ *
  * Copyright (C) 2010 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
@@ -73,24 +75,52 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
 
 /*!
  * Frees memory and sets the pointer to \c NULL.
- *
  * \param _x A pointer.
  */
 #define w_free(_x) \
 	(free(_x), (_x) = NULL)
 
+/*!
+ * Allocates a new chunk of memory suitable for a value of some type.
+ * \param _t Type name for which the chunk will be allocated.
+ * \sa w_new0(), w_alloc(), w_alloc0(), w_free()
+ */
 #define w_new(_t) \
 	((_t *) w_malloc(sizeof(_t)))
 
+/*!
+ * Allocates a zero-filled chunk of memory suitable for a value of some type.
+ * \param _t Type name for which the chunk will be allocated.
+ * \sa w_new(), w_alloc(), w_alloc0(), w_free()
+ */
 #define w_new0(_t) \
     ((_t *) memset (w_new (_t), 0x00, sizeof (_t)))
 
+/*!
+ * Allocate an array of memory for items of some type.
+ * \param _t Type name of the elements.
+ * \param _n Number of elements to allocate memory for.
+ * \sa w_new(), w_new0(), w_alloc0(), w_free(), w_resize()
+ */
 #define w_alloc(_t, _n) \
 	((_t *) w_malloc(sizeof(_t) * (_n)))
 
+/*!
+ * Allocate a zero-filled array of memory for items of some type.
+ * \param _t Type name of the elements.
+ * \param _n Number of elements to allocate memory for.
+ * \sa w_new(), w_new0(), w_alloc(), w_free(), w_resize()
+ */
 #define w_alloc0(_t, _n) \
     ((_t *) memset (w_alloc ((_t), (_n)), 0x00, sizeof (_t) * (_n)))
 
+/*!
+ * Resize a chunk of memory containing items of some type.
+ * \param _p Valid pointer to a memory area.
+ * \param _t Type name of the elements.
+ * \param _n Number of elements to allocate memory for.
+ * \sa w_new(), w_new0(), w_alloc(), w_alloc0(), w_free()
+ */
 #define w_resize(_p, _t, _n) \
 	((_t *) w_realloc(_p, sizeof(_t) * (_n)))
 
