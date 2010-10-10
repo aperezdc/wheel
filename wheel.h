@@ -227,6 +227,9 @@ typedef struct w_dict_item w_dict_item_t;
 #define w_dict_item_next(_d, _i) \
 	((w_dict_item_t*) w_dict_next((_d), (w_iterator_t)(_i)))
 
+#define w_dict_foreach(_d, _i) \
+    for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
+
 
 /*----------------------------------------------------[ CLI parsing ]-----*/
 
