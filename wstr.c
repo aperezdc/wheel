@@ -135,9 +135,11 @@ w_str_int(const char *str, int *val)
 	w_assert(val != NULL);
 
 	v = strtol(str, &chkstr, 0);
-	if ((*str != '\0') && (*chkstr == '\0') &&
-			!(((v == LONG_MIN) || (v == LONG_MAX)) && (errno == ERANGE)))
-		return (*val = v, W_YES);
+	if ((*str != '\0') && (*chkstr == '\0') && (v <= INT_MAX) && (v >= INT_MIN)
+	    && !(((v == LONG_MIN) || (v == LONG_MAX)) && (errno == ERANGE)))
+    {
+        return (*val = v, W_YES);
+    }
 
 	return W_NO;
 }
