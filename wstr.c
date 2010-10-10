@@ -188,7 +188,8 @@ w_str_ulong(const char *str, unsigned long *val)
 	w_assert(val != NULL);
 
 	v = strtoul(str, &chkstr, 0);
-	if ((*str != '\0') && (*chkstr == '\0'))
+	if ((*str != '\0') && (*chkstr == '\0') &&
+	        !(v == ULONG_MAX && errno == ERANGE))
 		return (*val = v, W_YES);
 
 	return W_NO;
