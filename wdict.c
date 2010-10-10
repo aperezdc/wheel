@@ -36,7 +36,7 @@
 #define W_DICT_KEY_EQN(_a, _b, _blen) (!strncmp((_a), (_b), (_blen)))
 #endif /* !W_DICT_KEY_EQN */
 
-typedef struct w_dict_node w_dict_node_t;
+typedef struct w_dict_node_t w_dict_node_t;
 
 
 /*
@@ -44,7 +44,7 @@ typedef struct w_dict_node w_dict_node_t;
  * XXX  you want to add new fields, ADD FIELDS AT THE END.  XXX
  */
 
-struct w_dict_node
+struct w_dict_node_t
 {
 	void *val;
 	char *key;
@@ -53,7 +53,7 @@ struct w_dict_node
 	w_dict_node_t *prevNode;
 };
 
-struct w_dict
+struct w_dict_t
 {
 	w_dict_node_t **nodes;
 	w_dict_node_t *first;

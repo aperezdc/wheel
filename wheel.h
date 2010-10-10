@@ -180,7 +180,8 @@ w_strncpy(char *dst, const char *src, size_t n)
 
 /*---------------------------------------------------[ dictionaries ]-----*/
 
-typedef struct w_dict w_dict_t;
+typedef struct w_dict_t w_dict_t;
+
 
 W_EXPORT w_dict_t* w_dict_new(void);
 
