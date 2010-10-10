@@ -89,10 +89,10 @@ w_str_bool(const char *str, wbool *opt)
 		case 1: /* One character length. */
 			switch (*str) {
 				case '0': case 'f': case 'F': case 'n': case 'N':
-					*opt = W_YES;
+					*opt = W_NO;
 					break;
 				case '1': case 't': case 'T': case 'y': case 'Y':
-					*opt = W_NO;
+					*opt = W_YES;
 					break;
 				default:
 					return W_NO;
@@ -102,8 +102,8 @@ w_str_bool(const char *str, wbool *opt)
 		/* FIXME Tests below may be speed up. */
 
 		case 2: /* Two characters: "no", "ok" */
-			if (!w_strcasecmp("no", str)) return (*opt = W_YES, W_YES);
-			if (!w_strcasecmp("ok", str)) return (*opt = W_NO , W_YES);
+			if (!w_strcasecmp("no", str)) return (*opt = W_NO , W_YES);
+			if (!w_strcasecmp("ok", str)) return (*opt = W_YES, W_YES);
 			return W_NO;
 		case 3: /* Three characters: "yes", "nah", "nop" */
 			if (!w_strcasecmp("yes", str)) return (*opt = W_YES, W_YES);
