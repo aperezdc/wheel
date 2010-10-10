@@ -147,6 +147,9 @@ w_dict_clear(w_dict_t *d)
 	w_assert (d != NULL);
 	_w_dict_free_nodes(d);
 	memset(d->nodes, 0x00, d->size * sizeof(w_dict_node_t*));
+
+	d->first = NULL;
+	d->count = 0;
 }
 
 
