@@ -340,7 +340,7 @@ w_dict_traverse(w_dict_t *d, w_traverse_fun_t f, void *ctx)
 	w_assert (d != NULL);
 	w_assert (f != NULL);
 
-	for (i = w_dict_first(d); i != NULL; i = w_dict_next(d, i))
+	w_dict_foreach (d, i)
 		*i = (*f)(*i, ctx);
 }
 
