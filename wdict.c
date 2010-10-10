@@ -370,3 +370,16 @@ w_dict_traverse_values(w_dict_t *d, w_traverse_fun_t f, void *ctx)
 		i->val = (*f)(i->val, ctx);
 }
 
+
+void
+w_dict_update (w_dict_t *dst, const w_dict_t *src)
+{
+    w_dict_item_t *i;
+
+    w_assert (dst != NULL);
+    w_assert (src != NULL);
+
+    for (i = w_dict_item_first (src); i != NULL; i = w_dict_item_next (src, i))
+        w_dict_set (dst, i->key, i->val);
+}
+
