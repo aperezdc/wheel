@@ -116,7 +116,7 @@ _w_dict_free_nodes(w_dict_t *d)
 w_dict_t*
 w_dict_new(void)
 {
-	w_dict_t *d = w_new(w_dict_t);
+	w_dict_t *d = w_new0 (w_dict_t);
 	d->size  = W_DICT_DEFAULT_SIZE;
 	d->nodes = w_alloc(w_dict_node_t*, d->size);
 	return d;
