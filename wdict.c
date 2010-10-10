@@ -267,7 +267,14 @@ w_dict_setn(w_dict_t *d, const char *key, size_t len, void *val)
 
 
 void
-w_dict_del(w_dict_t *d, const char *key)
+w_dict_del (w_dict_t *d, const char *key)
+{
+    w_dict_deln (d, key, strlen (key));
+}
+
+
+void
+w_dict_deln(w_dict_t *d, const char *key, size_t keylen)
 {
 	unsigned hval;
 	w_dict_node_t *node;
@@ -275,10 +282,10 @@ w_dict_del(w_dict_t *d, const char *key)
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASH(key, d->size);
+	hval = W_DICT_HASHN(key, d->size, keylen);
 
 	for (node = d->nodes[hval]; node; node = node->next) {
-		if (W_DICT_KEY_EQ(node->key, key)) {
+		if (W_DICT_KEY_EQN(node->key, key, keylen)) {
 			w_dict_node_t *prevNode = node->prevNode;
 			w_dict_node_t *nextNode = node->nextNode;
 

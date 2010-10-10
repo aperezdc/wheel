@@ -191,6 +191,7 @@ W_EXPORT unsigned w_dict_count(const w_dict_t *d);
 
 W_EXPORT void* w_dict_getn(const w_dict_t *d, const char *key, size_t keylen);
 W_EXPORT void  w_dict_setn(w_dict_t *d, const char *key, size_t keylen, void *data);
+W_EXPORT void  w_dict_deln(w_dict_t *d, const char *key, size_t keylen);
 
 W_EXPORT void  w_dict_del(w_dict_t *d, const char *key);
 W_EXPORT void  w_dict_set(w_dict_t *d, const char *key, void *data);
