@@ -6,6 +6,7 @@
  */
 
 #include <check.h>
+#include <limits.h>
 #include "wheel.h"
 
 START_TEST (test_wstr_conv_bool_t)
@@ -187,6 +188,90 @@ START_TEST (test_wstr_conv_bool_fail)
     fail_if (w_str_bool ("", &dummy), "Could convert ''");
     fail_if (w_str_bool (" ", &dummy), "Could convert ' '");
     fail_if (w_str_bool ("foo", &dummy), "Could convert 'foo'");
+}
+END_TEST
+
+
+START_TEST (test_wstr_conv_int_0)
+{
+    int val;
+    fail_unless (w_str_int ("0", &val), "Could not convert");
+    fail_unless (val == 0, "Converted value is not 0");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_negative)
+{
+    int val;
+    fail_unless (w_str_int ("-42", &val), "Could not converted");
+    fail_unless (val == -42, "Converted value is not -42");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_positive)
+{
+    int val;
+    fail_unless (w_str_int ("42", &val), "Could not converted");
+    fail_unless (val == 42, "Converted value is not -42");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_fail)
+{
+    int val;
+    fail_if (w_str_int ("", &val), "Could convert");
+    fail_if (w_str_int (" ", &val), "Could convert");
+    fail_if (w_str_int ("a", &val), "Could convert");
+    fail_if (w_str_int ("21f", &val), "Could convert");
+    fail_if (w_str_int ("f12", &val), "Could convert");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_huge)
+{
+    int val;
+    fail_if (w_str_int ("123456789012345678901234567890", &val),
+             "Could convert");
+    fail_if (w_str_int ("-123456789012345678901234567890", &val),
+             "Could convert");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_max)
+{
+    char buf[200];
+    int val;
+    sprintf (buf, "%i", INT_MAX);
+    fail_unless (w_str_int (buf, &val), "Could not convert");
+    fail_unless (val == INT_MAX, "Convertted value is not INT_MAX");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_min)
+{
+    char buf[200];
+    int val;
+    sprintf (buf, "%i", INT_MIN);
+    fail_unless (w_str_int (buf, &val), "Could not convert");
+    fail_unless (val == INT_MIN, "Converted value is not INT_MIN");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_min_minusone)
+{
+    char buf[200];
+    int val;
+    sprintf (buf, "%li", (long) INT_MIN - 1);
+    fail_if (w_str_int (buf, &val), "Could convert");
+}
+END_TEST
+
+START_TEST (test_wstr_conv_int_max_plusone)
+{
+    char buf[200];
+    int val;
+    sprintf (buf, "%li", (long) INT_MAX + 1);
+    fail_if (w_str_int (buf, &val), "Could convert");
 }
 END_TEST
 
