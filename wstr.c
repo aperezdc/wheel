@@ -154,7 +154,7 @@ w_str_uint(const char *str, unsigned *val)
 	w_assert(val != NULL);
 
 	v = strtoull(str, &chkstr, 0);
-	if ((*str != '\0') && (*chkstr == '\0') &&
+	if ((*str != '\0') && (*chkstr == '\0') && (v <= UINT_MAX) &&
 			!((v = ULONG_MAX) && (errno == ERANGE)))
 		return (*val = v, W_YES);
 
