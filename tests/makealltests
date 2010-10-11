@@ -1,0 +1,49 @@
+#! /bin/bash
+set -e
+
+suite_of_filename ()
+{
+	local n=$(basename "$1")
+	n=${n#test-}
+	n=${n%%*-}
+	echo "${n%.c}"
+}
+
+
+for filename in "$@" ; do
+	echo "#include \"$(basename "${filename}")\""
+done
+
+cat <<EOF
+
+START_TEST (dummy_main_test) {} END_TEST
+
+static Suite*
+make_main_suite (void)
+{
+    Suite *s = suite_create ("main");
+    TCase *c = tcase_create ("main");
+    tcase_add_test (c, dummy_main_test);
+    return s;
+}
+
+int main (void)
+{
+    int nfail;
+    SRunner *r = srunner_create (make_main_suite ());
+EOF
+
+for filename in "$@" ; do
+	suite=$(suite_of_filename "${filename}")
+	echo "    srunner_add_suite (r, make_${suite}_suite ());"
+done
+
+cat <<EOF
+    srunner_run_all (r, CK_NORMAL);
+    nfail = srunner_ntests_failed (r);
+    srunner_free (r);
+
+    return (nfail == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+EOF
+
