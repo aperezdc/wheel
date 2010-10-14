@@ -291,8 +291,9 @@ _opt_lookup_long(const w_opt_t *opt, const char *str)
  *      file argument callback as part of its %w_opt_context_t argument.
  * \param argc Number of command line arguments.
  * \param argv Actual command line arguments.
+ * \return Number of options consumed.
  */
-void
+unsigned
 w_opt_parse (const w_opt_t *options,
              w_action_fun_t file_cb,
              void          *userdata,
@@ -353,8 +354,9 @@ w_opt_parse (const w_opt_t *options,
 		}
 		else {
 			if (file_cb != NULL)
-				(*file_cb)((void*) argv[i], userdata);
-			i++;
+				(*file_cb)((void*) argv[i++], userdata);
+			else
+				return ++i;
 		}
 	}
 
@@ -381,6 +383,8 @@ w_opt_parse (const w_opt_t *options,
 		case W_OPT_EXIT_OK:
 			exit(EXIT_SUCCESS);
 	}
+
+	return i;
 }
 
 

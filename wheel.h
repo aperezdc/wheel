@@ -333,11 +333,11 @@ _W_M_(W_OPT_STRING);
 W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*);
 W_EXPORT void w_opt_help(const w_opt_t opt[], FILE *out, const char *progname);
 
-W_EXPORT void w_opt_parse(const w_opt_t  *options,
-                          w_action_fun_t file_cb,
-                          void          *userdata,
-                          int            argc,
-                          char         **argv);
+W_EXPORT unsigned w_opt_parse(const w_opt_t  *options,
+                              w_action_fun_t file_cb,
+                              void          *userdata,
+                              int            argc,
+                              char         **argv);
 
 W_EXPORT wbool w_opt_parse_file(const w_opt_t *opt,
                                 FILE          *input,
