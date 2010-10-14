@@ -148,7 +148,7 @@ _print_blanks(FILE *f, size_t n)
 static inline void
 _print_lspaced(FILE *f, const char *s, int l)
 {
-  unsigned tty_cols = w_tty_cols() - 10;
+  unsigned tty_cols = w_tty_cols() - l;
   const char *spc = s;
   unsigned col = 0;
   int lstart = 1;
@@ -214,7 +214,7 @@ w_opt_help(const w_opt_t *opt, FILE *out, const char *progname)
 			case  1: fprintf(out, "ARG   "); break;
 			default: fprintf(out, "ARG...");
 		}
-		_print_lspaced(out, opt->info, 11 + width);
+		_print_lspaced(out, opt->info, 15 + width);
 	}
 	fputc('\n', out);
 }
