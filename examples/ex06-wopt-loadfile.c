@@ -24,7 +24,7 @@ static const w_opt_t option_spec[] = {
 
 
 int
-main (int argc, const char **argv)
+main (int argc, char **argv)
 {
     char *errmsg = NULL;
 

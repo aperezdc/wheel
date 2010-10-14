@@ -281,26 +281,40 @@ _opt_lookup_long(const w_opt_t *opt, const char *str)
 }
 
 
+/*!
+ * Parses command line options.
+ *
+ * \param options An array of %w_opt_t structures which specify what options
+ *      are acceptable.
+ * \param file_cb Callback function called when a file argument is found.
+ * \param userdata Arbitrary user-provided data which is passed back to the
+ *      file argument callback as part of its %w_opt_context_t argument.
+ * \param argc Number of command line arguments.
+ * \param argv Actual command line arguments.
+ */
 void
-w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
-    void *ctx, int argc, const char **argv)
+w_opt_parse (const w_opt_t *options,
+             w_action_fun_t file_cb,
+             void          *userdata,
+             int            argc,
+             char         **argv)
 {
   w_opt_status_t status = W_OPT_OK;
-  w_opt_context_t context = { argc, argv, NULL, ctx, NULL };
+  w_opt_context_t context = { argc, argv, NULL, userdata, NULL };
   wbool files_only = W_NO;
   size_t i = 1;
 
-  w_assert(opt != NULL);
+  w_assert(options != NULL);
   w_assert(argv != NULL);
 
   while (i < (unsigned) argc) {
     if (!files_only && (argv[i][0] == '-')) {
       /* option */
       context.option = ((argv[i][1] == '-') && (argv[i][2] != '\0'))
-        ? _opt_lookup_long(opt, &argv[i][2])
+        ? _opt_lookup_long(options, &argv[i][2])
         : ((argv[i][2] == '\0')
-            ? _opt_lookup_shrt(opt,  argv[i][1])
-            : _opt_lookup_fuzz(opt, &argv[i][1], _program_name(argv[0]))
+            ? _opt_lookup_shrt(options,  argv[i][1])
+            : _opt_lookup_fuzz(options, &argv[i][1], _program_name(argv[0]))
           );
 
       if (context.option == NULL) {
@@ -308,7 +322,7 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 				break;
 			}
 			if (OPT_LETTER(context.option->letter) == 'h') {
-				w_opt_help(opt, stdout, _program_name(argv[0]));
+				w_opt_help(options, stdout, _program_name(argv[0]));
 				status = W_OPT_EXIT_OK;
 				break;
 			}
@@ -338,8 +352,8 @@ w_opt_parse(const w_opt_t *opt, w_action_fun_t file_fun,
 			i += context.option->narg;
 		}
 		else {
-			if (file_fun != NULL)
-				(*file_fun)((void*) argv[i], ctx);
+			if (file_cb != NULL)
+				(*file_cb)((void*) argv[i], userdata);
 			i++;
 		}
 	}
@@ -435,10 +449,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
 
             {
                 /* Ok, arguments gathered, now let's try to invoke the action */
-                w_opt_context_t oc = { narg,
-                    (const char**) args, opt, NULL,
-                    (const char**) args
-                };
+                w_opt_context_t oc = { narg, args, opt, NULL, args };
                 status = (*opt->action) (&oc);
             }
 
