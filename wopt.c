@@ -356,7 +356,7 @@ w_opt_parse (const w_opt_t *options,
 			if (file_cb != NULL)
 				(*file_cb)((void*) argv[i++], userdata);
 			else
-				return ++i;
+				return i;
 		}
 	}
 
