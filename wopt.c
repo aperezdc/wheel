@@ -409,7 +409,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
     w_assert (options != NULL);
 
     while (!feof (p->input)) {
-        if ((token = w_parse_ident (p)) == NULL) {
+        if ((token = w_parse_word (p)) == NULL) {
             w_parse_error (p, "%u:%u: identifier expected",
                            p->line, p->lpos);
         }
