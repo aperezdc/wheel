@@ -455,7 +455,7 @@ W_EXPORT wbool    w_cfg_dump(const w_cfg_t *cf, FILE *output);
 W_EXPORT w_cfg_t* w_cfg_load(FILE *input, char **msg);
 
 W_EXPORT wbool    w_cfg_dump_file(const w_cfg_t *cf, const char *path);
-W_EXPORT w_cfg_t *w_cfg_load_file(const char *path, char **msg);
+W_EXPORT w_cfg_t* w_cfg_load_file(const char *path, char **msg);
 
 #define w_cfg_set_string(cf, key, val) \
 	w_cfg_set(cf, W_CFG_STRING, key, val, W_CFG_END)
