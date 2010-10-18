@@ -351,20 +351,20 @@ _w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
 
         node = (w_cfg_node_t*) *i;
 
-        fprintf (out, "%s = ", w_dict_iterator_get_key (i));
+        fprintf (out, "%s ", w_dict_iterator_get_key (i));
 
         switch (node->kind & W_CFG_TYPE_MASK) {
             case W_CFG_NODE:
                 fprintf (out, "{\n");
                 _w_cfg_dump_cfg (node->node, out, indent + 1);
                 W_CFG_DUMP_INDENT (indent, out);
-                fprintf (out, "};\n");
+                fprintf (out, "}\n");
                 break;
             case W_CFG_STRING:
-                fprintf (out, "\"%s\";\n", node->string);
+                fprintf (out, "\"%s\"\n", node->string);
                 break;
             case W_CFG_NUMBER:
-                fprintf (out, "%lf;\n", node->number);
+                fprintf (out, "%lf\n", node->number);
                 break;
             default:
                 break;
@@ -384,9 +384,7 @@ w_cfg_dump (const w_cfg_t *cf, FILE *output)
     w_assert (cf != NULL);
     w_assert (output != NULL);
 
-    return (fprintf (output, "{\n") >= 0 &&
-            _w_cfg_dump_cfg (cf, output, 1) &&
-            fprintf (output, "};\n") >= 0);
+    return _w_cfg_dump_cfg (cf, output, 0);
 }
 
 
