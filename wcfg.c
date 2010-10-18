@@ -95,6 +95,8 @@ _w_cfg_ensurenode(w_cfg_t *cf, const char *key)
 
 	if ((sep = strchr(key, '.')) != NULL)
 		len = (size_t) (sep - key);
+    else
+        len = strlen (key);
 
 	if (w_dict_count(cf)) {
 		if (sep != NULL) {
