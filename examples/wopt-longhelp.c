@@ -21,6 +21,10 @@ static const w_opt_t options[] = {
 
 int main (int argc, char **argv)
 {
-    w_opt_parse (options, NULL, NULL, argc, argv);
-    return 0;
+    w_unused (argc);
+    w_unused (argv);
+
+    w_opt_help (options, stdout, argv[0]);
+
+    return EXIT_SUCCESS;
 }
