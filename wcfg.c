@@ -406,27 +406,83 @@ w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 }
 
 
-#if 0
+static void
+_w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
+{
+    char    *key;
+    char    *svalue;
+    w_cfg_t *cvalue;
+    double   dvalue;
+
+    w_assert (p);
+    w_assert (r);
+
+    /*
+     * Empty subnode, e.g. like the following:
+     *
+     *    this_is_empty { }
+     *
+     * This is valid syntax, so take it into account.
+     */
+    while (p->look != EOF && p->look != '}' && !feof (p->input)) {
+        key = w_parse_ident (p);
+        switch (p->look) {
+            case '"':
+                if ((svalue = w_parse_string (p)) == NULL) {
+                    w_free (key);
+                    w_parse_error (p, "%u:%u: error parsing string",
+                                   p->line, p->lpos);
+                }
+                w_cfg_set_string (r, key, svalue);
+                w_free (svalue);
+                break;
+            case '{':
+                w_parse_match (p, '{');
+                cvalue = w_cfg_new ();
+                w_cfg_set_node (r, key, cvalue);
+                w_free (key);
+                _w_cfg_parse_items (p, cvalue);
+                w_parse_match (p, '}');
+                break;
+            default:
+                if (!w_parse_double (p, &dvalue)) {
+                    w_free (key);
+                    w_parse_error (p, "%u:%u: number expected",
+                                   p->line, p->lpos);
+                }
+                w_cfg_set_number (r, key, dvalue);
+        }
+        w_free (key);
+    }
+}
+
+
 w_cfg_t*
 w_cfg_load (FILE *input, char **pmsg)
 {
-    w_cfg_parser_t parser;
-    char *msg;
+    char *errmsg;
+    w_cfg_t *result = w_cfg_new ();
+
+    w_parse_t parser;
 
     w_assert (input != NULL);
 
-    w_cfg_parser_init (&parser, input);
-    msg = w_cfg_parser_parse (&parser);
+    w_parse_run (&parser, input, '#',
+                 (w_parse_fun_t) _w_cfg_parse_items,
+                 result, &errmsg);
 
-    if (msg != NULL) {
-        if (pmsg)
-            *pmsg = msg;
+    if (errmsg != NULL) {
+        w_cfg_free (result);
+        w_assert (errmsg);
+        if (pmsg == NULL)
+            w_free (errmsg);
         else
-            w_free (msg);
+            *pmsg = errmsg;
         return NULL;
     }
-
-    return parser.result;
+    else {
+        return result;
+    }
 }
 
 
@@ -446,4 +502,4 @@ w_cfg_load_file (const char *path, char **msg)
     fclose (fp);
     return ret;
 }
-#endif
+
