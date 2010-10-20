@@ -73,7 +73,7 @@ W_OPT_BOOL(const w_opt_context_t *context)
 	w_assert(context->option->extra != NULL);
 
 	if (context->option->narg == 0) {
-		*((wbool*) context->option->extra) = !*((wbool*) context->option->extra);
+		*((wbool*) context->option->extra) = W_YES;
 		return W_OPT_OK;
 	}
 
