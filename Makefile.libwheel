@@ -15,6 +15,7 @@ libwheel_SRCS := wcfg.c   \
                  wopt.c   \
                  wparse.c \
                  wstr.c   \
+                 wbuf.c   \
                  wtty.c
 
 CPPFLAGS      += -I$(libwheel_PATH)

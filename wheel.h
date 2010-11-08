@@ -414,6 +414,109 @@ W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
         w_parse_match_with_cleanup((_p), (_c), (void)0)
 
 
+/*--------------------------------------------------[ text buffers ]------*/
+
+typedef struct w_buf_t w_buf_t;
+
+/*!
+ * \brief A variable-length buffer for arbitrary data.
+ * Can hold any kind of data, including null characters, as data length is
+ * tracked separately. To initialize a buffer, do something like this:
+ * \code
+ *   w_buf_t mybuffer = W_BUFFER;
+ * \endcode
+ */
+struct w_buf_t
+{
+    char  *buf; /*!< Actual data */
+    size_t len; /*!< Data length */
+    size_t bsz; /*!< Buffer size */
+};
+
+
+/*!
+ * Initializer for %w_buf_t
+ */
+#define W_BUF { NULL, 0, 0 }
+
+
+/*!
+ * Get the length of a buffer
+ */
+#define w_buf_length(_b)  (w_assert (_b), (_b)->len)
+
+/*!
+ * Reset a buffer to its initial (empty) state
+ */
+#define w_buf_reset w_buf_free
+
+/*!
+ * Adjust the length of a buffer keeping contents.
+ * This is mostly useful for trimming contents, when shrinking the buffer.
+ * When a buffer grows, random data is liklely to appear at the end.
+ * \param buf A %w_buf_t buffer
+ * \param len New length of the buffer
+ */
+void w_buf_length_set  (w_buf_t       *buf,
+                        size_t         len);
+
+/*!
+ * Set the contents of a buffer to a C string.
+ * \param buf A %w_buf_t buffer
+ * \param str String to set the buffer to
+ */
+void w_buf_set_str     (w_buf_t       *buf,
+                        const char    *str);
+
+/*!
+ * Appends the contents of a memory block to a buffer.
+ * \param buf A %w_buf_t buffer
+ * \param ptr Pointer to the block of memory
+ * \param len Length of the memory block
+ */
+void w_buf_append_mem  (w_buf_t       *buf,
+                        const void    *ptr,
+                        size_t         len);
+
+/*!
+ * Appends a character to a buffer
+ * \param buf A %w_buf_t buffer
+ * \param chr A character
+ */
+void w_buf_append_char (w_buf_t       *buf,
+                        int            chr);
+
+/*!
+ * Appends a string to a buffer.
+ * \param buf A %w_buf_t buffer
+ * \param str A string
+ */
+void w_buf_append_str  (w_buf_t       *buf,
+                        const char    *str);
+
+/*!
+ * Appends a buffer to another buffer
+ * \param buf A %w_buf_t buffer
+ * \param src Another %w_buf_t which contains the data to be appended
+ */
+void w_buf_append_buf  (w_buf_t       *buf,
+                        const w_buf_t *src);
+
+/*!
+ * Frees the contents of a buffer.
+ * \param buf A %w_buf_t buffer
+ */
+void w_buf_free        (w_buf_t    *buf);
+
+/*!
+ * Get the buffer as a C string.
+ * Note that if the buffer contains embedded null characters, functions like
+ * \c strlen() will not report the full length of the buffer.
+ * \param buf A %w_buf_t buffer
+ */
+const char*
+     w_buf_str         (const w_buf_t *buf);
+
 /*---------------------------------------------------[ config files ]-----*/
 
 typedef w_dict_t w_cfg_t;
