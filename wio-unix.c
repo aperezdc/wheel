@@ -10,10 +10,16 @@
 #include <errno.h>
 
 
+/*
+ * NOTE: Casting void* to ptrdiff_t is more portable, because depending on
+ * the platform pointers may not fit in integers and compilers could give
+ * warnings or even refuse to compile this file.
+ */
+
 wbool
 w_io_unix_close (void *udata)
 {
-    int fd = (int) udata;
+    int fd = (ptrdiff_t) udata;
     return (close (fd) == 0);
 }
 
@@ -21,7 +27,7 @@ w_io_unix_close (void *udata)
 ssize_t
 w_io_unix_write (void *udata, const void *buf, size_t len)
 {
-    int fd = (int) udata;
+    int fd = (ptrdiff_t) udata;
     ssize_t ret, n = len;
 
     while (len > 0) {
@@ -44,7 +50,7 @@ w_io_unix_write (void *udata, const void *buf, size_t len)
 ssize_t
 w_io_unix_read (void *udata, void *buf, size_t len)
 {
-    int fd = (int) udata;
+    int fd = (ptrdiff_t) udata;
     ssize_t ret;
 
     do {

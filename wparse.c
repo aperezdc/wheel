@@ -12,11 +12,6 @@
 #include <ctype.h>
 
 
-/*!
- * Skips whitespace in the input. All characters for which \c isspace()
- * returns true will be ignored until the first non-blank or the end of
- * the input stream is found.
- */
 void
 w_parse_skip_ws (w_parse_t *p)
 {
@@ -27,11 +22,6 @@ w_parse_skip_ws (w_parse_t *p)
 }
 
 
-/*!
- * Gets the next character in the input, skipping over comments. If comments
- * are enabled i.e. the \ref w_parse_t::comment field is different than
- * \c 0, then when a comment character is found, the entire line is skipped.
- */
 void
 w_parse_getchar (w_parse_t *p)
 {
@@ -56,18 +46,6 @@ w_parse_getchar (w_parse_t *p)
 }
 
 
-/*!
- * Format an error string. The formatted string will be saved in the
- * \ref w_parse_t::error field. A typical formats format is the following
- * one, including the line and column numbers:
- *
- * \code
- *    w_parse_ferror (p, "%u:%u: Your error message", p->line, p->lpos);
- * \endcode
- *
- * \param fmt Format string (printf-like).
- * \param ... Arguments for the format string.
- */
 void
 w_parse_ferror (w_parse_t  *p,
                 const char *fmt,
@@ -84,13 +62,6 @@ w_parse_ferror (w_parse_t  *p,
 }
 
 
-/*!
- * Raise a parsing error. Make sure you free intermediate strucutures and
- * data parsing may have created before calling this function, otherwise
- * memory will leak.
- *
- * \sa w_parse_ferror(), w_parse_error()
- */
 void
 w_parse_rerror (w_parse_t *p)
 {
@@ -99,13 +70,6 @@ w_parse_rerror (w_parse_t *p)
 }
 
 
-/*!
- * Formats an error string and raises an error.
- *
- * \sa w_parse_ferror(), w_parse_rerror()
- * \param fmt Format string (printf-like)
- * \param ... Arguments for the format string.
- */
 void
 w_parse_error (w_parse_t *p, const char *fmt, ...)
 {
@@ -122,14 +86,6 @@ w_parse_error (w_parse_t *p, const char *fmt, ...)
 }
 
 
-
-/*!
- * Gets a C-like identifier. Identifiers are the same as in C: a sequence of
- * non-blank character, being the first one a letter or an underscore, and
- * the rest letters, numbers and underscores. This function never raises
- * errors, but returns \c NULL when there is some error in the input. The
- * caller is responsible for calling \ref w_free() on the returned string.
- */
 char*
 w_parse_ident (w_parse_t *p)
 {
@@ -158,15 +114,6 @@ w_parse_ident (w_parse_t *p)
 }
 
 
-
-/*!
- * Parses a aigned integer as an <tt>unsigned long</tt> value. Note that
- * prefix \c 0x will cause the number to be parsed as hexadecimal, and
- * prefix \c 0 as octal.
- *
- * \param value Pointer to where to store the result.
- * \return Whether the value was successfully parsed.
- */
 wbool
 w_parse_ulong (w_parse_t      *p,
                unsigned long  *value)
@@ -202,13 +149,6 @@ w_parse_ulong (w_parse_t      *p,
 }
 
 
-/*!
- * Parses a aigned integer as a \c long value. Note that prefix \c 0x will
- * cause the number to be parsed as hexadecimal, and prefix \c 0 as octal.
- *
- * \param value Pointer to where to store the result.
- * \return Whether the value was successfully parsed.
- */
 wbool
 w_parse_long (w_parse_t *p, long *value)
 {
@@ -247,12 +187,6 @@ w_parse_long (w_parse_t *p, long *value)
 }
 
 
-/*!
- * Parses a floating point value as \c double.
- *
- * \param value Pointer to where to store the result.
- * \return Whether the value was successfully parsed.
- */
 wbool
 w_parse_double (w_parse_t *p, double *value)
 {
@@ -269,20 +203,6 @@ w_parse_double (w_parse_t *p, double *value)
     return W_YES;
 }
 
-
-/*!
- * Parses an input file.
- *
- * \param input     Input file stream.
- * \param comment   Character used as comment delimiter. When the character
- *                  is found, the remainder of the line will be ignored. To
- *                  disable this behavior, pass \c 0.
- * \param parse_fun Function used for parsing.
- * \param context   Context passed as user data to the parsing function.
- * \param msg       If not \c NULL, where to store an error string in case
- *                  an error is generated.
- * \return          Whether parsing was successful.
- */
 
 void*
 w_parse_run (w_parse_t    *p,
@@ -325,12 +245,6 @@ w_parse_run (w_parse_t    *p,
 }
 
 
-/*!
- * Gets a single word from the input. A \e word here is any sequence of
- * non-whitespace characters. This function will never raise errors, but
- * returns \c NULL when the word cannot be read. The caller is responsible
- * for calling \ref w_free() on the returned string.
- */
 char*
 w_parse_word (w_parse_t *p)
 {
@@ -357,13 +271,6 @@ w_parse_word (w_parse_t *p)
 }
 
 
-/*!
- * Gets a string enclosed in double-quotes from the input. Escape characters
- * in the string are interpreted, same way as the C compiler does. This
- * function never raises errors, but returns \c NULL when there is some
- * error in the input. The caller is responsible for calling \ref w_free()
- * on the returned string.
- */
 char*
 w_parse_string (w_parse_t *p)
 {

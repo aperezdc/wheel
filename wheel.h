@@ -11,7 +11,20 @@
 #ifndef __wheel_h__
 #define __wheel_h__
 
+/*!
+ * \defgroup misc Miscelaneous utilities
+ * \addtogroup misc
+ * \{
+ */
+
+/*!
+ * Obtain the number of elements in a statically allocated array.
+ */
 #define w_lengthof(_v)  (sizeof(_v) / sizeof(0[_v]))
+
+/*!
+ * Mark a variable as unused, to avoid compiler warnings.
+ */
 #define w_unused(_id)   ((void)(_id))
 
 #ifdef __GNUC__
@@ -20,6 +33,9 @@
 		__typeof__(_m) __m = (_m); \
 		(__n > __m) ? __n : __m; })
 #else /* !__GNUC__ */
+/*!
+ * Obtain the highest of two numbers.
+ */
 # define w_max(_n, _m) \
 	(((_n) > (_m)) ? (_n) : (_m))
 #endif /* __GNUC__ */
@@ -32,8 +48,16 @@ typedef void** w_iterator_t;
 typedef void* (*w_traverse_fun_t)(void *data, void *context);
 typedef void  (*w_action_fun_t)(void *object, void *context);
 
-enum w_bool { W_NO = 0, W_YES };
-typedef enum w_bool wbool;
+typedef enum wbool wbool;
+
+/*!
+ * Boolean data type.
+ */
+enum wbool
+{
+    W_NO = 0, /*!< False value. */
+    W_YES     /*!< True value. */
+};
 
 /*
  * Use this macros to control symbol visibility with recent GCC compilers
@@ -50,6 +74,7 @@ typedef enum w_bool wbool;
 # define W_HIDDEN
 #endif
 
+/*\}*/
 
 /*--------------------------------------------------[ libc includes ]-----*/
 
@@ -69,6 +94,12 @@ typedef enum w_bool wbool;
 
 
 /*------------------------------------------------[ memory handling ]-----*/
+
+/*!
+ * \defgroup wmem Memory handling
+ * \addtogroup wmem
+ * \{
+ */
 
 W_EXPORT void* w_malloc(size_t sz);
 W_EXPORT void* w_realloc(void *ptr, size_t sz);
@@ -124,11 +155,25 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
 #define w_resize(_p, _t, _n) \
 	((_t *) w_realloc(_p, sizeof(_t) * (_n)))
 
+/*\}*/
+
 
 /*---------------------------------------------------[ errors/debug ]-----*/
 
+/*!
+ * \defgroup debug Debugging support
+ * \addtogroup debug
+ * \{
+ */
 
+/*!
+ * Prints a message to stderr and aborts execution.
+ */
 W_EXPORT void  w_die(const char *fmt, ...);
+
+/*!
+ * Prints a message to stderr and aborts execution.
+ */
 W_EXPORT void w_vdie(const char *fmt, va_list al);
 
 
@@ -139,21 +184,67 @@ W_EXPORT void __w_dprintf(const char *fmt, ...);
 # define w_dprintf(_x) ((void)0)
 #endif
 
+/*\}*/
 
 /*-----------------------------------------------[ string functions ]-----*/
+
+/*!
+ * \defgroup wstr String functions
+ * \addtogroup wstr
+ * \{
+ */
 
 W_EXPORT char* w_strfmtv(const char *fmt, va_list argl);
 W_EXPORT char* w_strfmt (const char *fmt, ...);
 
+/*!
+ * Hashes the start of a string.
+ * \param str String to get the hash of.
+ * \param len Number of characters to hash.
+ * \return Hash value.
+ */
 W_EXPORT unsigned w_hashstrn(const char *str, size_t len);
+
+/*!
+ * Hashes a string.
+ * \param str String to get the hash of.
+ * \return Hash value.
+ */
 W_EXPORT unsigned w_hashstr (const char *str);
 
+/*!
+ * Converts a string into a boolean.
+ */
 W_EXPORT wbool w_str_bool  (const char *str, wbool *val);
+
+/*!
+ * Converts a string into an integer.
+ */
 W_EXPORT wbool w_str_int   (const char *str, int *val);
+
+/*!
+ * Converts a string inyo an unsigned integer.
+ */
 W_EXPORT wbool w_str_uint  (const char *str, unsigned *val);
+
+/*!
+ * Converts a string into a long integer.
+ */
 W_EXPORT wbool w_str_long  (const char *str, long *val);
+
+/*!
+ * Converts a string into a long unsigned integer.
+ */
 W_EXPORT wbool w_str_ulong (const char *str, unsigned long *val);
+
+/*!
+ * Converts a string into a float number.
+ */
 W_EXPORT wbool w_str_float (const char *str, float *val);
+
+/*!
+ * Converts a string into a double-precision float number.
+ */
 W_EXPORT wbool w_str_double(const char *str, double *val);
 
 
@@ -207,27 +298,64 @@ w_strncpy(char *dst, const char *src, size_t n)
 	return result;
 }
 
+/*\}*/
 
 /*---------------------------------------------------[ dictionaries ]-----*/
 
+/*!
+ * \defgroup wdict Hash-based dictionaries
+ * \addtogroup wdict
+ * \{
+ */
+
 typedef struct w_dict_t w_dict_t;
 
-
+/*!
+ * Create a new dictionary.
+ */
 W_EXPORT w_dict_t* w_dict_new(void);
 
+/*!
+ * Free a dictionary.
+ */
 W_EXPORT void w_dict_free(w_dict_t *d);
+
+/*!
+ * Clears the contents of a dictionary.
+ */
 W_EXPORT void w_dict_clear(w_dict_t *d);
 
+/*!
+ * Get the number of items in a dictionary.
+ */
 W_EXPORT unsigned w_dict_count(const w_dict_t *d);
 
 W_EXPORT void* w_dict_getn(const w_dict_t *d, const char *key, size_t keylen);
 W_EXPORT void  w_dict_setn(w_dict_t *d, const char *key, size_t keylen, void *data);
 W_EXPORT void  w_dict_deln(w_dict_t *d, const char *key, size_t keylen);
 
+/*!
+ * Delete an item from a dictionary given its key.
+ */
 W_EXPORT void  w_dict_del(w_dict_t *d, const char *key);
+
+/*!
+ * Set an item in a dictionary.
+ */
 W_EXPORT void  w_dict_set(w_dict_t *d, const char *key, void *data);
+
+/*!
+ * Get an item from a dictionary.
+ */
 W_EXPORT void* w_dict_get(const w_dict_t *d, const char *key);
 
+/*!
+ * Update a dictionary with the contents of another. For each key present in
+ * the source dictionary, copy it and its value to the destination one, if
+ * the key already existed in the destination, the value gets overwritten.
+ * \param d Destination dictionary.
+ * \param o Source dictionary.
+ */
 W_EXPORT void  w_dict_update(w_dict_t *d, const w_dict_t *o);
 
 W_EXPORT void w_dict_traverse(w_dict_t *d, w_traverse_fun_t f, void *ctx);
@@ -261,10 +389,17 @@ typedef struct w_dict_item w_dict_item_t;
 #define w_dict_foreach(_d, _i) \
     for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
 
+/*\}*/
 
 /*----------------------------------------------------[ CLI parsing ]-----*/
 
-enum w_opt_status
+/*!
+ * \defgroup wopt Command line parsing
+ * \addtogroup wopt
+ * \{
+ */
+
+enum w_opt_status_t
 {
 	W_OPT_OK,          /*!< All was correct. */
 	W_OPT_EXIT_OK,     /*!< Exit the program with zero status. */
@@ -274,27 +409,30 @@ enum w_opt_status
 	W_OPT_FILES,       /*!< Remaining arguments are file names. */
 };
 
-typedef enum w_opt_status w_opt_status_t;
+typedef enum w_opt_status_t w_opt_status_t;
 
-typedef struct w_opt_context w_opt_context_t;
+typedef struct w_opt_context_t w_opt_context_t;
 
-/**
+/*!
  * Type of option parsing action callbacks.
  */
 typedef w_opt_status_t (*w_opt_action_t)(const w_opt_context_t*);
 
 
-struct w_opt
+/*!
+ * Command line option information.
+ */
+struct w_opt_t
 {
-	unsigned       narg;
-	unsigned char  letter;
-	const char    *string;
-	w_opt_action_t action;
-	void          *extra;
-	const char    *info;
+	unsigned       narg;   /*!< Number of arguments consumed.           */
+	unsigned char  letter; /*!< Letter for short option style parsing.  */
+	const char    *string; /*!< String for long option style parsing.   */
+	w_opt_action_t action; /*!< Action performed when option is parsed. */
+	void          *extra;  /*!< Additional argument to the action.      */
+	const char    *info;   /*!< Text describing the option.             */
 };
 
-typedef struct w_opt w_opt_t;
+typedef struct w_opt_t w_opt_t;
 
 #define W_OPT_CLI_ONLY  0x80
 
@@ -308,7 +446,7 @@ typedef struct w_opt w_opt_t;
 	{ 0, '\0', NULL, NULL, NULL, NULL }
 
 
-struct w_opt_context
+struct w_opt_context_t
 {
 	const int      argc;
 	char         **argv;
@@ -331,23 +469,69 @@ _W_M_(W_OPT_STRING);
 
 
 W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*);
+
+/*!
+ * Generates a long help message for a set of options.
+ * \param opt Array of options.
+ * \param out Stream where write the message.
+ * \param progname Program name (usually <tt>argv[0]</tt>).
+ */
 W_EXPORT void w_opt_help(const w_opt_t opt[], FILE *out, const char *progname);
 
+/*!
+ * Parses an array of command line arguments.
+ * \param options  Array of options.
+ * \param file_cb  Callback invoked for each non-option argument found (most
+ *                 likely files, thus the name).
+ * \param userdata User data, this is passed to the \c file_cb callback.
+ * \param argc     Number of command line arguments.
+ * \param argv     Array of command line arguments.
+ * \return Number of consmed arguments.
+ */
 W_EXPORT unsigned w_opt_parse(const w_opt_t  *options,
                               w_action_fun_t file_cb,
                               void          *userdata,
                               int            argc,
                               char         **argv);
 
+/*!
+ * Uses long option information to parse simple config-like files.
+ * \param opt   Array of options.
+ * \param input Input file stream.
+ * \param msg   Pointer to a place where to store an error message,
+ *              if needed. You need to call \ref w_free on it if
+ *              it is non-NULL upon return.
+ * \return Whether parsing was successfull. If not successful, most likely
+ *         there was some parsing error and the error string will be
+ *         non-NULL.
+ */
 W_EXPORT wbool w_opt_parse_file(const w_opt_t *opt,
                                 FILE          *input,
                                 char         **msg);
 
 
+/*\}*/
+
 /*---------------------------------[ simple, piece-based LL parsers ]-----*/
 
 /*!
- * Auxiliary structure for parsers.
+ * \defgroup wparse Support utilities for building simple parsers
+ * \addtogroup wparse
+ * \{
+ */
+
+/*!
+ * Auxiliary structure for parsers. Those do not need to be manually
+ * initialized, because the \ref w_parse_run function already takes care of
+ * that. Usually those structures are allocated on the stack.
+ *
+ * Example usage:
+ *
+ * \code
+ * char *error = NULL;
+ * w_parse_t parser;
+ * w_parse_run (&parser, input, '#', parse_func, NULL, &error);
+ * \endcode
  */
 struct w_parse_t
 {
@@ -364,22 +548,124 @@ typedef struct w_parse_t w_parse_t;
 
 typedef void (*w_parse_fun_t) (w_parse_t*, void*);
 
+
+/*!
+ * Parses an input file.
+ *
+ * \param input     Input file stream.
+ * \param comment   Character used as comment delimiter. When the character
+ *                  is found, the remainder of the line will be ignored. To
+ *                  disable this behavior, pass \c 0.
+ * \param parse_fun Function used for parsing.
+ * \param context   Context passed as user data to the parsing function.
+ * \param msg       If not \c NULL, where to store an error string in case
+ *                  an error is generated.
+ * \return          Whether parsing was successful.
+ */
 W_EXPORT void* w_parse_run     (w_parse_t    *p,
                                 FILE         *input,
                                 int           comment,
                                 w_parse_fun_t parse_fun,
                                 void         *context,
                                 char         **msg);
+
+/*!
+ * Formats an error string and raises an error.
+ *
+ * \sa w_parse_ferror(), w_parse_rerror()
+ * \param fmt Format string (printf-like)
+ * \param ... Arguments for the format string.
+ */
 W_EXPORT void  w_parse_error   (w_parse_t *p, const char *fmt, ...);
+
+/*!
+ * Format an error string. The formatted string will be saved in the
+ * \ref w_parse_t::error field. A typical formats format is the following
+ * one, including the line and column numbers:
+ *
+ * \code
+ *    w_parse_ferror (p, "%u:%u: Your error message", p->line, p->lpos);
+ * \endcode
+ *
+ * \param fmt Format string (printf-like).
+ * \param ... Arguments for the format string.
+ */
 W_EXPORT void  w_parse_ferror  (w_parse_t *p, const char *fmt, ...);
+
+/*!
+ * Raise a parsing error. Make sure you free intermediate strucutures and
+ * data parsing may have created before calling this function, otherwise
+ * memory will leak.
+ *
+ * \sa w_parse_ferror(), w_parse_error()
+ */
 W_EXPORT void  w_parse_rerror  (w_parse_t *p);
+
+/*!
+ * Gets the next character in the input, skipping over comments. If comments
+ * are enabled i.e. the \ref w_parse_t::comment field is different than
+ * \c 0, then when a comment character is found, the entire line is skipped.
+ */
 W_EXPORT void  w_parse_getchar (w_parse_t *p);
+
+/*!
+ * Skips whitespace in the input. All characters for which \c isspace()
+ * returns true will be ignored until the first non-blank or the end of
+ * the input stream is found.
+ */
 W_EXPORT void  w_parse_skip_ws (w_parse_t *p);
+
+/*!
+ * Gets a string enclosed in double-quotes from the input. Escape characters
+ * in the string are interpreted, same way as the C compiler does. This
+ * function never raises errors, but returns \c NULL when there is some
+ * error in the input. The caller is responsible for calling \ref w_free()
+ * on the returned string.
+ */
 W_EXPORT char* w_parse_string  (w_parse_t *p);
+
+/*!
+ * Gets a C-like identifier. Identifiers are the same as in C: a sequence of
+ * non-blank character, being the first one a letter or an underscore, and
+ * the rest letters, numbers and underscores. This function never raises
+ * errors, but returns \c NULL when there is some error in the input. The
+ * caller is responsible for calling \ref w_free() on the returned string.
+ */
 W_EXPORT char* w_parse_ident   (w_parse_t *p);
+
+/*!
+ * Gets a single word from the input. A \e word here is any sequence of
+ * non-whitespace characters. This function will never raise errors, but
+ * returns \c NULL when the word cannot be read. The caller is responsible
+ * for calling \ref w_free() on the returned string.
+ */
 W_EXPORT char* w_parse_word    (w_parse_t *p);
+
+/*!
+ * Parses a floating point value as \c double.
+ *
+ * \param value Pointer to where to store the result.
+ * \return Whether the value was successfully parsed.
+ */
 W_EXPORT wbool w_parse_double  (w_parse_t *p, double *value);
+
+/*!
+ * Parses a aigned integer as an <tt>unsigned long</tt> value. Note that
+ * prefix \c 0x will cause the number to be parsed as hexadecimal, and
+ * prefix \c 0 as octal.
+ *
+ * \param value Pointer to where to store the result.
+ * \return Whether the value was successfully parsed.
+ */
 W_EXPORT wbool w_parse_ulong   (w_parse_t *p, unsigned long *value);
+
+/*!
+ * Parses a aigned integer as a \c long value. Note that prefix \c 0x will
+ * cause the number to be parsed as hexadecimal, and prefix \c 0 as octal.
+ *
+ * \param value Pointer to where to store the result.
+ * \return Whether the value was successfully parsed.
+ */
 W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
 
 /*!
@@ -414,7 +700,40 @@ W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
         w_parse_match_with_cleanup((_p), (_c), (void)0)
 
 
-/*--------------------------------------------------[ text buffers ]------*/
+/*\}*/
+
+/*--------------------------------------------------[ data buffers ]------*/
+
+/*!
+ * \defgroup buffers Generic data buffers
+ * \addtogroup buffers
+ * \{
+ *
+ * Buffers provide a variable-length area of memory in which data may be
+ * held and manipulated. Contained data is not interpreted, and length of
+ * it is tracked, so it is even possible to add null bytes to a buffer.
+ * Allocating a buffer is done in the stack, so it is very fast, the macro
+ * \ref W_BUF is provided to intialize them; once that is done all buffer
+ * functions can be used, and once working with tha buffer has finished,
+ * its contents must be deallocated using \ref w_buf_free:
+ *
+ * \code
+ * w_buf_t b = W_BUF;
+ *
+ * w_buf_append_str (&b, "Too much work ");
+ * w_buf_append_str (&b, "and no joy makes");
+ * w_buf_append_str (&b, " Jack a dull boy");
+ *
+ * printf ("%s\n", w_buf_str (&b));
+ *
+ * w_buf_free (&b);
+ * \endcode
+ *
+ * In the above example, a buffer is created, some strings appended to it
+ * (there are convenience functions to use them as string buffers) and
+ * finally the resulting string is printed and the buffer-held resources
+ * freed.
+ */
 
 typedef struct w_buf_t w_buf_t;
 
@@ -435,7 +754,7 @@ struct w_buf_t
 
 
 /*!
- * Initializer for %w_buf_t
+ * Initializer for \ref w_buf_t
  */
 #define W_BUF { NULL, 0, 0 }
 
@@ -454,7 +773,7 @@ struct w_buf_t
  * Adjust the length of a buffer keeping contents.
  * This is mostly useful for trimming contents, when shrinking the buffer.
  * When a buffer grows, random data is liklely to appear at the end.
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  * \param len New length of the buffer
  */
 void w_buf_length_set  (w_buf_t       *buf,
@@ -462,7 +781,7 @@ void w_buf_length_set  (w_buf_t       *buf,
 
 /*!
  * Set the contents of a buffer to a C string.
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  * \param str String to set the buffer to
  */
 void w_buf_set_str     (w_buf_t       *buf,
@@ -470,7 +789,7 @@ void w_buf_set_str     (w_buf_t       *buf,
 
 /*!
  * Appends the contents of a memory block to a buffer.
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  * \param ptr Pointer to the block of memory
  * \param len Length of the memory block
  */
@@ -480,7 +799,7 @@ void w_buf_append_mem  (w_buf_t       *buf,
 
 /*!
  * Appends a character to a buffer
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  * \param chr A character
  */
 void w_buf_append_char (w_buf_t       *buf,
@@ -488,7 +807,7 @@ void w_buf_append_char (w_buf_t       *buf,
 
 /*!
  * Appends a string to a buffer.
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  * \param str A string
  */
 void w_buf_append_str  (w_buf_t       *buf,
@@ -496,15 +815,15 @@ void w_buf_append_str  (w_buf_t       *buf,
 
 /*!
  * Appends a buffer to another buffer
- * \param buf A %w_buf_t buffer
- * \param src Another %w_buf_t which contains the data to be appended
+ * \param buf A \ref w_buf_t buffer
+ * \param src Another \ref w_buf_t which contains the data to be appended
  */
 void w_buf_append_buf  (w_buf_t       *buf,
                         const w_buf_t *src);
 
 /*!
  * Frees the contents of a buffer.
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  */
 void w_buf_free        (w_buf_t    *buf);
 
@@ -512,16 +831,52 @@ void w_buf_free        (w_buf_t    *buf);
  * Get the buffer as a C string.
  * Note that if the buffer contains embedded null characters, functions like
  * \c strlen() will not report the full length of the buffer.
- * \param buf A %w_buf_t buffer
+ * \param buf A \ref w_buf_t buffer
  */
 const char*
      w_buf_str         (const w_buf_t *buf);
 
 
+/*\}*/
+
+/*-----------------------------------------------[ text formatting ]------*/
+
+/*!
+ * \defgroup formatting Text formatting
+ * \addtogroup formatting
+ * \{
+ */
+
+/*!
+ * Formats text into a buffer.
+ * \param buf A \ref w_buf_t buffer
+ * \param fmt Format string
+ */
+void w_fmt_buf  (w_buf_t *buf, const char *fmt, ...);
+
+/*!
+ * Formats text into a buffer.
+ * \param buf A \ref w_buf_t buffer
+ * \param fmt Format string
+ * \param arg Argument list
+ */
+void w_fmt_bufv (w_buf_t *buf, const char *fmt, va_list arg);
+
+/*\}*/
+
 /*--------------------------------------------------[ input/output ]------*/
+
+/*!
+ * \defgroup wio Input/output
+ * \addtogroup wio
+ * \{
+ */
 
 typedef struct w_io_t w_io_t;
 
+/*!
+ * Input/output descriptor.
+ */
 struct w_io_t
 {
     void     *udata;
@@ -531,10 +886,44 @@ struct w_io_t
 };
 
 
-wbool   w_io_close (const w_io_t *io);
-ssize_t w_io_write (const w_io_t *io, const void *buf, size_t len);
-ssize_t w_io_read  (const w_io_t *io, void       *buf, size_t len);
+/*!
+ * Closes an input/output descriptor. If the \c close callback of the
+ * descriptor is \c NULL, then no action is performed.
+ *
+ * \param io An input/output descriptor.
+ */
+wbool   w_io_close   (const w_io_t *io);
 
+/*!
+ * Writes data to an input/output descriptor. If the descriptor has no
+ * \c write callback, then \c -1 is returned and \c errno is set to
+ * \c EBADF.
+ *
+ * \param io  An input/output descriptor.
+ * \param buf Pointer to the data to be written.
+ * \param len Number of bytes to be written.
+ */
+ssize_t w_io_write   (const w_io_t *io,
+                      const void   *buf,
+                      size_t        len);
+
+/*!
+ * Reads data from an input/output descriptor. If the descriptor has no
+ * \c read callback, then \c -1 is returned and \c errno is set to
+ * \c EBADF.
+ */
+ssize_t w_io_read    (const w_io_t *io,
+                      void         *buf,
+                      size_t        len);
+
+
+ssize_t w_io_format  (const w_io_t *io,
+                      const char   *fmt,
+                      ...);
+
+ssize_t w_io_formatv (const w_io_t *io,
+                      const char   *fmt,
+                      va_list       args);
 
 #define W_IO_UNIX(_fd) \
     { (void*) (_fd), w_io_unix_close, w_io_unix_write, w_io_unix_read }
@@ -569,25 +958,31 @@ ssize_t w_io_stdio_read  (void       *udata,
                           void       *buf,
                           size_t      len);
 
+/*\}*/
 
 /*---------------------------------------------------[ config files ]-----*/
 
+/*!
+ * \defgroup wcfg Structured configuration files
+ * \addtogroup wcfg
+ * \{
+ */
+
 typedef w_dict_t w_cfg_t;
 
-enum w_cfg_type
+/*!
+ * Flags and constant values for node types.
+ */
+enum w_cfg_type_t
 {
 	/* Marks en of parameter list for set/get. */
-	W_CFG_END       = 0,
+	W_CFG_END       = 0,    /*!< Marker for ending parameter lists. */
 
 	/* Types for element nodes. */
-	W_CFG_NONE      = 0,
-	W_CFG_STRING    = 0x01,
-	W_CFG_NUMBER    = 0x02,
-	W_CFG_NODE      = 0x04,
-
-	/* Flags for set/get. */
-	W_CFG_SET       = 0x80,
-	W_CFG_DEFAULT   = 0x40,
+	W_CFG_NONE      = 0,    /*!< Invalid node.                      */
+	W_CFG_STRING    = 0x01, /*!< Node containing a string.          */
+	W_CFG_NUMBER    = 0x02, /*!< Node containing a number.          */
+	W_CFG_NODE      = 0x04, /*!< Node containing a subnode.         */
 
 	/* Mask for the type. */
 	W_CFG_TYPE_MASK =  W_CFG_STRING | W_CFG_NUMBER | W_CFG_NODE,
@@ -596,21 +991,92 @@ enum w_cfg_type
 	W_CFG_FLAG_MASK = ~W_CFG_TYPE_MASK,
 };
 
-typedef enum w_cfg_type w_cfg_type_t;
+typedef enum w_cfg_type_t w_cfg_type_t;
 
+/*!
+ * Create a new configuration object.
+ */
 W_EXPORT w_cfg_t* w_cfg_new(void);
+
+/*!
+ * Free resources allocated in the configuration object.
+ */
 W_EXPORT void w_cfg_free(w_cfg_t *cf);
 
+/*!
+ * Checks whether a key exists in a configuration object.
+ */
 W_EXPORT wbool w_cfg_has(const w_cfg_t *cf, const char *key);
+
+/*!
+ * Deletes a key from a configuration object.
+ */
 W_EXPORT wbool w_cfg_del(w_cfg_t *cf, const char *key);
+
+/*!
+ * Sets a number of items in a configuration object. Prefix each item with
+ * the type, and then pass the key and the contents, and finally use
+ * \ref W_CFG_END to terminate the list. For example:
+ *
+ * \code
+ * w_cfg_t *cf = w_cfg_new ();
+ * w_cfg_set (cf, W_CFG_STRING, "string-key", "string-value",
+ *                W_CFG_NUMBER, "number-key", 12345,
+ *                W_CFG_END);
+ * \endcode
+ */
 W_EXPORT wbool w_cfg_set(w_cfg_t *cf, ...);
+
+/*!
+ * Gets a number of items from a configuration object. The variable argument
+ * list works similarly to \ref w_cfg_set, but passing pointers to suitable
+ * variables where to store values. Example:
+ *
+ * \code
+ * char  *sval;
+ * double dval;
+ * w_cfg_get (cf, W_CFG_STRING, "string-key", &sval,
+ *                W_CFG_NUMBER, "number-key", &dval,
+ *                W_CFG_END);
+ * \endcode
+ */
 W_EXPORT wbool w_cfg_get(const w_cfg_t *cf, ...);
+
+/*!
+ * Obtain the type of a configuration object node.
+ */
 W_EXPORT w_cfg_type_t w_cfg_type(const w_cfg_t *cf, const char *key);
 
+/*!
+ * Dump configuration to a stream.
+ * \param cf     Configuration object.
+ * \param output Output stream where to write.
+ * \return       Whether writing was successful.
+ */
 W_EXPORT wbool    w_cfg_dump(const w_cfg_t *cf, FILE *output);
+
+/*!
+ * Load configuration from a stream.
+ * \param input  Input stream
+ * \param msg    Pointer to where to store an error message, if there is one.
+ * \return       Valid configuration object or \c NULL if there is some error.
+ */
 W_EXPORT w_cfg_t* w_cfg_load(FILE *input, char **msg);
 
+/*!
+ * Dump configuration to a file.
+ * \param cf   Configuration object.
+ * \param path Path to a file.
+ * \return     Whether writing was successful.
+ */
 W_EXPORT wbool    w_cfg_dump_file(const w_cfg_t *cf, const char *path);
+
+/*!
+ * Load configuration from a file.
+ * \param path Path to a file.
+ * \param msg  Pointer to where to store an error message, if there is one.
+ * \return     Valid configuration object or \c NULL if there is some error.
+ */
 W_EXPORT w_cfg_t* w_cfg_load_file(const char *path, char **msg);
 
 #define w_cfg_set_string(cf, key, val) \
@@ -635,13 +1101,27 @@ _W_G( node,   W_CFG_NODE,   w_cfg_t*    )
 
 #undef _W_G
 
+/*! Check whether a node is invalid. */
 #define w_cfg_isnone(cf, key)    (W_CFG_NONE   == w_cfg_type(cf, key))
+
+/*! Check whether a node contains a subnode. */
 #define w_cfg_isnode(cf, key)    (W_CFG_NODE   == w_cfg_type(cf, key))
+
+/*! Check whether a node contains a number. */
 #define w_cfg_isnumber(cf, key)  (W_CFG_NUMBER == w_cfg_type(cf, key))
+
+/*! Check whether a node contains a string. */
 #define w_cfg_isstring(cf, key)  (W_CFG_STRING == w_cfg_type(cf, key))
 
+/*\}*/
 
 /*-----------------------------------------------------------[ ttys ]-----*/
+
+/*!
+ * \defgroup wtty Terminal handling
+ * \addtogroup wtty
+ * \{
+ */
 
 /*!
  * Obtains the dimensions (width & height) of the controlling terminal.
@@ -686,6 +1166,7 @@ typedef void (*w_tty_notify_fun_t)(unsigned, unsigned, void*);
  */
 W_EXPORT wbool w_tty_size_notify(w_tty_notify_fun_t function, void *context);
 
+/*\}*/
 
 #endif /* !__wheel_h__ */
 
