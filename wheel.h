@@ -517,6 +517,59 @@ void w_buf_free        (w_buf_t    *buf);
 const char*
      w_buf_str         (const w_buf_t *buf);
 
+
+/*--------------------------------------------------[ input/output ]------*/
+
+typedef struct w_io_t w_io_t;
+
+struct w_io_t
+{
+    void     *udata;
+    wbool   (*close) (void *udata);
+    ssize_t (*write) (void *udata, const void *buf, size_t len);
+    ssize_t (*read ) (void *udata, void       *buf, size_t len);
+};
+
+
+wbool   w_io_close (const w_io_t *io);
+ssize_t w_io_write (const w_io_t *io, const void *buf, size_t len);
+ssize_t w_io_read  (const w_io_t *io, void       *buf, size_t len);
+
+
+#define W_IO_UNIX(_fd) \
+    { (void*) (_fd), w_io_unix_close, w_io_unix_write, w_io_unix_read }
+
+#define w_io_unix_fd(_io) \
+    ((int) (_fd)->udata)
+
+wbool   w_io_unix_close (void       *udata);
+
+ssize_t w_io_unix_write (void       *udata,
+                         const void *buf,
+                         size_t      len);
+
+ssize_t w_io_unix_read  (void       *udata,
+                         void       *buf,
+                         size_t      len);
+
+
+#define W_IO_STDIO(_fp) \
+    { (_fp), w_io_stdio_close, w_io_stdio_write, w_io_stdio_read }
+
+#define w_io_stdio_filep(_io) \
+    ((FILE*) (_io)->udata)
+
+wbool   w_io_stdio_close (void       *udata);
+
+ssize_t w_io_stdio_write (void       *udata,
+                          const void *buf,
+                          size_t      len);
+
+ssize_t w_io_stdio_read  (void       *udata,
+                          void       *buf,
+                          size_t      len);
+
+
 /*---------------------------------------------------[ config files ]-----*/
 
 typedef w_dict_t w_cfg_t;
