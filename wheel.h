@@ -851,7 +851,8 @@ W_EXPORT const char* w_buf_str (const w_buf_t *buf);
  * \param buf A \ref w_buf_t buffer
  * \param fmt Format string
  */
-void w_fmt_buf  (w_buf_t *buf, const char *fmt, ...);
+W_EXPORT void w_fmt_buf (w_buf_t    *buf,
+                         const char *fmt, ...);
 
 /*!
  * Formats text into a buffer.
@@ -859,7 +860,9 @@ void w_fmt_buf  (w_buf_t *buf, const char *fmt, ...);
  * \param fmt Format string
  * \param arg Argument list
  */
-void w_fmt_bufv (w_buf_t *buf, const char *fmt, va_list arg);
+W_EXPORT void w_fmt_bufv (w_buf_t    *buf,
+                          const char *fmt,
+                          va_list     arg);
 
 /*\}*/
 
