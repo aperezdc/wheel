@@ -776,16 +776,16 @@ struct w_buf_t
  * \param buf A \ref w_buf_t buffer
  * \param len New length of the buffer
  */
-void w_buf_length_set  (w_buf_t       *buf,
-                        size_t         len);
+W_EXPORT void w_buf_length_set (w_buf_t *buf,
+                                size_t  len);
 
 /*!
  * Set the contents of a buffer to a C string.
  * \param buf A \ref w_buf_t buffer
  * \param str String to set the buffer to
  */
-void w_buf_set_str     (w_buf_t       *buf,
-                        const char    *str);
+W_EXPORT void w_buf_set_str (w_buf_t    *buf,
+                             const char *str);
 
 /*!
  * Appends the contents of a memory block to a buffer.
@@ -793,39 +793,39 @@ void w_buf_set_str     (w_buf_t       *buf,
  * \param ptr Pointer to the block of memory
  * \param len Length of the memory block
  */
-void w_buf_append_mem  (w_buf_t       *buf,
-                        const void    *ptr,
-                        size_t         len);
+W_EXPORT void w_buf_append_mem (w_buf_t    *buf,
+                                const void *ptr,
+                                size_t     len);
 
 /*!
  * Appends a character to a buffer
  * \param buf A \ref w_buf_t buffer
  * \param chr A character
  */
-void w_buf_append_char (w_buf_t       *buf,
-                        int            chr);
+W_EXPORT void w_buf_append_char (w_buf_t *buf,
+                                 int      chr);
 
 /*!
  * Appends a string to a buffer.
  * \param buf A \ref w_buf_t buffer
  * \param str A string
  */
-void w_buf_append_str  (w_buf_t       *buf,
-                        const char    *str);
+W_EXPORT void w_buf_append_str (w_buf_t    *buf,
+                                const char *str);
 
 /*!
  * Appends a buffer to another buffer
  * \param buf A \ref w_buf_t buffer
  * \param src Another \ref w_buf_t which contains the data to be appended
  */
-void w_buf_append_buf  (w_buf_t       *buf,
-                        const w_buf_t *src);
+W_EXPORT void w_buf_append_buf (w_buf_t       *buf,
+                                const w_buf_t *src);
 
 /*!
  * Frees the contents of a buffer.
  * \param buf A \ref w_buf_t buffer
  */
-void w_buf_free        (w_buf_t    *buf);
+W_EXPORT void w_buf_free (w_buf_t *buf);
 
 /*!
  * Get the buffer as a C string.
@@ -833,8 +833,7 @@ void w_buf_free        (w_buf_t    *buf);
  * \c strlen() will not report the full length of the buffer.
  * \param buf A \ref w_buf_t buffer
  */
-const char*
-     w_buf_str         (const w_buf_t *buf);
+W_EXPORT const char* w_buf_str (const w_buf_t *buf);
 
 
 /*\}*/
