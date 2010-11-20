@@ -935,7 +935,7 @@ struct w_io_t
  *
  * \param io An input/output descriptor.
  */
-wbool   w_io_close   (const w_io_t *io);
+W_EXPORT wbool w_io_close (const w_io_t *io);
 
 /*!
  * Writes data to an input/output descriptor. If the descriptor has no
@@ -946,27 +946,38 @@ wbool   w_io_close   (const w_io_t *io);
  * \param buf Pointer to the data to be written.
  * \param len Number of bytes to be written.
  */
-ssize_t w_io_write   (const w_io_t *io,
-                      const void   *buf,
-                      size_t        len);
+W_EXPORT ssize_t w_io_write (const w_io_t *io,
+                             const void   *buf,
+                             size_t        len);
 
 /*!
  * Reads data from an input/output descriptor. If the descriptor has no
  * \c read callback, then \c -1 is returned and \c errno is set to
  * \c EBADF.
  */
-ssize_t w_io_read    (const w_io_t *io,
-                      void         *buf,
-                      size_t        len);
+W_EXPORT ssize_t w_io_read (const w_io_t *io,
+                            void         *buf,
+                            size_t        len);
 
+/*!
+ * Formats text and writes it to an I/O object.
+ * \param io  An input/output descriptor.
+ * \param fmt Format string.
+ */
+W_EXPORT ssize_t w_io_format (const w_io_t *io,
+                              const char   *fmt,
+                              ...);
 
-ssize_t w_io_format  (const w_io_t *io,
-                      const char   *fmt,
-                      ...);
-
-ssize_t w_io_formatv (const w_io_t *io,
-                      const char   *fmt,
-                      va_list       args);
+/*!
+ * Formats text and writes it to an I/O object. This version accepts
+ * a standard variable argument list.
+ * \param io   An input/output descriptor.
+ * \param fmt  Format string.
+ * \param args Argument list.
+ */
+W_EXPORT ssize_t w_io_formatv (const w_io_t *io,
+                               const char   *fmt,
+                               va_list       args);
 
 
 /*!
