@@ -40,6 +40,20 @@
 	(((_n) > (_m)) ? (_n) : (_m))
 #endif /* __GNUC__ */
 
+
+#ifdef __GNUC__
+# define w_min(_n, _m) ({      \
+		__typeof__(_n) __n = (_n); \
+		__typeof__(_m) __m = (_m); \
+		(__n < __m) ? __n : __m; })
+#else /* !__GNUC__ */
+/*!
+ * Obtain the lowest of two numbers.
+ */
+# define w_max(_n, _m) \
+	(((_n) < (_m)) ? (_n) : (_m))
+#endif /* __GNUC__ */
+
 #define _W_MAKE_STRING(__s) #__s
 #define W_STRINGIZE(_s) _W_MAKE_STRING(_s)
 
