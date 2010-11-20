@@ -1055,6 +1055,43 @@ W_EXPORT void w_io_stdio_open (w_io_t *io,
                                FILE   *filep);
 
 
+struct w_io_buf_data
+{
+    w_buf_t buf;
+    size_t  pos;
+};
+
+/*!
+ * Declare an I/O object for use with w_buf_t objects.
+ * \param _v Variable name.
+ * \sa W_IO_BUF_BUF, w_io_buf_open
+ */
+#define W_IO_BUF(_v) \
+        W_IO_MAKE (_v, struct w_io_buf_data)
+
+/*!
+ * Get the buffer associated to an I/O object.
+ * \warning Using this macro with a \ref w_io_t which was not declared with
+ *          \ref W_IO_BUF and/or not initialized with \ref w_io_buf_open is
+ *          undefined.
+ * \param _io Pointer to a \ref w_io_t.
+ * \sa W_IO_BUF, w_io_buf_open
+ */
+#define W_IO_BUF_BUF(_io) \
+      (&W_IO_UDATA(_io, struct w_io_buf_data)->buf)
+
+/*!
+ * Initialize an I/O object to be used with a buffer.
+ * \param io  A pointer to a \ref w_io_t previously allocated with
+ *            \ref W_IO_BUF.
+ * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
+ *            \ref w_buf_t internally which can be retrieved with
+ *            \ref W_IO_BUF_BUF.
+ * \sa W_IO_BUF, W_IO_BUF_BUF
+ */
+W_EXPORT void w_io_buf_open (w_io_t  *io,
+                             w_buf_t *buf);
+
 /*\}*/
 
 /*---------------------------------------------------[ config files ]-----*/

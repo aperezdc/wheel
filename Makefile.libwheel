@@ -19,6 +19,7 @@ libwheel_SRCS := wcfg.c      \
                  wio.c       \
                  wio-unix.c  \
                  wio-stdio.c \
+                 wio-buf.c   \
                  wtty.c
 
 CPPFLAGS      += -I$(libwheel_PATH)
