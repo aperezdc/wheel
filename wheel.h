@@ -969,21 +969,61 @@ ssize_t w_io_formatv (const w_io_t *io,
                       va_list       args);
 
 
+/*!
+ * Declare an I/O object for use with an Unix file descriptor.
+ * \param _v Variable name.
+ * \sa W_IO_UNIX_FD, w_io_unix_open
+ */
 #define W_IO_UNIX(_v) \
         W_IO_MAKE (_v, int)
 
+/*!
+ * Get the Unix file descriptor associated to an I/O object.
+ * \warning Using this macro with a \ref w_io_t which was not declared
+ *          with \ref W_IO_UNIX and/or not initialized with \ref
+ *          w_io_unix_open is undefined.
+ * \param _io Pointer to a \ref w_io_t.
+ * \sa W_IO_UNIX, w_io_unix_open
+ */
 #define W_IO_UNIX_FD(_io) \
       (*W_IO_UDATA (_io, int))
 
+/*!
+ * Initialize an I/O object to be used with an Unix file descriptor.
+ * \param io A pointer to a \ref w_io_t previously allocated with
+ *           \ref W_IO_UNIX.
+ * \param fd Unix file descriptor.
+ * \sa W_IO_UNIX, W_IO_UNIX_FD
+ */
 W_EXPORT void w_io_unix_open (w_io_t *io,
                               int    fd);
 
+/*!
+ * Declare an I/O object for use with C standard file descriptors.
+ * \param _v Variable name.
+ * \sa W_IO_STDIO, W_IO_STDIO_FILEP
+ */
 #define W_IO_STDIO(_v) \
         W_IO_MAKE (_v, FILE*)
 
+/*!
+ * Get the C standard file descriptor associated to an I/O object.
+ * \warning Using this macro with a \ref w_io_t which was not declared
+ *          with \ref W_IO_STDIO and/or not initialized with \ref
+ *          w_io_stdio_open is undefined.
+ * \param _io Pointer to a \ref w_io_t.
+ * \sa W_IO_STDIO, w_io_stdio_open
+ */
 #define W_IO_STDIO_FILEP(_io) \
       (*W_IO_UDATA (_io, FILE*))
 
+/*!
+ * Initialize an I/O object to be used with an C standard file descriptor.
+ * \param io A pointer to a \ref w_io_t previously allocated with
+ *           \ref W_IO_STDIO.
+ * \param fd Unix file descriptor.
+ * \sa W_IO_STDIO, W_IO_STDIO_FILEP
+ */
 W_EXPORT void w_io_stdio_open (w_io_t *io,
                                FILE   *filep);
 
