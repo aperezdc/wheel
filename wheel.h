@@ -879,12 +879,55 @@ typedef struct w_io_t w_io_t;
  */
 struct w_io_t
 {
-    void     *udata;
     wbool   (*close) (void *udata);
     ssize_t (*write) (void *udata, const void *buf, size_t len);
     ssize_t (*read ) (void *udata, void       *buf, size_t len);
 };
 
+/*!
+ * Declare a I/O object with extra spacing for holding user data.
+ * This macro is intended to be used by concrete implementations, so they
+ * can define a macro to declare variables that contain the fields of the
+ * \ref w_io_t structure, plus additional space for their private data.
+ *
+ * For example, the following declares a new macro which will create \ref
+ * w_io_t structures with additional space for holding a <tt>struct
+ * my_io_data</tt>:
+ *
+ * \code
+ * struct my_io_data {
+ *   char buffer[512];
+ *   int  flags;
+ * };
+ *
+ * #define MY_IO(_varname) \
+ *         W_IO_MAKE (_varname, struct my_io_data)
+ * \endcode
+ *
+ * \param _varname Name of the variable to be allocated.
+ * \param _udata   Type name. Additional space will be reserved to
+ *                 accomodate values of this type.
+ */
+#define W_IO_MAKE(_varname, _udata) \
+    char w_io__ ## _varname ## __raw__ [sizeof (w_io_t) + sizeof (_udata)]; \
+    w_io_t * _varname = (w_io_t*) (w_io__ ## _varname ## __raw__)
+
+/*!
+ * Given an I/O object, get a pointer to the user data area.
+ * The user data area is the additional space reserved for data by the \ref
+ * W_IO_MAKE macro. For example, if you have space reserved for a <tt>struct
+ * my_io_data</tt> then you can access it like this:
+ *
+ * \code
+ * W_IO_MAKE (my_io, struct my_io_data);
+ * struct my_io_data *data = W_IO_UDATA (my_io, struct my_io_data);
+ * \endcode
+ *
+ * \param _ioptr Pointer to a \ref w_io_t.
+ * \param _udata Type name. The pointer will be cast to this type.
+ */
+#define W_IO_UDATA(_ioptr, _udata) \
+    ((_udata*) (((char*)(_ioptr)) + sizeof (w_io_t)))
 
 /*!
  * Closes an input/output descriptor. If the \c close callback of the
@@ -925,38 +968,25 @@ ssize_t w_io_formatv (const w_io_t *io,
                       const char   *fmt,
                       va_list       args);
 
-#define W_IO_UNIX(_fd) \
-    { (void*) (_fd), w_io_unix_close, w_io_unix_write, w_io_unix_read }
 
-#define w_io_unix_fd(_io) \
-    ((int) (_fd)->udata)
+#define W_IO_UNIX(_v) \
+        W_IO_MAKE (_v, int)
 
-wbool   w_io_unix_close (void       *udata);
+#define W_IO_UNIX_FD(_io) \
+      (*W_IO_UDATA (_io, int))
 
-ssize_t w_io_unix_write (void       *udata,
-                         const void *buf,
-                         size_t      len);
+W_EXPORT void w_io_unix_open (w_io_t *io,
+                              int    fd);
 
-ssize_t w_io_unix_read  (void       *udata,
-                         void       *buf,
-                         size_t      len);
+#define W_IO_STDIO(_v) \
+        W_IO_MAKE (_v, FILE*)
 
+#define W_IO_STDIO_FILEP(_io) \
+      (*W_IO_UDATA (_io, FILE*))
 
-#define W_IO_STDIO(_fp) \
-    { (_fp), w_io_stdio_close, w_io_stdio_write, w_io_stdio_read }
+W_EXPORT void w_io_stdio_open (w_io_t *io,
+                               FILE   *filep);
 
-#define w_io_stdio_filep(_io) \
-    ((FILE*) (_io)->udata)
-
-wbool   w_io_stdio_close (void       *udata);
-
-ssize_t w_io_stdio_write (void       *udata,
-                          const void *buf,
-                          size_t      len);
-
-ssize_t w_io_stdio_read  (void       *udata,
-                          void       *buf,
-                          size_t      len);
 
 /*\}*/
 

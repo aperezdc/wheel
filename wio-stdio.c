@@ -9,20 +9,39 @@
 #include <stdio.h>
 
 
-wbool
-w_io_stdio_close (void *udata)
+static wbool   w_io_stdio_close (void*);
+static ssize_t w_io_stdio_read  (void*, void*, size_t);
+static ssize_t w_io_stdio_write (void*, const void*, size_t);
+
+
+void
+w_io_stdio_open (w_io_t *io, FILE *filep)
 {
-    return (fclose ((FILE*) udata) == 0);
+    w_assert (io);
+    w_assert (filep);
+
+    io->close = w_io_stdio_close;
+    io->write = w_io_stdio_write;
+    io->read  = w_io_stdio_read;
+
+    *W_IO_UDATA (io, FILE*) = filep;
 }
 
 
-ssize_t
+static wbool
+w_io_stdio_close (void *udata)
+{
+    return (fclose (*((FILE**) udata)) == 0);
+}
+
+
+static ssize_t
 w_io_stdio_write (void *udata, const void *buf, size_t len)
 {
     size_t ret;
 
-    if ((ret = fwrite (buf, sizeof (char), len, (FILE*) udata)) < len) {
-        if (ferror ((FILE*) udata)) {
+    if ((ret = fwrite (buf, sizeof (char), len, *((FILE**) udata))) < len) {
+        if (ferror (*((FILE**) udata))) {
             return -1;
         }
         else {
@@ -34,17 +53,17 @@ w_io_stdio_write (void *udata, const void *buf, size_t len)
 }
 
 
-ssize_t
+static ssize_t
 w_io_stdio_read (void *udata, void *buf, size_t len)
 {
     size_t ret;
 
-    if ((ret = fread (buf, sizeof (char), len, (FILE*) udata)) < len) {
-        if (ferror ((FILE*) udata)) {
+    if ((ret = fread (buf, sizeof (char), len, *((FILE**) udata))) < len) {
+        if (ferror (*((FILE**) udata))) {
             return -1;
         }
         else {
-            w_assert (feof ((FILE*) udata));
+            w_assert (feof (*((FILE**) udata)));
             return ret;
         }
     }

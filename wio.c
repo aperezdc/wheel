@@ -13,7 +13,7 @@ wbool
 w_io_close (const w_io_t *io)
 {
     w_assert (io);
-    return (io->close) ? (*io->close) (io->udata) : W_YES;
+    return (io->close) ? (*io->close) (W_IO_UDATA (io, void)) : W_YES;
 }
 
 
@@ -24,7 +24,7 @@ w_io_read (const w_io_t *io, void *buf, size_t len)
     w_assert (buf);
 
     return (io->read)
-        ? (*io->read) (io->udata, buf, len)
+        ? (*io->read) (W_IO_UDATA (io, void), buf, len)
         : (errno = EBADF, -1);
 }
 
@@ -36,7 +36,7 @@ w_io_write (const w_io_t *io, const void *buf, size_t len)
     w_assert (buf);
 
     return (io->write)
-        ? (*io->write) (io->udata, buf, len)
+        ? (*io->write) (W_IO_UDATA (io, void), buf, len)
         : (errno = EBADF, -1);
 }
 

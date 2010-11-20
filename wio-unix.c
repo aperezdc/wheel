@@ -16,23 +16,40 @@
  * warnings or even refuse to compile this file.
  */
 
-wbool
-w_io_unix_close (void *udata)
+static wbool   w_io_unix_close (void*);
+static ssize_t w_io_unix_read  (void*, void*, size_t);
+static ssize_t w_io_unix_write (void*, const void*, size_t);
+
+
+void
+w_io_unix_open (w_io_t *io, int fd)
 {
-    int fd = (ptrdiff_t) udata;
-    return (close (fd) == 0);
+    w_assert (io);
+    w_assert (fd >= 0);
+
+    io->close = w_io_unix_close;
+    io->write = w_io_unix_write;
+    io->read  = w_io_unix_read;
+
+    *W_IO_UDATA (io, int) = fd;
 }
 
 
-ssize_t
+static wbool
+w_io_unix_close (void *udata)
+{
+    return (close (*((int*) udata)) == 0);
+}
+
+
+static ssize_t
 w_io_unix_write (void *udata, const void *buf, size_t len)
 {
-    int fd = (ptrdiff_t) udata;
     ssize_t ret, n = len;
 
     while (len > 0) {
         do {
-            ret = write (fd, buf, len);
+            ret = write (*((int*) udata), buf, len);
         } while (ret < 0 && errno == EINTR);
 
         if (ret < 0) {
@@ -47,14 +64,13 @@ w_io_unix_write (void *udata, const void *buf, size_t len)
 }
 
 
-ssize_t
+static ssize_t
 w_io_unix_read (void *udata, void *buf, size_t len)
 {
-    int fd = (ptrdiff_t) udata;
     ssize_t ret;
 
     do {
-        ret = read (fd, buf, len);
+        ret = read (*((int*) udata), buf, len);
     } while (ret < 0 && errno == EINTR);
 
     return ret;

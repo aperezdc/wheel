@@ -13,8 +13,8 @@
 int
 main (int argc, char **argv)
 {
-    w_io_t ioi = W_IO_UNIX (STDIN_FILENO);
-    w_io_t ioo = W_IO_UNIX (STDOUT_FILENO);
+    W_IO_UNIX (ioi);
+    W_IO_UNIX (ioo);
 
     char buf[BUFFER_SIZE];
     ssize_t ret;
@@ -22,8 +22,11 @@ main (int argc, char **argv)
     w_unused (argc);
     w_unused (argv);
 
-    while ((ret = w_io_read (&ioi, buf, BUFFER_SIZE)) > 0) {
-        w_io_write (&ioo, buf, ret);
+    w_io_unix_open (ioi, STDIN_FILENO);
+    w_io_unix_open (ioo, STDOUT_FILENO);
+
+    while ((ret = w_io_read (ioi, buf, BUFFER_SIZE)) > 0) {
+        w_io_write (ioo, buf, ret);
     }
 
     return EXIT_SUCCESS;
