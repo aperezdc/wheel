@@ -12,7 +12,12 @@
 static wbool
 w_io_buf_close (void *udata)
 {
-    w_buf_free (&(((struct w_io_buf_data*) udata)->buf));
+    struct w_io_buf_data *data = (struct w_io_buf_data*) udata;
+
+    if (data->own) {
+        w_buf_free (&data->buf);
+    }
+
     return W_YES;
 }
 
@@ -63,6 +68,7 @@ w_io_buf_open (w_io_t *io, w_buf_t *buf)
          *     to just *copy* the data in the passed buffer.
          */
         memcpy (&data->buf, buf, sizeof (w_buf_t));
+        data->own = W_NO;
     }
     else {
         /*
@@ -70,6 +76,7 @@ w_io_buf_open (w_io_t *io, w_buf_t *buf)
          *       setting everything to zero does the right thing.
          */
         memset (&data->buf, 0x00, sizeof (w_buf_t));
+        data->own = W_YES;
     }
 
     io->close = w_io_buf_close;

@@ -1059,6 +1059,7 @@ struct w_io_buf_data
 {
     w_buf_t buf;
     size_t  pos;
+    wbool   own;
 };
 
 /*!
@@ -1086,7 +1087,8 @@ struct w_io_buf_data
  *            \ref W_IO_BUF.
  * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
  *            \ref w_buf_t internally which can be retrieved with
- *            \ref W_IO_BUF_BUF.
+ *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
+ *            you will be responsible to call \ref w_buf_free on it.
  * \sa W_IO_BUF, W_IO_BUF_BUF
  */
 W_EXPORT void w_io_buf_open (w_io_t  *io,
