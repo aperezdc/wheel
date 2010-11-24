@@ -1061,6 +1061,13 @@ W_EXPORT void w_io_unix_open (w_io_t *io,
                               int    fd);
 
 /*!
+ * Create and initialize an I/O object to be used with Unix file
+ * descriptors.
+ * \param fd Unix file descriptor.
+ */
+W_EXPORT w_io_t* w_io_unix_new (int fd);
+
+/*!
  * Declare an I/O object for use with C standard file descriptors.
  * \param _v Variable name.
  * \sa W_IO_STDIO, W_IO_STDIO_FILEP

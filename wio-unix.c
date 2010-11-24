@@ -64,3 +64,12 @@ w_io_unix_open (w_io_t *io, int fd)
 
     *W_IO_UDATA (io, int) = fd;
 }
+
+
+w_io_t*
+w_io_unix_new (int fd)
+{
+    w_io_t *io = w_io_new (sizeof (int));
+    w_io_unix_open (io, fd);
+    return io;
+}
