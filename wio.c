@@ -9,11 +9,30 @@
 #include <errno.h>
 
 
-wbool
-w_io_close (const w_io_t *io)
+w_io_t*
+w_io_new (size_t usize)
 {
+    w_io_t *io;
+    usize += sizeof (w_io_t);
+    io = (w_io_t*) memset (w_malloc (usize), 0x00, usize);
+    io->__free = (void (*)(w_io_t*)) free;
+    return io;
+}
+
+
+wbool
+w_io_close (w_io_t *io)
+{
+    wbool ret;
     w_assert (io);
-    return (io->close) ? (*io->close) (W_IO_UDATA (io, void)) : W_YES;
+
+    ret = (io->close) ? (*io->close) (W_IO_UDATA (io, void)) : W_YES;
+
+    if (io->__free) {
+        (*io->__free) (io);
+    }
+
+    return ret;
 }
 
 

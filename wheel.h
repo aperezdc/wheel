@@ -902,10 +902,20 @@ typedef struct w_io_t w_io_t;
  */
 struct w_io_t
 {
-    wbool   (*close) (void *udata);
-    ssize_t (*write) (void *udata, const void *buf, size_t len);
-    ssize_t (*read ) (void *udata, void       *buf, size_t len);
+    wbool   (*close ) (void *udata);
+    ssize_t (*write ) (void *udata, const void *buf, size_t len);
+    ssize_t (*read  ) (void *udata, void       *buf, size_t len);
+    void    (*__free) (w_io_t *io);
 };
+
+/*!
+ * Allocate an I/O object with optional extra space holding user data.
+ * Objects allocated this way are created in the heap, if you prefer to
+ * create such an object in the stack, use \ref W_IO_MAKE instead (or some
+ * other macro that uses it like \ref W_IO_UNIX)
+ * \param usize Amount of extra space reserved for user data.
+ */
+W_EXPORT w_io_t* w_io_new (size_t usize);
 
 /*!
  * Declare a I/O object with extra spacing for holding user data.
@@ -933,7 +943,8 @@ struct w_io_t
  */
 #define W_IO_MAKE(_varname, _udata) \
     char w_io__ ## _varname ## __raw__ [sizeof (w_io_t) + sizeof (_udata)]; \
-    w_io_t * _varname = (w_io_t*) (w_io__ ## _varname ## __raw__)
+    w_io_t * _varname = (w_io_t*) memset (w_io__ ## _varname ## __raw__, 0x00, \
+                                          sizeof (w_io_t) + sizeof (_udata))
 
 /*!
  * Given an I/O object, get a pointer to the user data area.
@@ -958,7 +969,7 @@ struct w_io_t
  *
  * \param io An input/output descriptor.
  */
-W_EXPORT wbool w_io_close (const w_io_t *io);
+W_EXPORT wbool w_io_close (w_io_t *io);
 
 /*!
  * Writes data to an input/output descriptor. If the descriptor has no
