@@ -1090,11 +1090,19 @@ W_EXPORT w_io_t* w_io_unix_new (int fd);
  * Initialize an I/O object to be used with an C standard file descriptor.
  * \param io A pointer to a \ref w_io_t previously allocated with
  *           \ref W_IO_STDIO.
- * \param fd Unix file descriptor.
+ * \param filep Standard C file descriptor.
  * \sa W_IO_STDIO, W_IO_STDIO_FILEP
  */
 W_EXPORT void w_io_stdio_open (w_io_t *io,
                                FILE   *filep);
+
+
+/*!
+ * Create and initialize an I/O object to be used with a C stadanrd file
+ * descriptor.
+ * \param filep Standard C file descriptor.
+ */
+W_EXPORT w_io_t* w_io_stdio_new (FILE *filep);
 
 
 struct w_io_buf_data

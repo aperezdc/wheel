@@ -65,3 +65,12 @@ w_io_stdio_open (w_io_t *io, FILE *filep)
 
     *W_IO_UDATA (io, FILE*) = filep;
 }
+
+
+w_io_t*
+w_io_stdio_new (FILE *filep)
+{
+    w_io_t *io = w_io_new (sizeof (FILE*));
+    w_io_stdio_open (io, filep);
+    return io;
+}
