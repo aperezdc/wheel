@@ -10,31 +10,6 @@
 #include <errno.h>
 
 
-/*
- * NOTE: Casting void* to ptrdiff_t is more portable, because depending on
- * the platform pointers may not fit in integers and compilers could give
- * warnings or even refuse to compile this file.
- */
-
-static wbool   w_io_unix_close (void*);
-static ssize_t w_io_unix_read  (void*, void*, size_t);
-static ssize_t w_io_unix_write (void*, const void*, size_t);
-
-
-void
-w_io_unix_open (w_io_t *io, int fd)
-{
-    w_assert (io);
-    w_assert (fd >= 0);
-
-    io->close = w_io_unix_close;
-    io->write = w_io_unix_write;
-    io->read  = w_io_unix_read;
-
-    *W_IO_UDATA (io, int) = fd;
-}
-
-
 static wbool
 w_io_unix_close (void *udata)
 {
@@ -76,3 +51,16 @@ w_io_unix_read (void *udata, void *buf, size_t len)
     return ret;
 }
 
+
+void
+w_io_unix_open (w_io_t *io, int fd)
+{
+    w_assert (io);
+    w_assert (fd >= 0);
+
+    io->close = w_io_unix_close;
+    io->write = w_io_unix_write;
+    io->read  = w_io_unix_read;
+
+    *W_IO_UDATA (io, int) = fd;
+}
