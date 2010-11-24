@@ -9,25 +9,6 @@
 #include <stdio.h>
 
 
-static wbool   w_io_stdio_close (void*);
-static ssize_t w_io_stdio_read  (void*, void*, size_t);
-static ssize_t w_io_stdio_write (void*, const void*, size_t);
-
-
-void
-w_io_stdio_open (w_io_t *io, FILE *filep)
-{
-    w_assert (io);
-    w_assert (filep);
-
-    io->close = w_io_stdio_close;
-    io->write = w_io_stdio_write;
-    io->read  = w_io_stdio_read;
-
-    *W_IO_UDATA (io, FILE*) = filep;
-}
-
-
 static wbool
 w_io_stdio_close (void *udata)
 {
@@ -71,3 +52,16 @@ w_io_stdio_read (void *udata, void *buf, size_t len)
     return ret;
 }
 
+
+void
+w_io_stdio_open (w_io_t *io, FILE *filep)
+{
+    w_assert (io);
+    w_assert (filep);
+
+    io->close = w_io_stdio_close;
+    io->write = w_io_stdio_write;
+    io->read  = w_io_stdio_read;
+
+    *W_IO_UDATA (io, FILE*) = filep;
+}
