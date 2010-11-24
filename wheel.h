@@ -888,6 +888,13 @@ W_EXPORT void w_fmt_bufv (w_buf_t    *buf,
  * \{
  */
 
+enum w_io_flag
+{
+    W_IO_ERR = -1, /*!< An I/O error occured. */
+    W_IO_EOF = -2, /*!< End of file reached.  */
+};
+
+
 typedef struct w_io_t w_io_t;
 
 /*!
@@ -995,6 +1002,23 @@ W_EXPORT ssize_t w_io_formatv (const w_io_t *io,
                                const char   *fmt,
                                va_list       args);
 
+
+/*!
+ * Reads a single character from an I/O object.
+ * \param io An input/output descriptor.
+ * \return   The read character, or either \ref W_IO_EOF if the end of file
+ *           was reached, or \ref W_IO_ERR if there was some error.
+ */
+W_EXPORT int w_io_getchar (const w_io_t *io);
+
+/*!
+ * Writes a single character to an I/O object.
+ * \param io An input/output descriptor.
+ * \param ch Character.
+ * \return   Whether there was some error.
+ */
+W_EXPORT wbool w_io_putchar (const w_io_t *io,
+                             int           ch);
 
 /*!
  * Declare an I/O object for use with an Unix file descriptor.

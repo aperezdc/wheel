@@ -41,6 +41,27 @@ w_io_write (const w_io_t *io, const void *buf, size_t len)
 }
 
 
+int
+w_io_getchar (const w_io_t *io)
+{
+    ssize_t ret;
+    char ch;
+
+    if ((ret = w_io_read (io, &ch, 1)) == 1)
+        return ch;
+
+    return (ret == 0) ? W_IO_EOF : W_IO_ERR;
+}
+
+
+wbool
+w_io_putchar (const w_io_t *io, int ch)
+{
+    char bch = ch;
+    return (w_io_write (io, &bch, 1) != 1);
+}
+
+
 ssize_t
 w_io_format (const w_io_t *io, const char *fmt, ...)
 {
