@@ -22,21 +22,21 @@ struct w_cfg_node
 
 
 static void*
-_w_cfg_free_item(void *i, void *ctx)
+w_cfg_free_item (void *i, void *ctx)
 {
 	w_cfg_node_t *node = (w_cfg_node_t*) i;
-	w_assert(node != NULL);
-	w_unused(ctx);
+	w_assert (node != NULL);
+	w_unused (ctx);
 
 	switch (node->kind & W_CFG_TYPE_MASK) {
-		case W_CFG_NODE: w_cfg_free(node->node); break;
-		case W_CFG_STRING: w_free(node->string); break;
+		case W_CFG_NODE: w_obj_unref (node->node); break;
+		case W_CFG_STRING: w_free (node->string); break;
 		case W_CFG_NUMBER:
 			/* Fall through. */
 		default: /* Do nothing. */
 			break;
 	}
-	w_free(node);
+	w_free (node);
 	return NULL;
 }
 
@@ -58,24 +58,24 @@ w_cfg_new (void)
 
 
 static w_cfg_node_t*
-_w_cfg_getnode(const w_cfg_t *cf, const char *key)
+w_cfg_getnode (const w_cfg_t *cf, const char *key)
 {
 	w_cfg_node_t *node;
 	char *sep;
-	w_assert(key != NULL);
-	w_assert(cf != NULL);
+	w_assert (key != NULL);
+	w_assert (cf != NULL);
 
-	if (!w_dict_count(cf)) return NULL;
+	if (!w_dict_count (cf)) return NULL;
 
-	if ((sep = strchr(key, '.')) != NULL) {
+	if ((sep = strchr (key, '.')) != NULL) {
 		/* Dotted key. */
-		node = w_dict_getn(cf, key, (size_t)(sep - key));
+		node = w_dict_getn (cf, key, (size_t) (sep - key));
 		if ((node != NULL) && (node->kind == W_CFG_NODE))
-			return _w_cfg_getnode(node->node, ++sep);
+			return w_cfg_getnode (node->node, ++sep);
 	}
 	else {
 		/* Plain key. */
-		return w_dict_get(cf, key);
+		return w_dict_get (cf, key);
 	}
 
 	/* Not found. */
@@ -84,44 +84,44 @@ _w_cfg_getnode(const w_cfg_t *cf, const char *key)
 
 
 static w_cfg_node_t*
-_w_cfg_ensurenode(w_cfg_t *cf, const char *key)
+w_cfg_ensurenode (w_cfg_t *cf, const char *key)
 {
 	char *sep;
 	size_t len = 0;
 	w_cfg_node_t *node = NULL;
 
-	w_assert(key != NULL);
-	w_assert(cf != NULL);
+	w_assert (key != NULL);
+	w_assert (cf != NULL);
 
-	if ((sep = strchr(key, '.')) != NULL)
+	if ((sep = strchr (key, '.')) != NULL)
 		len = (size_t) (sep - key);
     else
         len = strlen (key);
 
-	if (w_dict_count(cf)) {
+	if (w_dict_count (cf)) {
 		if (sep != NULL) {
-			node = w_dict_getn(cf, key, len);
+			node = w_dict_getn (cf, key, len);
 			if ((node != NULL) && (node->kind == W_CFG_NODE))
-				return _w_cfg_ensurenode(node->node, ++sep);
+				return w_cfg_ensurenode (node->node, ++sep);
 		}
 		else {
-			node = w_dict_get(cf, key);
+			node = w_dict_get (cf, key);
 		}
 	}
 
 	if (node == NULL) {
 		/* Node not found -> create it. */
-		node = w_new(w_cfg_node_t);
+		node = w_new (w_cfg_node_t);
 		if (node != NULL)
-			w_dict_setn(cf, key, len, node);
+			w_dict_setn (cf, key, len, node);
 		else
-			w_dict_set(cf, key, node);
+			w_dict_set (cf, key, node);
 	}
 
 	if (sep != NULL) {
 		node->kind = W_CFG_NODE;
-		node->node = w_cfg_new();
-		return _w_cfg_ensurenode(node->node, ++sep);
+		node->node = w_cfg_new ();
+		return w_cfg_ensurenode (node->node, ++sep);
 	}
 
 	return node;
@@ -129,30 +129,30 @@ _w_cfg_ensurenode(w_cfg_t *cf, const char *key)
 
 
 static wbool
-_w_cfg_setv(w_cfg_t *cf, va_list args)
+w_cfg_setv (w_cfg_t *cf, va_list args)
 {
 	wbool ret = W_YES;
 	w_cfg_type_t kind;
 	w_cfg_node_t *node;
-	w_assert(cf != NULL);
+	w_assert (cf != NULL);
 
-	while ((kind = va_arg(args, int)) != W_CFG_END) {
-		const char *key = va_arg(args, const char*);
-		w_assert(key != NULL);
+	while ((kind = va_arg (args, int)) != W_CFG_END) {
+		const char *key = va_arg (args, const char*);
+		w_assert (key != NULL);
 
-		if ((node = _w_cfg_ensurenode(cf, key)) == NULL)
+		if ((node = w_cfg_ensurenode (cf, key)) == NULL)
 			ret = W_NO;
 		node->kind = kind & W_CFG_TYPE_MASK;
 
 		switch (node->kind) {
 			case W_CFG_NUMBER:
-				node->number = va_arg(args, double);
+				node->number = va_arg (args, double);
 				break;
 			case W_CFG_STRING:
-				node->string = w_strdup(va_arg(args, const char*));
+				node->string = w_strdup (va_arg (args, const char*));
 				break;
 			case W_CFG_NODE:
-				node->node = va_arg(args, w_cfg_t*);
+				node->node = va_arg (args, w_cfg_t*);
 				break;
 			default:
 				/* XXX For now just trust the programmer. */
@@ -165,7 +165,7 @@ _w_cfg_setv(w_cfg_t *cf, va_list args)
 
 
 static wbool
-_w_cfg_getv(const w_cfg_t *cf, va_list args)
+w_cfg_getv (const w_cfg_t *cf, va_list args)
 {
 	wbool ret = W_YES;
 	w_cfg_type_t kind;
@@ -173,30 +173,30 @@ _w_cfg_getv(const w_cfg_t *cf, va_list args)
 	double *pnumber;
 	w_cfg_t **pnode;
 	const char **pstring;
-	w_assert(cf != NULL);
+	w_assert (cf != NULL);
 
-	while ((kind = va_arg(args, int)) != W_CFG_END) {
-		const char *key = va_arg(args, const char*);
-		w_assert(key != NULL);
+	while ((kind = va_arg (args, int)) != W_CFG_END) {
+		const char *key = va_arg (args, const char*);
+		w_assert (key != NULL);
 
-		if ((node = _w_cfg_getnode(cf, key)) == NULL)
+		if ((node = w_cfg_getnode (cf, key)) == NULL)
 			ret = W_NO;
 
 		switch (kind & W_CFG_TYPE_MASK) {
 			case W_CFG_NUMBER:
-				pnumber = va_arg(args, double*);
+				pnumber = va_arg (args, double*);
 				if ((node != NULL) && (node->kind == W_CFG_NUMBER))
 					*pnumber = node->number;
 				else ret = W_NO;
 				break;
 			case W_CFG_STRING:
-				pstring = va_arg(args, const char**);
+				pstring = va_arg (args, const char**);
 				if ((node != NULL) && (node->kind == W_CFG_STRING))
 					*pstring = node->string;
 				else ret = W_NO;
 				break;
 			case W_CFG_NODE:
-				pnode = va_arg(args, w_cfg_t**);
+				pnode = va_arg (args, w_cfg_t**);
 				if ((node != NULL) && (node->kind == W_CFG_NODE))
 					*pnode = node->node;
 				else ret = W_NO;
@@ -212,51 +212,51 @@ _w_cfg_getv(const w_cfg_t *cf, va_list args)
 
 
 wbool
-w_cfg_set(w_cfg_t *cf, ...)
+w_cfg_set (w_cfg_t *cf, ...)
 {
 	wbool ret;
 	va_list args;
 
-	w_assert(cf != NULL);
-	va_start(args, cf);
-	ret = _w_cfg_setv(cf, args);
-	va_end(args);
+	w_assert (cf != NULL);
+	va_start (args, cf);
+	ret = w_cfg_setv (cf, args);
+	va_end (args);
 	return ret;
 }
 
 
 wbool
-w_cfg_get(const w_cfg_t *cf, ...)
+w_cfg_get (const w_cfg_t *cf, ...)
 {
 	wbool ret;
 	va_list args;
 
-	w_assert(cf != NULL);
-	va_start(args, cf);
-	ret = _w_cfg_getv(cf, args);
-	va_end(args);
+	w_assert (cf != NULL);
+	va_start (args, cf);
+	ret = w_cfg_getv (cf, args);
+	va_end (args);
 	return ret;
 }
 
 
 wbool
-w_cfg_has(const w_cfg_t *cf, const char *key)
+w_cfg_has (const w_cfg_t *cf, const char *key)
 {
-	w_assert(cf != NULL);
-	w_assert(key != NULL);
+	w_assert (cf != NULL);
+	w_assert (key != NULL);
 
-	return (_w_cfg_getnode(cf, key) != NULL);
+	return (w_cfg_getnode (cf, key) != NULL);
 }
 
 
 w_cfg_type_t
-w_cfg_type(const w_cfg_t *cf, const char *key)
+w_cfg_type (const w_cfg_t *cf, const char *key)
 {
 	w_cfg_node_t *node;
-	w_assert(cf != NULL);
-	w_assert(key != NULL);
+	w_assert (cf != NULL);
+	w_assert (key != NULL);
 
-	if ((node = _w_cfg_getnode(cf, key)) != NULL)
+	if ((node = w_cfg_getnode (cf, key)) != NULL)
 		return node->kind;
 	else
 		return W_CFG_NONE;
@@ -264,29 +264,29 @@ w_cfg_type(const w_cfg_t *cf, const char *key)
 
 
 static w_cfg_node_t*
-_w_cfg_getnodelocation(w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **where)
+w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **where)
 {
 	w_iterator_t i;
 	const char *sep;
 	size_t len;
 
-	w_assert(j != NULL);
-	w_assert(cf != NULL);
-	w_assert(key != NULL);
+	w_assert (j != NULL);
+	w_assert (cf != NULL);
+	w_assert (key != NULL);
 
-	if (!w_dict_count(cf)) return NULL;
+	if (!w_dict_count (cf)) return NULL;
 
-	sep = strchr(key, '.');
+	sep = strchr (key, '.');
 	len = (sep != NULL)
 		? (size_t) (sep - key)
-		: (size_t) strlen(key);
+		: (size_t) strlen (key);
 
-	for (i = w_dict_first(cf); i != NULL; i = w_dict_next(cf, i)) {
+	for (i = w_dict_first (cf); i != NULL; i = w_dict_next (cf, i)) {
 		w_cfg_node_t *node = (w_cfg_node_t*) *i;
-		if (!strncmp(key, w_dict_iterator_get_key(i), len)) {
+		if (!strncmp (key, w_dict_iterator_get_key (i), len)) {
 			if (sep != NULL) {
 				if (node->kind != W_CFG_NODE) return NULL;
-				else return _w_cfg_getnodelocation(node->node, ++sep, j, where);
+				else return w_cfg_getnodelocation (node->node, ++sep, j, where);
 			}
 			else {
 				*j     = i;
@@ -300,28 +300,28 @@ _w_cfg_getnodelocation(w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **
 
 
 wbool
-w_cfg_del(w_cfg_t *cf, const char *key)
+w_cfg_del (w_cfg_t *cf, const char *key)
 {
 	w_cfg_node_t *node;
 	w_cfg_t *where = NULL;
 	w_iterator_t it = NULL;
 
-	w_assert(cf != NULL);
-	w_assert(key != NULL);
+	w_assert (cf != NULL);
+	w_assert (key != NULL);
 
-	if ((node = _w_cfg_getnodelocation(cf, key, &it, &where)) == NULL)
+	if ((node = w_cfg_getnodelocation (cf, key, &it, &where)) == NULL)
 		return W_NO;
 
-	w_assert(where != NULL);
-	w_assert(it != NULL);
+	w_assert (where != NULL);
+	w_assert (it != NULL);
 
 	if (node->kind == W_CFG_NODE)
-		w_cfg_free(node->node);
+		w_cfg_free (node->node);
 	else if (node->kind == W_CFG_STRING)
-		w_free(node->string);
+		w_free (node->string);
 
-	w_dict_del(where, w_dict_iterator_get_key(it));
-	w_free(node);
+	w_dict_del (where, w_dict_iterator_get_key (it));
+	w_free (node);
 
 	return W_YES;
 }
@@ -338,7 +338,7 @@ w_cfg_del(w_cfg_t *cf, const char *key)
 
 
 static wbool
-_w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
+w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
 {
 	w_iterator_t i;
 	w_cfg_node_t *node;
@@ -356,7 +356,7 @@ _w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
         switch (node->kind & W_CFG_TYPE_MASK) {
             case W_CFG_NODE:
                 fprintf (out, "{\n");
-                _w_cfg_dump_cfg (node->node, out, indent + 1);
+                w_cfg_dump_cfg (node->node, out, indent + 1);
                 W_CFG_DUMP_INDENT (indent, out);
                 fprintf (out, "}\n");
                 break;
@@ -384,7 +384,7 @@ w_cfg_dump (const w_cfg_t *cf, FILE *output)
     w_assert (cf != NULL);
     w_assert (output != NULL);
 
-    return _w_cfg_dump_cfg (cf, output, 0);
+    return w_cfg_dump_cfg (cf, output, 0);
 }
 
 
@@ -407,7 +407,7 @@ w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 
 
 static void
-_w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
+w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
 {
     char    *key;
     char    *svalue;
@@ -441,7 +441,7 @@ _w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
                 cvalue = w_cfg_new ();
                 w_cfg_set_node (r, key, cvalue);
                 w_free (key);
-                _w_cfg_parse_items (p, cvalue);
+                w_cfg_parse_items (p, cvalue);
                 w_parse_match (p, '}');
                 break;
             default:
@@ -468,7 +468,7 @@ w_cfg_load (FILE *input, char **pmsg)
     w_assert (input != NULL);
 
     w_parse_run (&parser, input, '#',
-                 (w_parse_fun_t) _w_cfg_parse_items,
+                 (w_parse_fun_t) w_cfg_parse_items,
                  result, &errmsg);
 
     if (errmsg != NULL) {
