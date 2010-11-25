@@ -373,46 +373,51 @@ w_strncpy(char *dst, const char *src, size_t n)
  * \{
  */
 
-W_OBJ_DECL (w_dict_t);
+typedef struct w_dict_node_t w_dict_node_t;
+
+W_OBJ (w_dict_t)
+{
+    w_obj_t         parent;
+    w_dict_node_t **nodes;
+    w_dict_node_t  *first;
+    size_t          count;
+    size_t          size;
+};
 
 /*!
  * Create a new dictionary.
  */
-W_EXPORT w_dict_t* w_dict_new(void);
-
-/*!
- * Free a dictionary.
- */
-W_EXPORT void w_dict_free(w_dict_t *d);
+W_EXPORT w_dict_t* w_dict_new (void);
 
 /*!
  * Clears the contents of a dictionary.
  */
-W_EXPORT void w_dict_clear(w_dict_t *d);
+W_EXPORT void w_dict_clear (w_dict_t *d);
 
 /*!
  * Get the number of items in a dictionary.
  */
-W_EXPORT unsigned w_dict_count(const w_dict_t *d);
+#define w_dict_count(_d) \
+    (w_assert (_d), (_d)->count)
 
-W_EXPORT void* w_dict_getn(const w_dict_t *d, const char *key, size_t keylen);
-W_EXPORT void  w_dict_setn(w_dict_t *d, const char *key, size_t keylen, void *data);
-W_EXPORT void  w_dict_deln(w_dict_t *d, const char *key, size_t keylen);
+W_EXPORT void* w_dict_getn (const w_dict_t *d, const char *key, size_t keylen);
+W_EXPORT void  w_dict_setn (w_dict_t *d, const char *key, size_t keylen, void *data);
+W_EXPORT void  w_dict_deln (w_dict_t *d, const char *key, size_t keylen);
 
 /*!
  * Delete an item from a dictionary given its key.
  */
-W_EXPORT void  w_dict_del(w_dict_t *d, const char *key);
+W_EXPORT void  w_dict_del (w_dict_t *d, const char *key);
 
 /*!
  * Set an item in a dictionary.
  */
-W_EXPORT void  w_dict_set(w_dict_t *d, const char *key, void *data);
+W_EXPORT void  w_dict_set (w_dict_t *d, const char *key, void *data);
 
 /*!
  * Get an item from a dictionary.
  */
-W_EXPORT void* w_dict_get(const w_dict_t *d, const char *key);
+W_EXPORT void* w_dict_get (const w_dict_t *d, const char *key);
 
 /*!
  * Update a dictionary with the contents of another. For each key present in
@@ -421,15 +426,15 @@ W_EXPORT void* w_dict_get(const w_dict_t *d, const char *key);
  * \param d Destination dictionary.
  * \param o Source dictionary.
  */
-W_EXPORT void  w_dict_update(w_dict_t *d, const w_dict_t *o);
+W_EXPORT void  w_dict_update (w_dict_t *d, const w_dict_t *o);
 
-W_EXPORT void w_dict_traverse(w_dict_t *d, w_traverse_fun_t f, void *ctx);
-W_EXPORT void w_dict_traverse_keys(w_dict_t *d, w_traverse_fun_t f, void *ctx);
-W_EXPORT void w_dict_traverse_values(w_dict_t *d, w_traverse_fun_t f, void *ctx);
+W_EXPORT void w_dict_traverse (w_dict_t *d, w_traverse_fun_t f, void *ctx);
+W_EXPORT void w_dict_traverse_keys (w_dict_t *d, w_traverse_fun_t f, void *ctx);
+W_EXPORT void w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx);
 
-W_EXPORT w_iterator_t w_dict_first(const w_dict_t *d);
-W_EXPORT w_iterator_t w_dict_next(const w_dict_t *d, w_iterator_t i);
-W_EXPORT const char const* w_dict_iterator_get_key(w_iterator_t i);
+W_EXPORT w_iterator_t w_dict_first (const w_dict_t *d);
+W_EXPORT w_iterator_t w_dict_next (const w_dict_t *d, w_iterator_t i);
+W_EXPORT const char const* w_dict_iterator_get_key (w_iterator_t i);
 
 /*
  * XXX: Never, NEVER change the layout of this structure. This **MUST**
@@ -446,10 +451,10 @@ typedef struct w_dict_item w_dict_item_t;
 
 
 #define w_dict_item_first(_d) \
-	((w_dict_item_t*) w_dict_first(_d))
+	((w_dict_item_t*) w_dict_first (_d))
 
 #define w_dict_item_next(_d, _i) \
-	((w_dict_item_t*) w_dict_next((_d), (w_iterator_t)(_i)))
+	((w_dict_item_t*) w_dict_next ((_d), (w_iterator_t)(_i)))
 
 #define w_dict_foreach(_d, _i) \
     for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))

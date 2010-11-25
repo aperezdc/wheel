@@ -26,7 +26,7 @@ START_TEST (test_wdict_get_set)
     fail_if (strcmp ("BAR", w_dict_get (d, "bar")),
              "String 'BAR' does not match");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -43,7 +43,7 @@ START_TEST (test_wdict_getn)
     fail_if (strcmp (w_dict_get (d, "foo"), w_dict_getn (d, "foobar", 3)),
              "String 'FOO' does not match (get/getn)");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -58,7 +58,7 @@ START_TEST (test_wdict_setn)
     fail_if (strcmp ("FOO", w_dict_get (d, "foo")),
              "String 'FOO' does not match");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -80,7 +80,7 @@ START_TEST (test_wdict_clear)
     fail_unless (w_dict_count (d) == 0,
                  "Expected 0 items in dict");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -112,7 +112,7 @@ START_TEST (test_wdict_del)
     fail_unless (w_dict_count (d) == 2,
                  "Expected 2 items in dict");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -134,7 +134,7 @@ START_TEST (test_wdict_deln)
     fail_unless (w_dict_count (d) == 3,
                  "Expected 3 items in dict");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -161,8 +161,8 @@ START_TEST (test_wdict_update)
     fail_if (strcmp ("BAZINGA", w_dict_get (d1, "baz")),
              "Strcmp 'BAZINGA' does not match");
 
-    w_dict_free (d1);
-    w_dict_free (d2);
+    w_obj_unref (d1);
+    w_obj_unref (d2);
 }
 END_TEST
 
@@ -175,7 +175,7 @@ START_TEST (test_wdict_first)
     fail_if (strcmp ("FOO", *w_dict_first (d)),
              "String 'FOO' does not match");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST
 
@@ -199,6 +199,6 @@ START_TEST (test_wdict_iter)
     fail_unless (count == w_dict_count (d),
                  "Number of iterations does not match item count");
 
-    w_dict_free (d);
+    w_obj_unref (d);
 }
 END_TEST

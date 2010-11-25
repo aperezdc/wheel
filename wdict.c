@@ -36,8 +36,6 @@
 #define W_DICT_KEY_EQN(_a, _b, _blen) (!strncmp((_a), (_b), (_blen)))
 #endif /* !W_DICT_KEY_EQN */
 
-typedef struct w_dict_node_t w_dict_node_t;
-
 
 /*
  * XXX  Never, NEVER, change the layout of this struct. If  XXX
@@ -53,30 +51,22 @@ struct w_dict_node_t
 	w_dict_node_t *prevNode;
 };
 
-struct w_dict_t
-{
-	w_dict_node_t **nodes;
-	w_dict_node_t *first;
-	unsigned      count;
-	unsigned      size;
-};
-
 
 static inline w_dict_node_t*
-_w_dict_node_new(const char *key, void *val)
+w_dict_node_new (const char *key, void *val)
 {
 	w_dict_node_t *node;
 	w_assert (key != NULL);
 
-	node = w_new(w_dict_node_t);
-	node->key  = w_strdup(key);
-	node->val  = val;
+	node = w_new (w_dict_node_t);
+	node->key = w_strdup(key);
+	node->val = val;
 	return node;
 }
 
 
 static inline w_dict_node_t*
-_w_dict_node_newn(const char *key, size_t len, void *val)
+w_dict_node_newn (const char *key, size_t len, void *val)
 {
 	w_dict_node_t *node;
 	w_assert (key != NULL);
@@ -90,63 +80,56 @@ _w_dict_node_newn(const char *key, size_t len, void *val)
 
 
 static inline void
-_w_dict_node_free(w_dict_node_t *node)
+w_dict_node_free (w_dict_node_t *node)
 {
 	w_assert (node != NULL);
 	w_assert (node->key != NULL);
-	w_free(node->key);
-	w_free(node);
+	w_free (node->key);
+	w_free (node);
 }
 
 
 static inline void
-_w_dict_free_nodes(w_dict_t *d)
+w_dict_free_nodes(w_dict_t *d)
 {
 	w_dict_node_t *node = d->first;
 	w_dict_node_t *next;
 
 	while (node) {
 		next = node->nextNode;
-		_w_dict_node_free(node);
+		w_dict_node_free (node);
 		node = next;
 	}
 }
 
 
+static void
+w_dict_free (void *obj)
+{
+	w_dict_t *d = (w_dict_t*) obj;
+	w_assert (d != NULL);
+	w_dict_free_nodes (d);
+	w_free (d->nodes);
+}
+
+
 w_dict_t*
-w_dict_new(void)
+w_dict_new (void)
 {
-	w_dict_t *d = w_new0 (w_dict_t);
+	w_dict_t *d = w_obj_new (w_dict_t);
 	d->size  = W_DICT_DEFAULT_SIZE;
-	d->nodes = w_alloc(w_dict_node_t*, d->size);
-	return d;
+	d->nodes = w_alloc (w_dict_node_t*, d->size);
+	d->count = 0;
+	return w_obj_dtor (d, w_dict_free);
 }
 
 
 void
-w_dict_free(w_dict_t *d)
+w_dict_clear (w_dict_t *d)
 {
 	w_assert (d != NULL);
-	_w_dict_free_nodes(d);
-	w_free(d->nodes);
-	w_free(d);
-}
-
-
-unsigned
-w_dict_count(const w_dict_t *d)
-{
-	w_assert (d != NULL);
-	return d->count;
-}
-
-
-void
-w_dict_clear(w_dict_t *d)
-{
-	w_assert (d != NULL);
-	_w_dict_free_nodes(d);
-	memset(d->nodes, 0x00, d->size * sizeof(w_dict_node_t*));
+	w_dict_free_nodes (d);
+	memset (d->nodes, 0x00, d->size * sizeof (w_dict_node_t*));
 
 	d->first = NULL;
 	d->count = 0;
@@ -154,14 +137,14 @@ w_dict_clear(w_dict_t *d)
 
 
 void*
-w_dict_get(const w_dict_t *d, const char *key)
+w_dict_get (const w_dict_t *d, const char *key)
 {
-	return w_dict_getn(d, key, strlen(key));
+	return w_dict_getn (d, key, strlen (key));
 }
 
 
 void*
-w_dict_getn(const w_dict_t *d, const char *key, size_t len)
+w_dict_getn (const w_dict_t *d, const char *key, size_t len)
 {
 	w_dict_node_t *node;
 	unsigned hval;
@@ -169,18 +152,18 @@ w_dict_getn(const w_dict_t *d, const char *key, size_t len)
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASHN(key, d->size, len);
+	hval = W_DICT_HASHN (key, d->size, len);
 	node = d->nodes[hval];
 
 	if (node) {
-		if (W_DICT_KEY_EQN(node->key, key, len)) {
+		if (W_DICT_KEY_EQN (node->key, key, len)) {
 			return node->val;
 		}
 		else {
 			w_dict_node_t *lastNode = node;
 			node = node->next;
 			while (node) {
-				if (W_DICT_KEY_EQN(node->key, key, len)) {
+				if (W_DICT_KEY_EQN (node->key, key, len)) {
 					lastNode->next = node->next;
 					node->next = d->nodes[hval];
 					d->nodes[hval] = node;
@@ -196,7 +179,7 @@ w_dict_getn(const w_dict_t *d, const char *key, size_t len)
 
 
 static inline void
-_w_dict_rehash(w_dict_t *d)
+w_dict_rehash (w_dict_t *d)
 {
 	w_dict_node_t *node = d->first;
 
@@ -206,11 +189,11 @@ _w_dict_rehash(w_dict_t *d)
 	}
 
 	d->size *= W_DICT_RESIZE_FACTOR;
-	d->nodes = w_resize(d->nodes, w_dict_node_t*, ++d->size);
-	memset(d->nodes, 0x00, d->size * sizeof(w_dict_node_t*));
+	d->nodes = w_resize (d->nodes, w_dict_node_t*, ++d->size);
+	memset (d->nodes, 0x00, d->size * sizeof (w_dict_node_t*));
 
 	for (node = d->first; node; node = node->nextNode) {
-		unsigned hval  = W_DICT_HASH(node->key, d->size);
+		unsigned hval  = W_DICT_HASH (node->key, d->size);
 		w_dict_node_t *n = d->nodes[hval];
 		if (!n) d->nodes[hval] = node;
 		else {
@@ -228,30 +211,30 @@ _w_dict_rehash(w_dict_t *d)
 void
 w_dict_set(w_dict_t *d, const char *key, void *val)
 {
-	w_dict_setn(d, key, strlen(key), val);
+	w_dict_setn (d, key, strlen (key), val);
 }
 
 
 void
-w_dict_setn(w_dict_t *d, const char *key, size_t len, void *val)
+w_dict_setn (w_dict_t *d, const char *key, size_t len, void *val)
 {
 	unsigned hval;
 	w_dict_node_t *node;
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASHN(key, d->size, len);
+	hval = W_DICT_HASHN (key, d->size, len);
 	node = d->nodes[hval];
 
 	while (node) {
-		if (W_DICT_KEY_EQN(node->key, key, len)) {
+		if (W_DICT_KEY_EQN (node->key, key, len)) {
 			node->val = val;
 			return;
 		}
 		node = node->next;
 	}
 
-	node = _w_dict_node_newn(key, len, val);
+	node = w_dict_node_newn(key, len, val);
 
 	if (d->nodes[hval]) node->next = d->nodes[hval];
 	d->nodes[hval] = node;
@@ -262,7 +245,7 @@ w_dict_setn(w_dict_t *d, const char *key, size_t len, void *val)
 
 	d->count++;
 	if (d->count > (d->size * W_DICT_COUNT_TO_SIZE_RATIO))
-		_w_dict_rehash(d);
+		w_dict_rehash (d);
 }
 
 
@@ -274,7 +257,7 @@ w_dict_del (w_dict_t *d, const char *key)
 
 
 void
-w_dict_deln(w_dict_t *d, const char *key, size_t keylen)
+w_dict_deln (w_dict_t *d, const char *key, size_t keylen)
 {
 	unsigned hval;
 	w_dict_node_t *node;
@@ -282,10 +265,10 @@ w_dict_deln(w_dict_t *d, const char *key, size_t keylen)
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASHN(key, d->size, keylen);
+	hval = W_DICT_HASHN (key, d->size, keylen);
 
 	for (node = d->nodes[hval]; node; node = node->next) {
-		if (W_DICT_KEY_EQN(node->key, key, keylen)) {
+		if (W_DICT_KEY_EQN (node->key, key, keylen)) {
 			w_dict_node_t *prevNode = node->prevNode;
 			w_dict_node_t *nextNode = node->nextNode;
 
@@ -296,7 +279,7 @@ w_dict_deln(w_dict_t *d, const char *key, size_t keylen)
 			if (lastNode) lastNode->next = node->next;
 			else d->nodes[hval] = node->next;
 
-			_w_dict_node_free(node);
+			w_dict_node_free (node);
 			d->count--;
 			return;
 		}
@@ -305,7 +288,7 @@ w_dict_deln(w_dict_t *d, const char *key, size_t keylen)
 
 
 w_iterator_t
-w_dict_first(const w_dict_t *d)
+w_dict_first (const w_dict_t *d)
 {
 	w_assert (d != NULL);
 	return (w_iterator_t) d->first;
@@ -313,18 +296,18 @@ w_dict_first(const w_dict_t *d)
 
 
 w_iterator_t
-w_dict_next(const w_dict_t *d, w_iterator_t i)
+w_dict_next (const w_dict_t *d, w_iterator_t i)
 {
 	w_dict_node_t *node = (w_dict_node_t*) i;
 	w_assert (d != NULL);
 	w_assert (i != NULL);
-	w_unused(d); /* Avoid compiler warnings. */
+	w_unused (d); /* Avoid compiler warnings. */
 	return (w_iterator_t) node->nextNode;
 }
 
 
 const char*
-w_dict_iterator_get_key(w_iterator_t i)
+w_dict_iterator_get_key (w_iterator_t i)
 {
 	w_dict_node_t *node = (w_dict_node_t*) i;
 	w_assert (i != NULL);
@@ -333,41 +316,43 @@ w_dict_iterator_get_key(w_iterator_t i)
 
 
 void
-w_dict_traverse(w_dict_t *d, w_traverse_fun_t f, void *ctx)
+w_dict_traverse (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 {
 	w_iterator_t i;
 
 	w_assert (d != NULL);
 	w_assert (f != NULL);
 
-	w_dict_foreach (d, i)
-		*i = (*f)(*i, ctx);
+	w_dict_foreach (d, i) {
+		*i = (*f) (*i, ctx);
+    }
 }
 
 
 void
-w_dict_traverse_keys(w_dict_t *d, w_traverse_fun_t f, void *ctx)
+w_dict_traverse_keys (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 {
 	w_dict_item_t *i;
 
-	w_assert(d != NULL);
-	w_assert(f != NULL);
+	w_assert (d != NULL);
+	w_assert (f != NULL);
 
-	for (i = w_dict_item_first(d); i != NULL; i = w_dict_item_next(d, i))
-		(*f)((void*) i->key, ctx);
+	for (i = w_dict_item_first (d); i != NULL; i = w_dict_item_next (d, i)) {
+		(*f) ((void*) i->key, ctx);
+    }
 }
 
 
 void
-w_dict_traverse_values(w_dict_t *d, w_traverse_fun_t f, void *ctx)
+w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 {
 	w_dict_item_t *i;
 
-	w_assert(d != NULL);
-	w_assert(f != NULL);
+	w_assert (d != NULL);
+	w_assert (f != NULL);
 
-	for (i = w_dict_item_first(d); i != NULL; i = w_dict_item_next(d, i))
-		i->val = (*f)(i->val, ctx);
+	for (i = w_dict_item_first (d); i != NULL; i = w_dict_item_next (d, i))
+		i->val = (*f) (i->val, ctx);
 }
 
 
