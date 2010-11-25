@@ -1101,6 +1101,9 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io,
  */
 W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
 
+#define W_IO_BUF_BUF(_p) \
+    (&((w_io_buf_t*) (_p))->buf)
+
 /*\}*/
 
 /*---------------------------------------------------[ config files ]-----*/
