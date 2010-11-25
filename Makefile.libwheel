@@ -12,6 +12,7 @@ libwheel_SRCS := wcfg.c      \
                  wdict.c     \
                  werr.c      \
                  wmem.c      \
+                 wobj.c      \
                  wopt.c      \
                  wparse.c    \
                  wstr.c      \

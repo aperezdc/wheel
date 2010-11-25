@@ -172,6 +172,57 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
 /*\}*/
 
 
+/*------------------------------------------------[ simple objects ]------*/
+
+/*!
+ * \defgroup wobj Poor man's object orientation
+ * \addtogroup wobj
+ * \{
+ */
+
+#define W_OBJ_DECL(_c) \
+    typedef struct _c ## __class _c
+#define W_OBJ_DEF(_c) \
+    struct _c ## __class
+#define W_OBJ(_c) \
+    W_OBJ_DECL (_c); \
+    W_OBJ_DEF  (_c)
+
+
+W_OBJ (w_obj_t)
+{
+    size_t __refs;
+    void (*__dtor) (void*);
+};
+
+
+static inline void*
+w_obj_init (w_obj_t *obj)
+{
+    w_assert (obj);
+    obj->__refs = 1;
+    return obj;
+}
+
+#define w_obj_new_with_priv_sized(_t, _s) \
+    ((_t *) w_obj_init (w_malloc (sizeof (_t) + (_s))))
+
+#define w_obj_new_with_priv(_t) \
+    w_obj_new_with_priv_sized (_t, sizeof (_t ## _p))
+
+#define w_obj_new(_t) \
+    ((_t *) w_obj_init (w_malloc (sizeof (_t))))
+
+#define w_obj_priv(_p, _t) \
+    ((void*) (((char*) (_p)) + sizeof (_t)))
+
+void* w_obj_ref     (void *obj);
+void* w_obj_unref   (void *obj);
+void  w_obj_destroy (void *obj);
+void* w_obj_dtor    (void *obj, void (*fini) (void*));
+
+/*\}*/
+
 /*---------------------------------------------------[ errors/debug ]-----*/
 
 /*!
@@ -322,7 +373,7 @@ w_strncpy(char *dst, const char *src, size_t n)
  * \{
  */
 
-typedef struct w_dict_t w_dict_t;
+W_OBJ_DECL (w_dict_t);
 
 /*!
  * Create a new dictionary.
