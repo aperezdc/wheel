@@ -152,7 +152,10 @@ w_cfg_setv (w_cfg_t *cf, va_list args)
 				node->string = w_strdup (va_arg (args, const char*));
 				break;
 			case W_CFG_NODE:
-				node->node = va_arg (args, w_cfg_t*);
+				if (node->node) {
+				    w_obj_unref (node->node);
+				}
+				node->node = w_obj_ref (va_arg (args, w_cfg_t*));
 				break;
 			default:
 				/* XXX For now just trust the programmer. */
@@ -440,6 +443,7 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
                 w_parse_match (p, '{');
                 cvalue = w_cfg_new ();
                 w_cfg_set_node (r, key, cvalue);
+                w_obj_unref (cvalue);
                 w_free (key);
                 w_cfg_parse_items (p, cvalue);
                 w_parse_match (p, '}');
@@ -472,7 +476,7 @@ w_cfg_load (FILE *input, char **pmsg)
                  result, &errmsg);
 
     if (errmsg != NULL) {
-        w_cfg_free (result);
+        w_obj_unref (result);
         w_assert (errmsg);
         if (pmsg == NULL)
             w_free (errmsg);
