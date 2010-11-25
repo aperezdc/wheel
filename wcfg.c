@@ -21,13 +21,6 @@ struct w_cfg_node
 };
 
 
-w_cfg_t*
-w_cfg_new(void)
-{
-	return w_dict_new();
-}
-
-
 static void*
 _w_cfg_free_item(void *i, void *ctx)
 {
@@ -48,12 +41,19 @@ _w_cfg_free_item(void *i, void *ctx)
 }
 
 
-void
-w_cfg_free(w_cfg_t *cf)
+static void
+w_cfg_free (void *cf)
 {
-	w_assert(cf != NULL);
-	w_dict_traverse(cf, _w_cfg_free_item, NULL);
-	w_dict_free(cf);
+	w_assert (cf != NULL);
+	w_dict_traverse ((w_dict_t*) cf, w_cfg_free_item, NULL);
+	w_dict_free (cf);
+}
+
+
+w_cfg_t*
+w_cfg_new (void)
+{
+	return w_obj_dtor (w_dict_new (), w_dict_free);
 }
 
 

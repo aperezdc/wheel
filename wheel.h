@@ -459,6 +459,8 @@ typedef struct w_dict_item w_dict_item_t;
 #define w_dict_foreach(_d, _i) \
     for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
 
+W_EXPORT void w_dict_free (void *d);
+
 /*\}*/
 
 /*----------------------------------------------------[ CLI parsing ]-----*/
@@ -1148,11 +1150,6 @@ typedef enum w_cfg_type_t w_cfg_type_t;
  * Create a new configuration object.
  */
 W_EXPORT w_cfg_t* w_cfg_new(void);
-
-/*!
- * Free resources allocated in the configuration object.
- */
-W_EXPORT void w_cfg_free(w_cfg_t *cf);
 
 /*!
  * Checks whether a key exists in a configuration object.

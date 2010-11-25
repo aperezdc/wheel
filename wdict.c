@@ -103,7 +103,7 @@ w_dict_free_nodes(w_dict_t *d)
 }
 
 
-static void
+void
 w_dict_free (void *obj)
 {
 	w_dict_t *d = (w_dict_t*) obj;
