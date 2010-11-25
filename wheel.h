@@ -1149,17 +1149,17 @@ typedef enum w_cfg_type_t w_cfg_type_t;
 /*!
  * Create a new configuration object.
  */
-W_EXPORT w_cfg_t* w_cfg_new(void);
+W_EXPORT w_cfg_t* w_cfg_new (void);
 
 /*!
  * Checks whether a key exists in a configuration object.
  */
-W_EXPORT wbool w_cfg_has(const w_cfg_t *cf, const char *key);
+W_EXPORT wbool w_cfg_has (const w_cfg_t *cf, const char *key);
 
 /*!
  * Deletes a key from a configuration object.
  */
-W_EXPORT wbool w_cfg_del(w_cfg_t *cf, const char *key);
+W_EXPORT wbool w_cfg_del (w_cfg_t *cf, const char *key);
 
 /*!
  * Sets a number of items in a configuration object. Prefix each item with
@@ -1173,7 +1173,7 @@ W_EXPORT wbool w_cfg_del(w_cfg_t *cf, const char *key);
  *                W_CFG_END);
  * \endcode
  */
-W_EXPORT wbool w_cfg_set(w_cfg_t *cf, ...);
+W_EXPORT wbool w_cfg_set (w_cfg_t *cf, ...);
 
 /*!
  * Gets a number of items from a configuration object. The variable argument
@@ -1188,12 +1188,12 @@ W_EXPORT wbool w_cfg_set(w_cfg_t *cf, ...);
  *                W_CFG_END);
  * \endcode
  */
-W_EXPORT wbool w_cfg_get(const w_cfg_t *cf, ...);
+W_EXPORT wbool w_cfg_get (const w_cfg_t *cf, ...);
 
 /*!
  * Obtain the type of a configuration object node.
  */
-W_EXPORT w_cfg_type_t w_cfg_type(const w_cfg_t *cf, const char *key);
+W_EXPORT w_cfg_type_t w_cfg_type (const w_cfg_t *cf, const char *key);
 
 /*!
  * Dump configuration to a stream.
@@ -1201,7 +1201,7 @@ W_EXPORT w_cfg_type_t w_cfg_type(const w_cfg_t *cf, const char *key);
  * \param output Output stream where to write.
  * \return       Whether writing was successful.
  */
-W_EXPORT wbool    w_cfg_dump(const w_cfg_t *cf, FILE *output);
+W_EXPORT wbool w_cfg_dump (const w_cfg_t *cf, FILE *output);
 
 /*!
  * Load configuration from a stream.
@@ -1209,7 +1209,7 @@ W_EXPORT wbool    w_cfg_dump(const w_cfg_t *cf, FILE *output);
  * \param msg    Pointer to where to store an error message, if there is one.
  * \return       Valid configuration object or \c NULL if there is some error.
  */
-W_EXPORT w_cfg_t* w_cfg_load(FILE *input, char **msg);
+W_EXPORT w_cfg_t* w_cfg_load (FILE *input, char **msg);
 
 /*!
  * Dump configuration to a file.
@@ -1217,7 +1217,7 @@ W_EXPORT w_cfg_t* w_cfg_load(FILE *input, char **msg);
  * \param path Path to a file.
  * \return     Whether writing was successful.
  */
-W_EXPORT wbool    w_cfg_dump_file(const w_cfg_t *cf, const char *path);
+W_EXPORT wbool w_cfg_dump_file (const w_cfg_t *cf, const char *path);
 
 /*!
  * Load configuration from a file.
@@ -1225,22 +1225,22 @@ W_EXPORT wbool    w_cfg_dump_file(const w_cfg_t *cf, const char *path);
  * \param msg  Pointer to where to store an error message, if there is one.
  * \return     Valid configuration object or \c NULL if there is some error.
  */
-W_EXPORT w_cfg_t* w_cfg_load_file(const char *path, char **msg);
+W_EXPORT w_cfg_t* w_cfg_load_file (const char *path, char **msg);
 
 #define w_cfg_set_string(cf, key, val) \
-	w_cfg_set(cf, W_CFG_STRING, key, val, W_CFG_END)
+	w_cfg_set ((cf), W_CFG_STRING, key, val, W_CFG_END)
 
 #define w_cfg_set_number(cf, key, val) \
-	w_cfg_set(cf, W_CFG_NUMBER, key, val, W_CFG_END)
+	w_cfg_set ((cf), W_CFG_NUMBER, key, val, W_CFG_END)
 
 #define w_cfg_set_node(cf, key, val) \
-	w_cfg_set(cf, W_CFG_NODE, key, val, W_CFG_END)
+	w_cfg_set ((cf), W_CFG_NODE, key, val, W_CFG_END)
 
 #define _W_G(func_name, conf_type, c_type)              \
 	static inline c_type w_cfg_get_ ## func_name         \
 	(w_cfg_t *cf, const char *key, c_type defval)         \
 	{ c_type value;                                        \
-		if (w_cfg_get(cf, conf_type, key, &value, W_CFG_END)) \
+		if (w_cfg_get (cf, conf_type, key, &value, W_CFG_END)) \
 			return value; else return defval;	}
 
 _W_G( number, W_CFG_NUMBER, double      )
@@ -1250,16 +1250,16 @@ _W_G( node,   W_CFG_NODE,   w_cfg_t*    )
 #undef _W_G
 
 /*! Check whether a node is invalid. */
-#define w_cfg_isnone(cf, key)    (W_CFG_NONE   == w_cfg_type(cf, key))
+#define w_cfg_isnone(cf, key)    (W_CFG_NONE   == w_cfg_type (cf, key))
 
 /*! Check whether a node contains a subnode. */
-#define w_cfg_isnode(cf, key)    (W_CFG_NODE   == w_cfg_type(cf, key))
+#define w_cfg_isnode(cf, key)    (W_CFG_NODE   == w_cfg_type (cf, key))
 
 /*! Check whether a node contains a number. */
-#define w_cfg_isnumber(cf, key)  (W_CFG_NUMBER == w_cfg_type(cf, key))
+#define w_cfg_isnumber(cf, key)  (W_CFG_NUMBER == w_cfg_type (cf, key))
 
 /*! Check whether a node contains a string. */
-#define w_cfg_isstring(cf, key)  (W_CFG_STRING == w_cfg_type(cf, key))
+#define w_cfg_isstring(cf, key)  (W_CFG_STRING == w_cfg_type (cf, key))
 
 /*\}*/
 
@@ -1279,24 +1279,24 @@ _W_G( node,   W_CFG_NODE,   w_cfg_t*    )
  *
  * \return Wether the terminal size was guessed properly.
  */
-W_EXPORT wbool w_tty_size(unsigned *cols, unsigned *rows);
+W_EXPORT wbool w_tty_size (unsigned *cols, unsigned *rows);
 
 /*!
  * Obtains the width of a row of the controlling terminal.
  *
  * \return Terminal width.
  */
-W_EXPORT unsigned w_tty_cols(void);
+W_EXPORT unsigned w_tty_cols (void);
 
 /*!
  * Obtains the height of the the controlling terminal.
  *
  * \return Terminal height.
  */
-W_EXPORT unsigned w_tty_rows(void);
+W_EXPORT unsigned w_tty_rows (void);
 
 
-typedef void (*w_tty_notify_fun_t)(unsigned, unsigned, void*);
+typedef void (*w_tty_notify_fun_t) (unsigned, unsigned, void*);
 
 /*!
  * Enables automatic tracking of the terminal size. Whenever the terminal
@@ -1312,7 +1312,7 @@ typedef void (*w_tty_notify_fun_t)(unsigned, unsigned, void*);
  *
  * \note This functionality requires the \c SIGWINCH signal to be defined.
  */
-W_EXPORT wbool w_tty_size_notify(w_tty_notify_fun_t function, void *context);
+W_EXPORT wbool w_tty_size_notify (w_tty_notify_fun_t function, void *context);
 
 /*\}*/
 
