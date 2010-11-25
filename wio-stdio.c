@@ -10,19 +10,19 @@
 
 
 static wbool
-w_io_stdio_close (void *udata)
+w_io_stdio_close (w_io_t *io)
 {
-    return (fclose (*((FILE**) udata)) == 0);
+    return (fclose (((w_io_stdio_t*) io)->fp) == 0);
 }
 
 
 static ssize_t
-w_io_stdio_write (void *udata, const void *buf, size_t len)
+w_io_stdio_write (w_io_t *io, const void *buf, size_t len)
 {
     size_t ret;
 
-    if ((ret = fwrite (buf, sizeof (char), len, *((FILE**) udata))) < len) {
-        if (ferror (*((FILE**) udata))) {
+    if ((ret = fwrite (buf, sizeof (char), len, ((w_io_stdio_t*) io)->fp)) < len) {
+        if (ferror (((w_io_stdio_t*) io)->fp)) {
             return -1;
         }
         else {
@@ -35,16 +35,16 @@ w_io_stdio_write (void *udata, const void *buf, size_t len)
 
 
 static ssize_t
-w_io_stdio_read (void *udata, void *buf, size_t len)
+w_io_stdio_read (w_io_t *io, void *buf, size_t len)
 {
     size_t ret;
 
-    if ((ret = fread (buf, sizeof (char), len, *((FILE**) udata))) < len) {
-        if (ferror (*((FILE**) udata))) {
+    if ((ret = fread (buf, sizeof (char), len, ((w_io_stdio_t*) io)->fp)) < len) {
+        if (ferror (((w_io_stdio_t*) io)->fp)) {
             return -1;
         }
         else {
-            w_assert (feof (*((FILE**) udata)));
+            w_assert (feof (((w_io_stdio_t*) io)->fp));
             return ret;
         }
     }
@@ -54,23 +54,22 @@ w_io_stdio_read (void *udata, void *buf, size_t len)
 
 
 void
-w_io_stdio_open (w_io_t *io, FILE *filep)
+w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
 {
     w_assert (io);
-    w_assert (filep);
+    w_assert (fp);
 
-    io->close = w_io_stdio_close;
-    io->write = w_io_stdio_write;
-    io->read  = w_io_stdio_read;
-
-    *W_IO_UDATA (io, FILE*) = filep;
+    io->parent.close = w_io_stdio_close;
+    io->parent.write = w_io_stdio_write;
+    io->parent.read  = w_io_stdio_read;
+    io->fp = fp;
 }
 
 
 w_io_t*
-w_io_stdio_new (FILE *filep)
+w_io_stdio_open (FILE *fp)
 {
-    w_io_t *io = w_io_new (sizeof (FILE*));
-    w_io_stdio_open (io, filep);
-    return io;
+    w_io_stdio_t *io = w_obj_new (w_io_stdio_t);
+    w_io_stdio_init (io, fp);
+    return (w_io_t*) io;
 }

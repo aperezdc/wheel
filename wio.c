@@ -9,14 +9,21 @@
 #include <errno.h>
 
 
+static void
+w_io_destroy (void *obj)
+{
+    w_io_t *io = (w_io_t*) obj;
+    if (io->close) {
+        (*io->close) (io);
+    }
+}
+
+
 w_io_t*
 w_io_new (size_t usize)
 {
-    w_io_t *io;
-    usize += sizeof (w_io_t);
-    io = (w_io_t*) memset (w_malloc (usize), 0x00, usize);
-    io->__free = (void (*)(w_io_t*)) free;
-    return io;
+    w_io_t *io = w_obj_new_with_priv_sized (w_io_t, usize);
+    return w_obj_dtor (io, w_io_destroy);
 }
 
 
@@ -26,42 +33,43 @@ w_io_close (w_io_t *io)
     wbool ret;
     w_assert (io);
 
-    ret = (io->close) ? (*io->close) (W_IO_UDATA (io, void)) : W_YES;
-
-    if (io->__free) {
-        (*io->__free) (io);
+    if (io->close) {
+        ret = (*io->close) (io);
+        io->close = NULL;
     }
-
+    else {
+        ret = W_YES;
+    }
     return ret;
 }
 
 
 ssize_t
-w_io_read (const w_io_t *io, void *buf, size_t len)
+w_io_read (w_io_t *io, void *buf, size_t len)
 {
     w_assert (io);
     w_assert (buf);
 
     return (io->read)
-        ? (*io->read) (W_IO_UDATA (io, void), buf, len)
+        ? (*io->read) (io, buf, len)
         : (errno = EBADF, -1);
 }
 
 
 ssize_t
-w_io_write (const w_io_t *io, const void *buf, size_t len)
+w_io_write (w_io_t *io, const void *buf, size_t len)
 {
     w_assert (io);
     w_assert (buf);
 
     return (io->write)
-        ? (*io->write) (W_IO_UDATA (io, void), buf, len)
+        ? (*io->write) (io, buf, len)
         : (errno = EBADF, -1);
 }
 
 
 int
-w_io_getchar (const w_io_t *io)
+w_io_getchar (w_io_t *io)
 {
     ssize_t ret;
     char ch;
@@ -74,7 +82,7 @@ w_io_getchar (const w_io_t *io)
 
 
 wbool
-w_io_putchar (const w_io_t *io, int ch)
+w_io_putchar (w_io_t *io, int ch)
 {
     char bch = ch;
     return (w_io_write (io, &bch, 1) != 1);
@@ -82,7 +90,7 @@ w_io_putchar (const w_io_t *io, int ch)
 
 
 ssize_t
-w_io_format (const w_io_t *io, const char *fmt, ...)
+w_io_format (w_io_t *io, const char *fmt, ...)
 {
     ssize_t ret;
     va_list args;
@@ -98,7 +106,7 @@ w_io_format (const w_io_t *io, const char *fmt, ...)
 
 
 ssize_t
-w_io_formatv (const w_io_t *io, const char *fmt, va_list args)
+w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 {
     w_assert (io);
     w_assert (fmt);

@@ -10,12 +10,12 @@
 
 
 static wbool
-w_io_buf_close (void *udata)
+w_io_buf_close (w_io_t *iobase)
 {
-    struct w_io_buf_data *data = (struct w_io_buf_data*) udata;
+    w_io_buf_t *io = (w_io_buf_t*) iobase;
 
-    if (data->own) {
-        w_buf_free (&data->buf);
+    if (io->own) {
+        w_buf_free (&io->buf);
     }
 
     return W_YES;
@@ -23,42 +23,38 @@ w_io_buf_close (void *udata)
 
 
 static ssize_t
-w_io_buf_write (void *udata, const void *buf, size_t len)
+w_io_buf_write (w_io_t *iobase, const void *buf, size_t len)
 {
-    struct w_io_buf_data *data = (struct w_io_buf_data*) udata;
+    w_io_buf_t *io = (w_io_buf_t*) iobase;
 
-    w_buf_length_set (&data->buf, data->pos);
-    w_buf_append_mem (&data->buf, buf, len);
-    data->pos += len;
+    w_buf_length_set (&io->buf, io->pos);
+    w_buf_append_mem (&io->buf, buf, len);
+    io->pos += len;
     return len;
 }
 
 
 static ssize_t
-w_io_buf_read (void *udata, void *buf, size_t len)
+w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
 {
+    w_io_buf_t *io = (w_io_buf_t*) iobase;
     size_t to_read;
-    struct w_io_buf_data *data = (struct w_io_buf_data*) udata;
 
-    if (data->pos >= data->buf.len) {
+    if (io->pos >= io->buf.len) {
         return 0;
     }
 
-    to_read = w_min (len, data->buf.len - data->pos);
-    memcpy (buf, data->buf.buf + data->pos, to_read);
-    data->pos += to_read;
+    to_read = w_min (len, io->buf.len - io->pos);
+    memcpy (buf, io->buf.buf + io->pos, to_read);
+    io->pos += to_read;
     return to_read;
 }
 
 
-void
-w_io_buf_open (w_io_t *io, w_buf_t *buf)
+w_io_t*
+w_io_buf_open (w_buf_t *buf)
 {
-    struct w_io_buf_data *data;
-    w_assert (io);
-
-    data = W_IO_UDATA (io, struct w_io_buf_data);
-    data->pos = 0;
+    w_io_buf_t *io = w_obj_new (w_io_buf_t);
 
     if (buf) {
         /*
@@ -67,21 +63,23 @@ w_io_buf_open (w_io_t *io, w_buf_t *buf)
          *     here is nice in case problems arise. Quick solution would be
          *     to just *copy* the data in the passed buffer.
          */
-        memcpy (&data->buf, buf, sizeof (w_buf_t));
-        data->own = W_NO;
+        memcpy (&io->buf, buf, sizeof (w_buf_t));
+        io->own = W_NO;
     }
     else {
         /*
          * FIXME This has knowledge of w_buf_t internals! It assumes that
          *       setting everything to zero does the right thing.
          */
-        memset (&data->buf, 0x00, sizeof (w_buf_t));
-        data->own = W_YES;
+        memset (&io->buf, 0x00, sizeof (w_buf_t));
+        io->own = W_YES;
     }
 
-    io->close = w_io_buf_close;
-    io->write = w_io_buf_write;
-    io->read  = w_io_buf_read;
-}
+    io->parent.close = w_io_buf_close;
+    io->parent.write = w_io_buf_write;
+    io->parent.read  = w_io_buf_read;
+    io->pos = 0;
 
+    return (w_io_t*) io;
+}
 
