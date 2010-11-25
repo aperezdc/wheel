@@ -13,20 +13,21 @@
 int
 main (int argc, char **argv)
 {
-    W_IO_STDIO (ioi);
-    W_IO_STDIO (ioo);
+    w_io_t *ioi = w_io_stdio_open (stdin);
+    w_io_t *ioo = w_io_stdio_open (stdout);
+
     char buf[BUFFER_SIZE];
     ssize_t ret;
 
     w_unused (argc);
     w_unused (argv);
 
-    w_io_stdio_open (ioi, stdin);
-    w_io_stdio_open (ioo, stdout);
-
     while ((ret = w_io_read (ioi, buf, BUFFER_SIZE)) > 0) {
         w_io_write (ioo, buf, ret);
     }
+
+    w_obj_unref (ioi);
+    w_obj_unref (ioo);
 
     return EXIT_SUCCESS;
 }
