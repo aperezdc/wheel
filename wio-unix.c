@@ -11,9 +11,13 @@
 
 
 static wbool
-w_io_unix_close (w_io_t *udata)
+w_io_unix_close (w_io_t *iobase)
 {
-    return (close (((w_io_unix_t*) udata)->fd) == 0);
+    w_io_unix_t *io = (w_io_unix_t*) iobase;
+    if (io->fd >= 0) {
+        return (close (io->fd) == 0);
+    }
+    return W_YES;
 }
 
 

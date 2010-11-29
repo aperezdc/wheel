@@ -8,19 +8,20 @@ ifeq ($(strip $(libwheel_PATH)),)
   libwheel_PATH := .
 endif
 
-libwheel_SRCS := wcfg.c      \
-                 wdict.c     \
-                 werr.c      \
-                 wmem.c      \
-                 wobj.c      \
-                 wopt.c      \
-                 wparse.c    \
-                 wstr.c      \
-                 wbuf.c      \
-                 wio.c       \
-                 wio-unix.c  \
-                 wio-stdio.c \
-                 wio-buf.c   \
+libwheel_SRCS := wcfg.c       \
+                 wdict.c      \
+                 werr.c       \
+                 wmem.c       \
+                 wobj.c       \
+                 wopt.c       \
+                 wparse.c     \
+                 wstr.c       \
+                 wbuf.c       \
+                 wio.c        \
+                 wio-unix.c   \
+                 wio-socket.c \
+                 wio-stdio.c  \
+                 wio-buf.c    \
                  wtty.c
 
 CPPFLAGS      += -I$(libwheel_PATH)

@@ -948,8 +948,9 @@ W_EXPORT void w_fmt_bufv (w_buf_t    *buf,
 
 enum w_io_flag
 {
-    W_IO_ERR = -1, /*!< An I/O error occured. */
-    W_IO_EOF = -2, /*!< End of file reached.  */
+    __W_IO_ZERO =  0,
+    W_IO_ERR    = -1, /*!< An I/O error occured. */
+    W_IO_EOF    = -2, /*!< End of file reached.  */
 };
 
 
@@ -1061,6 +1062,67 @@ W_EXPORT w_io_t* w_io_unix_open (int fd);
  */
 W_EXPORT void w_io_unix_init (w_io_unix_t *io, int fd);
 
+
+enum w_io_socket_kind_t
+{
+    /* Socket kinds */
+    W_IO_SOCKET_UNIX, /*!< Unix named socket.    */
+    W_IO_SOCKET_TCP4, /*!< IPv4 TCP socket.      */
+};
+typedef enum w_io_socket_kind_t w_io_socket_kind_t;
+
+enum w_io_socket_serve_mode_t
+{
+    /* Serving policies for sockets */
+    W_IO_SOCKET_SINGLE, /*!< Serve one client at a time.                   */
+    W_IO_SOCKET_THREAD, /*!< Each client is serviced using a new thread.   */
+    W_IO_SOCKET_FORK,   /*!< Each client is serviced by forking a process. */
+};
+typedef enum w_io_socket_serve_mode_t w_io_socket_serve_mode_t;
+
+
+#define W_IO_SOCKET_SA_LEN 1024
+
+W_OBJ (w_io_socket_t)
+{
+    w_io_unix_t        parent;
+    w_io_socket_kind_t kind;
+    size_t             slen;
+    wbool              bound;
+    char               sa[W_IO_SOCKET_SA_LEN];
+};
+
+#define W_IO_SOCKET_FD(_io) \
+    ((_io)->parent.fd)
+#define W_IO_SOCKET_KIND(_io) \
+    ((_io)->kind)
+
+/*!
+ */
+W_EXPORT w_io_t* w_io_socket_open (w_io_socket_kind_t kind, ...);
+
+/*!
+ */
+W_EXPORT wbool w_io_socket_init (w_io_socket_t *io,
+                                 w_io_socket_kind_t kind, ...);
+
+/*!
+ */
+W_EXPORT wbool w_io_socket_serve (w_io_socket_t *io,
+                                  w_io_socket_serve_mode_t mode,
+                                  wbool (*handler) (w_io_socket_t*));
+
+/*!
+ */
+W_EXPORT wbool w_io_socket_connect (w_io_socket_t *io);
+
+/*!
+ */
+W_EXPORT wbool w_io_socket_send_eof (w_io_socket_t *io);
+
+/*!
+ */
+W_EXPORT const char* w_io_socket_unix_path (w_io_socket_t *io);
 
 /*!
  */
