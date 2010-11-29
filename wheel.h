@@ -1044,6 +1044,7 @@ W_EXPORT wbool w_io_putchar (w_io_t *io,
 
 
 /*!
+ * Input/output object on Unix file descriptors.
  */
 W_OBJ (w_io_unix_t)
 {
@@ -1052,28 +1053,38 @@ W_OBJ (w_io_unix_t)
 };
 
 /*!
- * Initialize an I/O object to be used with an Unix file descriptor.
+ * Create an I/O object to be used with an Unix file descriptor.
  * \param fd Unix file descriptor.
- * \sa W_IO_UNIX, W_IO_UNIX_FD
+ * \sa W_IO_UNIX_FD
  */
 W_EXPORT w_io_t* w_io_unix_open (int fd);
 
 /*!
+ * Initialize an I/O object to be used with an Unix file descriptor.
+ * This function is not inteded to be used directly, but it is provided as
+ * a convenience for code extending \ref w_io_unix_t.
+ * \sa W_IO_UNIX_FD
  */
 W_EXPORT void w_io_unix_init (w_io_unix_t *io, int fd);
 
 
+/*!
+ * Socket kinds.
+ * \see w_io_socket_open
+ */
 enum w_io_socket_kind_t
 {
-    /* Socket kinds */
     W_IO_SOCKET_UNIX, /*!< Unix named socket.    */
     W_IO_SOCKET_TCP4, /*!< IPv4 TCP socket.      */
 };
 typedef enum w_io_socket_kind_t w_io_socket_kind_t;
 
+/*!
+ * Modes available for server-side sockets.
+ * \see w_io_socket_serve
+ */
 enum w_io_socket_serve_mode_t
 {
-    /* Serving policies for sockets */
     W_IO_SOCKET_SINGLE, /*!< Serve one client at a time.                   */
     W_IO_SOCKET_THREAD, /*!< Each client is serviced using a new thread.   */
     W_IO_SOCKET_FORK,   /*!< Each client is serviced by forking a process. */
@@ -1083,6 +1094,9 @@ typedef enum w_io_socket_serve_mode_t w_io_socket_serve_mode_t;
 
 #define W_IO_SOCKET_SA_LEN 1024
 
+/*!
+ * Performs input/output on sockets.
+ */
 W_OBJ (w_io_socket_t)
 {
     w_io_unix_t        parent;
@@ -1092,39 +1106,103 @@ W_OBJ (w_io_socket_t)
     char               sa[W_IO_SOCKET_SA_LEN];
 };
 
+/*!
+ * Obtain the Unix file descriptor associated to a socket.
+ */
 #define W_IO_SOCKET_FD(_io) \
     ((_io)->parent.fd)
+
+/*!
+ * Obtain the kind of a socket.
+ */
 #define W_IO_SOCKET_KIND(_io) \
     ((_io)->kind)
 
 /*!
+ * Create a new socket. Sockets can be used both for clients and servers,
+ * as this function only performs basic initialization. Calling \ref
+ * w_io_socket_serve will start serving request, and for client use \ref
+ * w_io_socket_connect should be called. Parameters other than the socket
+ * kind are dependant on the particular kind of socket being created. For
+ * the moment the following are supported:
+ *
+ * - \ref W_IO_SOCKET_UNIX will create an Unix domain socket. A path in
+ *   the file system must be given, at which the socket will be created.
+ * - \ref W_IO_SOCKET_TCP4 will create a TCP socket using IPv4, arguments
+ *   are the IP address as a string for binding (in the case of calling
+ *   \ref w_io_socket_serve afterwards) or connecting to (when using \ref
+ *   w_io_socket_connect). The second argument is the port number.
+ *
+ * \param kind Socket kind.
+ * \return When socket creation fails, \c NULL is returned and \c errno
+ *         is set accordingly.
+ * \sa w_io_socket_init.
  */
 W_EXPORT w_io_t* w_io_socket_open (w_io_socket_kind_t kind, ...);
 
 /*!
+ * Perform basic socket initialization. In general applications should use
+ * \ref w_io_socket_open instead of this function, but it is provided to be
+ * used from code extending \ref w_io_socket_t.
+ * \param io   An input/output object.
+ * \param kind Socket kind.
+ * \return Whether initialization was successful.
+ * \sa w_io_socket_open
  */
 W_EXPORT wbool w_io_socket_init (w_io_socket_t *io,
                                  w_io_socket_kind_t kind, ...);
 
 /*!
+ * Serves requests using a socket. This function will start a loop accepting
+ * connections, and for each connection an open socket will be passed to the
+ * given handler function. The way in which each request is served can be
+ * specified:
+ *
+ * - \ref W_IO_SOCKET_SINGLE: Each request is served by calling directly and
+ *   waiting for it to finish. This makes impossible to serve more than one
+ *   request at a time.
+ * - \ref W_IO_SOCKET_THREAD: Each request is served in a new thread. The
+ *   handler is invoked in that thread.
+ * - \ref W_IO_SOCKET_FORK: A new process is forked for each request. The
+ *   handler is invoked in the child process.
+ *
+ * \param io      An input/output object.
+ * \param mode    How to serve each request.
+ * \param handler Callback invoked to serve requests.
  */
 W_EXPORT wbool w_io_socket_serve (w_io_socket_t *io,
                                   w_io_socket_serve_mode_t mode,
                                   wbool (*handler) (w_io_socket_t*));
 
 /*!
+ * Connect a socket to a server. This makes a connection to the host
+ * specified when creating the socket with \ref w_io_socket_open, and
+ * puts it in client mode. Once the socket is successfully connected,
+ * read and write operations can be performed in the socket.
+ * \return Whether the connection was setup successfully.
  */
 W_EXPORT wbool w_io_socket_connect (w_io_socket_t *io);
 
 /*!
+ * Perform a half-close on the write direction. This closes the socket,
+ * but only in writing one direction, so other endpoint will think that
+ * the end of the stream was reached (thus the operation is conceptually
+ * equivalent to sending and “end of file marker”). Read operations can
+ * still be performing in a socket which was half-closed using this
+ * function. Note that for completely closing the socket, \ref w_io_close
+ * should be used instead.
+ * \return Whether performing the half-close was successful.
  */
 W_EXPORT wbool w_io_socket_send_eof (w_io_socket_t *io);
 
 /*!
+ * Obtain the path in the filesystem for an Unix socket.
  */
 W_EXPORT const char* w_io_socket_unix_path (w_io_socket_t *io);
 
+
 /*!
+ * Perform input/output in standard C file descriptors.
  */
 W_OBJ (w_io_stdio_t)
 {
@@ -1133,17 +1211,23 @@ W_OBJ (w_io_stdio_t)
 };
 
 /*!
- * Initialize an I/O object to be used with an C standard file descriptor.
+ * Initialize an I/O object to be used with a C standard file descriptor.
  * \param fp Standard C file descriptor.
  * \sa W_IO_STDIO, W_IO_STDIO_FILEP
  */
 W_EXPORT w_io_t* w_io_stdio_open (FILE *fp);
 
 /*!
+ * Initialize an I/O object to be used with a C standard file descriptor.
+ * This function is not meant to be used directly, but is provided as
+ * a convenience for other code extending \ref w_io_stdio_t.
  */
 W_EXPORT void w_io_stdio_init (w_io_stdio_t *io, FILE *fp);
 
 
+/*!
+ * Perform input/output on memory buffers.
+ */
 W_OBJ (w_io_buf_t)
 {
     w_io_t  parent;
@@ -1155,21 +1239,27 @@ W_OBJ (w_io_buf_t)
 
 /*!
  * Initialize an I/O object to be used with a buffer.
- * \param io  A pointer to a \ref w_io_t previously allocated with
- *            \ref W_IO_BUF.
  * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
  *            \ref w_buf_t internally which can be retrieved with
  *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
  *            you will be responsible to call \ref w_buf_free on it.
- * \sa W_IO_BUF, W_IO_BUF_BUF
+ * \sa W_IO_BUF_BUF
  */
 W_EXPORT void w_io_buf_init (w_io_buf_t *io,
                              w_buf_t    *buf);
 
 /*!
+ * Create an I/O object to be used with a bufffer.
+ * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
+ *            \ref w_buf_t internally which can be retrieved with
+ *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
+ *            you will be responsible to call \ref w_buf_free on it.
  */
 W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
 
+/*!
+ * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.
+ */
 #define W_IO_BUF_BUF(_p) \
     (&((w_io_buf_t*) (_p))->buf)
 
