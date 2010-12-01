@@ -914,7 +914,7 @@ W_EXPORT void w_buf_free (w_buf_t *buf);
  * \c strlen() will not report the full length of the buffer.
  * \param buf A \ref w_buf_t buffer
  */
-W_EXPORT const char* w_buf_str (const w_buf_t *buf);
+W_EXPORT char* w_buf_str (w_buf_t *buf);
 
 
 /*\}*/

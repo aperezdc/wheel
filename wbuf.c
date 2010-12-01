@@ -115,18 +115,17 @@ w_buf_append_buf (w_buf_t *buf, const w_buf_t *src)
 }
 
 
-const char*
-w_buf_str (const w_buf_t *buf)
+char*
+w_buf_str (w_buf_t *buf)
 {
     w_assert (buf);
 
-    if (buf->len) {
-        buf->buf[buf->len] = '\0';
-        return buf->buf;
+    if (!buf->len) {
+        _buf_xsetlen (buf, 1);
+        buf->len = 0;
     }
-    else {
-        return "";
-    }
+    buf->buf[buf->len] = '\0';
+    return buf->buf;
 }
 
 
