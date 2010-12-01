@@ -246,7 +246,10 @@ w_io_socket_serve (w_io_socket_t *io,
         case W_IO_SOCKET_FORK:
             mode_handler = w_io_socket_serve_fork;
             break;
+        default:
+            mode_handler = NULL;
     }
+    w_assert (mode_handler);
 
     if (bind (W_IO_SOCKET_FD (io), (struct sockaddr*) io->sa, io->slen) == -1) {
         return W_NO;
