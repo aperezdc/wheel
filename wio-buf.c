@@ -56,6 +56,8 @@ w_io_buf_open (w_buf_t *buf)
 {
     w_io_buf_t *io = w_obj_new (w_io_buf_t);
 
+    w_io_init ((w_io_t*) io);
+
     if (buf) {
         /*
          * XXX This makes the data memory area *shared* by the passed buffer

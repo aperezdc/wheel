@@ -969,10 +969,16 @@ enum w_io_flag
 W_OBJ (w_io_t)
 {
     w_obj_t  parent;
+    int      backch;
     wbool   (*close) (w_io_t *io);
     ssize_t (*write) (w_io_t *io, const void *buf, size_t len);
     ssize_t (*read ) (w_io_t *io, void       *buf, size_t len);
 };
+
+
+/*!
+ */
+W_EXPORT void w_io_init (w_io_t *io);
 
 
 /*!
@@ -1043,6 +1049,10 @@ W_EXPORT int w_io_getchar (w_io_t *io);
 W_EXPORT wbool w_io_putchar (w_io_t *io,
                              int     ch);
 
+/*!
+ */
+W_EXPORT void w_io_putback (w_io_t *io,
+                            char    ch);
 
 /*!
  * Input/output object on Unix file descriptors.

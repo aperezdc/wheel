@@ -59,6 +59,8 @@ w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
     w_assert (io);
     w_assert (fp);
 
+    w_io_init ((w_io_t*) io);
+
     io->parent.close = w_io_stdio_close;
     io->parent.write = w_io_stdio_write;
     io->parent.read  = w_io_stdio_read;

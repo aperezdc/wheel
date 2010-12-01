@@ -71,6 +71,8 @@ w_io_unix_init (w_io_unix_t *io, int fd)
     w_assert (io);
     w_assert (fd >= 0);
 
+    w_io_init ((w_io_t*) io);
+
     io->parent.close = w_io_unix_close;
     io->parent.write = w_io_unix_write;
     io->parent.read  = w_io_unix_read;
