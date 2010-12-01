@@ -54,6 +54,15 @@
 	(((_n) < (_m)) ? (_n) : (_m))
 #endif /* __GNUC__ */
 
+
+#ifdef __GNUC__
+# define w_likely(_expr)   __builtin_expect ((_expr), 1)
+# define w_unlikely(_expr) __builtin_expect ((_expr), 0)
+#else /* !__GNUC__ */
+# define w_likely
+# define w_unlikely
+#endif /* __GNUC__ */
+
 #define _W_MAKE_STRING(__s) #__s
 #define W_STRINGIZE(_s) _W_MAKE_STRING(_s)
 
