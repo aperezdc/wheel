@@ -9,24 +9,6 @@
 #include <errno.h>
 
 
-static void
-w_io_destroy (void *obj)
-{
-    w_io_t *io = (w_io_t*) obj;
-    if (io->close) {
-        (*io->close) (io);
-    }
-}
-
-
-w_io_t*
-w_io_new (size_t usize)
-{
-    w_io_t *io = w_obj_new_with_priv_sized (w_io_t, usize);
-    return w_obj_dtor (io, w_io_destroy);
-}
-
-
 wbool
 w_io_close (w_io_t *io)
 {

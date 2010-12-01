@@ -965,14 +965,6 @@ W_OBJ (w_io_t)
     ssize_t (*read ) (w_io_t *io, void       *buf, size_t len);
 };
 
-/*!
- * Allocate an I/O object with optional extra space holding user data.
- * Objects allocated this way are created in the heap, if you prefer to
- * create such an object in the stack, use \ref W_IO_MAKE instead (or some
- * other macro that uses it like \ref W_IO_UNIX)
- * \param usize Amount of extra space reserved for user data.
- */
-W_EXPORT w_io_t* w_io_new (size_t usize);
 
 /*!
  * Closes an input/output descriptor. If the \c close callback of the
