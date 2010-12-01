@@ -232,6 +232,12 @@ void* w_obj_dtor    (void *obj, void (*fini) (void*));
 
 /*\}*/
 
+
+/*------------------------------------------[ forward declarations ]------*/
+
+W_OBJ_DECL (w_io_t);
+
+
 /*---------------------------------------------------[ errors/debug ]-----*/
 
 /*!
@@ -966,7 +972,7 @@ enum w_io_flag
 /*!
  * Input/output descriptor.
  */
-W_OBJ (w_io_t)
+W_OBJ_DEF (w_io_t)
 {
     w_obj_t  parent;
     int      backch;
