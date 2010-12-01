@@ -1370,7 +1370,7 @@ W_EXPORT w_cfg_type_t w_cfg_type (const w_cfg_t *cf, const char *key);
  * \param output Output stream where to write.
  * \return       Whether writing was successful.
  */
-W_EXPORT wbool w_cfg_dump (const w_cfg_t *cf, FILE *output);
+W_EXPORT wbool w_cfg_dump (const w_cfg_t *cf, w_io_t *output);
 
 /*!
  * Load configuration from a stream.
@@ -1378,7 +1378,7 @@ W_EXPORT wbool w_cfg_dump (const w_cfg_t *cf, FILE *output);
  * \param msg    Pointer to where to store an error message, if there is one.
  * \return       Valid configuration object or \c NULL if there is some error.
  */
-W_EXPORT w_cfg_t* w_cfg_load (FILE *input, char **msg);
+W_EXPORT w_cfg_t* w_cfg_load (w_io_t *input, char **msg);
 
 /*!
  * Dump configuration to a file.

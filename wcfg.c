@@ -332,17 +332,17 @@ w_cfg_del (w_cfg_t *cf, const char *key)
 
 
 
-#define W_CFG_DUMP_INDENT(_l, _o)  \
-    do {                           \
-        unsigned __tmp = (_l) * 4; \
-        while (__tmp--)            \
-            fputc (' ', (_o));     \
+#define W_CFG_DUMP_INDENT(_l, _o)     \
+    do {                              \
+        unsigned __tmp = (_l) * 4;    \
+        while (__tmp--)               \
+            w_io_putchar ((_o), ' '); \
     } while (0)
 
 
 
 static wbool
-w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
+w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
 {
 	w_iterator_t i;
 	w_cfg_node_t *node;
@@ -350,29 +350,32 @@ w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
 	w_assert (cf != NULL);
 	w_assert (out != NULL);
 
-    for (i = w_dict_first (cf); i != NULL; i = w_dict_next (cf, i)) {
+    w_dict_foreach (cf, i) {
         W_CFG_DUMP_INDENT (indent, out);
 
         node = (w_cfg_node_t*) *i;
 
-        fprintf (out, "%s ", w_dict_iterator_get_key (i));
+        w_io_format (out, "$s ", w_dict_iterator_get_key (i));
 
         switch (node->kind & W_CFG_TYPE_MASK) {
             case W_CFG_NODE:
-                fprintf (out, "{\n");
+                w_io_putchar (out, '{');
+                w_io_putchar (out, '\n');
                 w_cfg_dump_cfg (node->node, out, indent + 1);
                 W_CFG_DUMP_INDENT (indent, out);
-                fprintf (out, "}\n");
+                w_io_putchar (out, '}');
                 break;
             case W_CFG_STRING:
-                fprintf (out, "\"%s\"\n", node->string);
+                /* FIXME Do proper escaping of the string! */
+                w_io_format (out, "\"$s\"", node->string);
                 break;
             case W_CFG_NUMBER:
-                fprintf (out, "%lf\n", node->number);
+                w_io_format_double (out, node->number);
                 break;
             default:
                 break;
         }
+        w_io_putchar (out, '\n');
     }
 
     return W_YES;
@@ -383,7 +386,7 @@ w_cfg_dump_cfg (const w_cfg_t *cf, FILE *out, unsigned indent)
  * TODO Better error checking of IO functions.
  */
 wbool
-w_cfg_dump (const w_cfg_t *cf, FILE *output)
+w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
 {
     w_assert (cf != NULL);
     w_assert (output != NULL);
@@ -395,8 +398,9 @@ w_cfg_dump (const w_cfg_t *cf, FILE *output)
 wbool
 w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 {
-    FILE *fp;
+    w_io_t *io;
     wbool ret;
+    FILE *fp;
 
     w_assert (cf != NULL);
     w_assert (path != NULL);
@@ -404,8 +408,10 @@ w_cfg_dump_file (const w_cfg_t *cf, const char *path)
     if ((fp = fopen (path, "wb")) == NULL)
         return W_NO;
 
-    ret = w_cfg_dump (cf, fp);
-    fclose (fp);
+    io = w_io_stdio_open (fp);
+    ret = w_cfg_dump (cf, io);
+    w_obj_unref (io);
+
     return ret;
 }
 
@@ -428,7 +434,7 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
      *
      * This is valid syntax, so take it into account.
      */
-    while (p->look != EOF && p->look != '}' && !feof (p->input)) {
+    while (p->look != W_IO_EOF && p->look != '}') {
         if (!(key = w_parse_ident (p))) {
             w_parse_error (p, "%u:%u: identifier expected",
                            p->line, p->lpos);
@@ -466,7 +472,7 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
 
 
 w_cfg_t*
-w_cfg_load (FILE *input, char **pmsg)
+w_cfg_load (w_io_t *input, char **pmsg)
 {
     char *errmsg;
     w_cfg_t *result = w_cfg_new ();
@@ -498,6 +504,7 @@ w_cfg_load (FILE *input, char **pmsg)
 w_cfg_t*
 w_cfg_load_file (const char *path, char **msg)
 {
+    w_io_t *io;
     FILE *fp;
     w_cfg_t *ret;
 
@@ -506,8 +513,10 @@ w_cfg_load_file (const char *path, char **msg)
     if ((fp = fopen (path, "rb")) == NULL)
         return NULL;
 
-    ret = w_cfg_load (fp, msg);
-    fclose (fp);
+    io = w_io_stdio_open (fp);
+    ret = w_cfg_load (io, msg);
+    w_obj_unref (io);
+
     return ret;
 }
 
