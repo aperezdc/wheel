@@ -406,7 +406,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
     w_assert (p != NULL);
     w_assert (options != NULL);
 
-    while (!feof (p->input)) {
+    while (w_likely (p->look != W_IO_EOF)) {
         if ((token = w_parse_word (p)) == NULL) {
             w_parse_error (p, "%u:%u: identifier expected",
                            p->line, p->lpos);
@@ -426,7 +426,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
             maxarg = W_OPT_PARSE_ARG_CHUNK;
             args   = w_alloc (char*, maxarg);
 
-            while (narg < opt->narg && !feof (p->input)) {
+            while (narg < opt->narg && p->look != W_IO_EOF) {
                 if (narg >= maxarg) {
                     maxarg += W_OPT_PARSE_ARG_CHUNK;
                     args    = w_resize (args, char*, maxarg);
@@ -437,7 +437,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
             }
 
             /* Not enough arguments given */
-            if (feof (p->input) && narg < opt->narg) {
+            if (p->look != W_IO_EOF && narg < opt->narg) {
                 unsigned i;
                 for (i = 0; i < narg; i++)
                     w_free (args[i]);
@@ -478,9 +478,9 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
 
 
 wbool
-w_opt_parse_file(const w_opt_t *opt,
-                 FILE          *input,
-                 char         **msg)
+w_opt_parse_io (const w_opt_t *opt,
+                w_io_t        *input,
+                char         **msg)
 {
     char *errmsg;
     wbool ret;

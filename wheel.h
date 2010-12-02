@@ -592,9 +592,9 @@ W_EXPORT unsigned w_opt_parse(const w_opt_t  *options,
  *         there was some parsing error and the error string will be
  *         non-NULL.
  */
-W_EXPORT wbool w_opt_parse_file(const w_opt_t *opt,
-                                FILE          *input,
-                                char         **msg);
+W_EXPORT wbool w_opt_parse_io (const w_opt_t *opt,
+                               w_io_t        *input,
+                               char         **msg);
 
 
 /*\}*/
