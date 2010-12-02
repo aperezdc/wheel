@@ -626,7 +626,7 @@ struct w_parse_t
     unsigned lpos;    /*!< Current position in line (column number). */
     int      look;    /*!< Look-ahead character.                     */
     int      comment; /*!< Comment character.                        */
-    FILE    *input;   /*!< Input file stream.                        */
+    w_io_t  *input;   /*!< Input data stream.                        */
     char    *error;   /*!< Error message.                            */
     void    *result;  /*!< Parsing result.                           */
     jmp_buf  jbuf;    /*!< Jump buffer (used when raising errors).   */
@@ -650,7 +650,7 @@ typedef void (*w_parse_fun_t) (w_parse_t*, void*);
  * \return          Whether parsing was successful.
  */
 W_EXPORT void* w_parse_run     (w_parse_t    *p,
-                                FILE         *input,
+                                w_io_t       *input,
                                 int           comment,
                                 w_parse_fun_t parse_fun,
                                 void         *context,

@@ -17,7 +17,7 @@ w_parse_skip_ws (w_parse_t *p)
 {
     w_assert (p != NULL);
 
-    while (isspace (p->look) && !feof (p->input))
+    while (p->look != W_IO_EOF && isspace (p->look))
         w_parse_getchar (p);
 }
 
@@ -28,7 +28,7 @@ w_parse_getchar (w_parse_t *p)
     w_assert (p != NULL);
 
     do {
-        p->look = fgetc (p->input);
+        p->look = w_io_getchar (p->input);
 
         if (p->look == '\n') {
             p->lpos = 0;
@@ -37,12 +37,14 @@ w_parse_getchar (w_parse_t *p)
         p->lpos++;
 
         if (p->comment && p->look == p->comment) {
-            while (fgetc (p->input) != '\n')
-                if (feof (p->input))
-                    p->look = EOF;
-            ungetc ('\n', p->input);
+            while ((p->look = w_io_getchar (p->input)) != '\n' &&
+                   (p->look != W_IO_EOF)) /* empty statement */;
+
+            if (w_unlikely (p->look != W_IO_EOF)) {
+                w_io_putback (p->input, '\n');
+            }
         }
-    } while (p->look != EOF && p->comment && p->look == p->comment);
+    } while (p->look != W_IO_EOF && p->comment && p->look == p->comment);
 }
 
 
@@ -89,28 +91,20 @@ w_parse_error (w_parse_t *p, const char *fmt, ...)
 char*
 w_parse_ident (w_parse_t *p)
 {
-    char *buf;
-    unsigned long pos = 0;
-    unsigned long sz  = 50;
+    w_buf_t buf = W_BUF;
 
     w_assert (p != NULL);
 
     if (!isalpha (p->look) && p->look != '_')
         return NULL;
 
-    buf = w_alloc (char, sz);
     while (isalnum (p->look) || p->look == '_') {
-        buf[pos++] = p->look;
-        if (pos >= sz) {
-            sz += 16;
-            buf = w_resize (buf, char, sz);
-        }
+        w_buf_append_char (&buf, p->look);
         w_parse_getchar (p);
     }
 
     w_parse_skip_ws (p);
-    buf[pos] = '\0';
-    return buf;
+    return w_buf_str (&buf);
 }
 
 
@@ -128,17 +122,17 @@ w_parse_ulong (w_parse_t      *p,
                 return W_NO;
         }
         else if (isdigit (p->look)) {
-            ungetc (p->look, p->input);
+            w_io_putback (p->input, p->look);
             if (!fscanf (p->input, "%lo", value))
                 return W_NO;
         }
         else {
-            ungetc (p->look, p->input);
+            w_io_putback (p->input, p->look);
             *value = 0;
         }
     }
     else {
-        ungetc (p->look, p->input);
+        w_io_putback (p->input, p->look);
         if (!fscanf (p->input, "%lu", value))
             return W_NO;
     }
@@ -165,18 +159,18 @@ w_parse_long (w_parse_t *p, long *value)
             *value = uval;
         }
         else if (isdigit (p->look)) {
-            ungetc (p->look, p->input);
+            w_io_putback (p->input, p->look);
             if (!fscanf (p->input, "%lo", &uval))
                 return W_NO;
             *value = uval;
         }
         else {
-            ungetc (p->look, p->input);
+            w_io_putback (p->input, p->look);
             *value = 0;
         }
     }
     else {
-        ungetc (p->look, p->input);
+        w_io_putback (p->input, p->look);
         if (!fscanf (p->input, "%li", value))
             return W_NO;
     }
@@ -193,7 +187,7 @@ w_parse_double (w_parse_t *p, double *value)
     w_assert (p != NULL);
     w_assert (value != NULL);
 
-    ungetc (p->look, p->input);
+    w_io_putback (p->input, p->look);
     if (!fscanf (p->input, "%lf", value))
         return W_NO;
 
@@ -206,7 +200,7 @@ w_parse_double (w_parse_t *p, double *value)
 
 void*
 w_parse_run (w_parse_t    *p,
-             FILE         *input,
+             w_io_t       *input,
              int           comment,
              w_parse_fun_t parse_fun,
              void         *context,
@@ -218,8 +212,8 @@ w_parse_run (w_parse_t    *p,
 
     /* Initialize parser structure */
     memset (p, 0x00, sizeof (w_parse_t));
+    p->input   = w_obj_ref (input);
     p->comment = comment;
-    p->input   = input;
     p->line    = 1;
 
     if (msg) {
@@ -241,6 +235,8 @@ w_parse_run (w_parse_t    *p,
         w_parse_skip_ws (p);
         (*parse_fun) (p, context);
     }
+
+    w_obj_unref (input);
     return p->result;
 }
 
@@ -248,43 +244,33 @@ w_parse_run (w_parse_t    *p,
 char*
 w_parse_word (w_parse_t *p)
 {
-    unsigned long pos = 0;
-    unsigned long sz  = 32;
-    char         *buf = w_alloc (char, sz);
-
+    w_buf_t buf = W_BUF;
     w_assert (p != NULL);
 
-    while (!isspace (p->look) && !feof (p->input)) {
-        buf[pos++] = p->look;
-        if (pos >= sz) {
-            sz += 32;
-            buf = w_resize (buf, char, sz);
-        }
+    while (!isspace (p->look) && p->look != W_IO_EOF) {
+        w_buf_append_char (&buf, p->look);
         w_parse_getchar (p);
     }
 
     w_parse_getchar (p);
     w_parse_skip_ws (p);
 
-    buf[pos] = '\0';
-    return buf;
+    return w_buf_str (&buf);
 }
 
 
 char*
 w_parse_string (w_parse_t *p)
 {
-    unsigned long pos = 0;
-    unsigned long sz  = 100;
-    char         *buf = w_alloc (char, sz);
-    int           chr = fgetc (p->input);
+    w_buf_t buf = W_BUF;
+    int     chr = w_io_getchar (p->input);
 
     w_assert (p != NULL);
 
-    for (; chr != '"' && !feof (p->input); chr = fgetc (p->input)) {
+    for (; chr != '"' && chr != W_IO_EOF; chr = w_io_getchar (p->input)) {
         if (chr == '\\') {
             /* escaped sequences */
-            switch ((chr = fgetc (p->input))) {
+            switch ((chr = w_io_getchar (p->input))) {
                 case 'n': chr = '\n'; break; /* carriage return */
                 case 'r': chr = '\r'; break; /* line feed */
                 case 'b': chr = '\b'; break; /* backspace */
@@ -294,30 +280,24 @@ w_parse_string (w_parse_t *p)
                 case 'v': chr = '\v'; break; /* vertical tab */
                 case 'X': /* hex number */
                 case 'x': { char num[3];
-                            num[0] = fgetc (p->input);
-                            num[1] = fgetc (p->input);
+                            num[0] = w_io_getchar (p->input);
+                            num[1] = w_io_getchar (p->input);
                             num[2] = '\0';
                             if (!isxdigit (num[0]) || !isxdigit (num[1])) {
-                                /* XXX Would making 2 ungetc() calls work? */
-                                ungetc (num[0], p->input);
-                                ungetc (num[1], p->input);
-                                continue;
+                                w_buf_free (&buf);
+                                w_parse_error (p, "%lu:%lu: Invalid hex sequence",
+                                               p->line, p->lpos);
                             }
                             chr = strtol (num, NULL, 16);
                           } break;
             }
         }
-        buf[pos++] = chr;
-        if (pos >= sz) {
-            sz += 50;
-            buf = w_resize (buf, char, sz);
-        }
+        w_buf_append_char (&buf, chr);
     }
 
     w_parse_getchar (p);
     w_parse_skip_ws (p);
 
-    buf[pos] = '\0';
-    return buf;
+    return w_buf_str (&buf);
 }
 
