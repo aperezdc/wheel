@@ -148,3 +148,59 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
     return -1;
 }
 
+
+ssize_t
+w_io_fscan (w_io_t *io, const char *fmt, ...)
+{
+    ssize_t ret;
+    va_list args;
+
+    w_assert (io);
+    w_assert (fmt);
+
+    va_start (args, fmt);
+    ret = w_io_fscanv (io, fmt, args);
+    va_end (args);
+
+    return ret;
+}
+
+
+ssize_t
+w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
+{
+    wbool (*rfun) (w_io_t*, void*);
+    ssize_t retval = 0;
+
+    w_assert (io);
+    w_assert (fmt);
+
+#define CHAR_TO_FUN(_c, _f) \
+        case _c : rfun = (wbool (*)(w_io_t*, void*)) _f; break
+
+    while (*fmt) {
+        void *dptr = va_arg (args, void*);
+
+        if (!dptr)
+            break;
+
+        switch (*fmt++) {
+            CHAR_TO_FUN ('l', w_io_fscan_long);
+            CHAR_TO_FUN ('L', w_io_fscan_ulong);
+            CHAR_TO_FUN ('X', w_io_fscan_ulong_hex);
+            CHAR_TO_FUN ('O', w_io_fscan_ulong_oct);
+            default: rfun = NULL;
+        }
+
+        if (!rfun)
+            break;
+
+        if ((*rfun) (io, dptr))
+            break;
+
+        retval++;
+    }
+
+    return retval;
+}
+

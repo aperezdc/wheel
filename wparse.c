@@ -118,12 +118,12 @@ w_parse_ulong (w_parse_t      *p,
     if (p->look == '0') {
         w_parse_getchar (p);
         if (p->look == 'x' || p->look == 'X') {
-            if (!fscanf (p->input, "%lx", value))
+            if (w_io_fscan_ulong_hex (p->input, value))
                 return W_NO;
         }
         else if (isdigit (p->look)) {
             w_io_putback (p->input, p->look);
-            if (!fscanf (p->input, "%lo", value))
+            if (w_io_fscan_ulong_oct (p->input, value))
                 return W_NO;
         }
         else {
@@ -133,7 +133,7 @@ w_parse_ulong (w_parse_t      *p,
     }
     else {
         w_io_putback (p->input, p->look);
-        if (!fscanf (p->input, "%lu", value))
+        if (w_io_fscan_ulong (p->input, value))
             return W_NO;
     }
 
@@ -154,13 +154,13 @@ w_parse_long (w_parse_t *p, long *value)
     if (p->look == '0') {
         w_parse_getchar (p);
         if (p->look == 'x' || p->look == 'X') {
-            if (!fscanf (p->input, "%lx", &uval))
+            if (w_io_fscan_ulong_hex (p->input, &uval))
                 return W_NO;
             *value = uval;
         }
         else if (isdigit (p->look)) {
             w_io_putback (p->input, p->look);
-            if (!fscanf (p->input, "%lo", &uval))
+            if (w_io_fscan_ulong_oct (p->input, &uval))
                 return W_NO;
             *value = uval;
         }
@@ -171,7 +171,7 @@ w_parse_long (w_parse_t *p, long *value)
     }
     else {
         w_io_putback (p->input, p->look);
-        if (!fscanf (p->input, "%li", value))
+        if (w_io_fscan_long (p->input, value))
             return W_NO;
     }
 
@@ -188,7 +188,7 @@ w_parse_double (w_parse_t *p, double *value)
     w_assert (value != NULL);
 
     w_io_putback (p->input, p->look);
-    if (!fscanf (p->input, "%lf", value))
+    if (w_io_fscan_double (p->input, value))
         return W_NO;
 
     w_parse_getchar (p);

@@ -1039,6 +1039,34 @@ W_EXPORT ssize_t w_io_formatv (w_io_t     *io,
 
 
 /*!
+ * Reads formatted input from an I/O object.
+ * \param io  An input/output descriptor.
+ * \param fmt Format string.
+ */
+W_EXPORT ssize_t w_io_fscan (w_io_t     *io,
+                             const char *fmt,
+                             ...);
+
+/*!
+ * Reads formatted input from an I/O object. This version accepts a standard
+ * variable argument list.
+ * \param io  An input/output descriptor.
+ * \param fmt Format string.
+ * \param args Argument list.
+ */
+W_EXPORT ssize_t w_io_fscanv (w_io_t     *io,
+                              const char *fmt,
+                              va_list     args);
+
+
+W_EXPORT wbool w_io_fscan_double    (w_io_t *io, double        *result);
+W_EXPORT wbool w_io_fscan_long      (w_io_t *io, long          *result);
+W_EXPORT wbool w_io_fscan_ulong     (w_io_t *io, unsigned long *result);
+W_EXPORT wbool w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result);
+W_EXPORT wbool w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result);
+
+
+/*!
  * Reads a single character from an I/O object.
  * \param io An input/output descriptor.
  * \return   The read character, or either \ref W_IO_EOF if the end of file
