@@ -24,7 +24,7 @@ serve_request (w_io_socket_t *io)
     printf ("BEGIN REQUEST\n");
 
     while ((ret = w_io_read ((w_io_t*) io, buf, BUFFER_SIZE)) > 0) {
-        write (STDOUT_FILENO, buf, ret);
+        ret = write (STDOUT_FILENO, buf, ret);
         w_io_write ((w_io_t*) io, buf, ret);
     }
 
