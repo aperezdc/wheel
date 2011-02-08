@@ -110,14 +110,19 @@ w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
 static wbool
 w_io_socket_initv (w_io_socket_t *io, enum w_io_flag kind, va_list args)
 {
+    char *host;
+    int   port;
+
     w_assert (io);
 
     switch (kind) {
         case W_IO_SOCKET_UNIX:
-            return w_io_socket_init_unix (io, va_arg (args, const char*));
+            host = va_arg (args, char *);
+            return w_io_socket_init_unix (io, (const char*) host);
         case W_IO_SOCKET_TCP4:
-            return w_io_socket_init_tcp4 (io, va_arg (args, const char*),
-                                              va_arg (args, int));
+            host = va_arg (args, char *);
+            port = va_arg (args, int);
+            return w_io_socket_init_tcp4 (io, (const char*) host, port);
         default:
             return W_NO;
     }
