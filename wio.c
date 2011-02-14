@@ -137,13 +137,51 @@ w_io_format (w_io_t *io, const char *fmt, ...)
 ssize_t
 w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 {
+    union {
+        int           vint;
+        unsigned int  vuint;
+        long          vlong;
+        unsigned long vulong;
+    } v;
+
     w_assert (io);
     w_assert (fmt);
 
-    /* TODO */
-    w_unused (io);
-    w_unused (fmt);
-    w_unused (args);
+    for (; *fmt; fmt++) {
+        if (*fmt != '$') {
+            w_io_putchar (io, *fmt);
+            continue;
+        }
+
+        switch (*(++fmt)) {
+            case 'l':
+                v.vlong = va_arg (args, long);
+                w_io_format_long (io, v.vlong);
+                break;
+            case 'i':
+                v.vint = va_arg (args, int);
+                w_io_format_long (io, v.vint);
+                break;
+            case 'I':
+                v.vuint = va_arg (args, unsigned int);
+                w_io_format_ulong (io, v.vuint);
+                break;
+            case 'L':
+                v.vulong = va_arg (args, unsigned long);
+                w_io_format_ulong (io, v.vulong);
+                break;
+            case 'X':
+                v.vulong = va_arg (args, unsigned long);
+                w_io_format_ulong_hex (io, v.vulong);
+                break;
+            case 'O':
+                v.vulong = va_arg (args, unsigned long);
+                w_io_format_ulong_oct (io, v.vulong);
+                break;
+            default:
+                w_io_putchar (io, *fmt);
+        }
+    }
 
     return -1;
 }
