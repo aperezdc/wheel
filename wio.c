@@ -137,11 +137,13 @@ w_io_format (w_io_t *io, const char *fmt, ...)
 ssize_t
 w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 {
+    size_t len_aux;
     union {
         int           vint;
         unsigned int  vuint;
         long          vlong;
         unsigned long vulong;
+        const char   *vcharp;
     } v;
 
     w_assert (io);
@@ -177,6 +179,15 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
             case 'O':
                 v.vulong = va_arg (args, unsigned long);
                 w_io_format_ulong_oct (io, v.vulong);
+                break;
+            case 's':
+                v.vcharp = va_arg (args, const char*);
+                w_io_write (io, v.vcharp, strlen (v.vcharp));
+                break;
+            case 'S':
+                len_aux  = va_arg (args, size_t);
+                v.vcharp = va_arg (args, const char*);
+                w_io_write (io, v.vcharp, len_aux);
                 break;
             default:
                 w_io_putchar (io, *fmt);
