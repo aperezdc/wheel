@@ -263,3 +263,82 @@ w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
     return W_NO;
 }
 
+
+wbool
+w_io_fscan_int (w_io_t *io, int *result)
+{
+    long value;
+    w_assert (io);
+
+    if (w_io_fscan_long (io, &value))
+        return W_YES;
+
+    if (value > INT_MAX) {
+        if (result)
+            *result = INT_MAX;
+        return W_YES;
+    }
+    if (value < INT_MIN) {
+        if (result)
+            *result = INT_MIN;
+        return W_YES;
+    }
+
+    if (result)
+        *result = (int) value;
+
+    return W_NO;
+}
+
+
+wbool
+w_io_fscan_uint (w_io_t *io, unsigned int *result)
+{
+    unsigned long value;
+    w_assert (io);
+
+    if (w_io_fscan_ulong (io, &value))
+        return W_YES;
+
+    if (value > UINT_MAX) {
+        if (result)
+            *result = UINT_MAX;
+        return W_YES;
+    }
+
+    if (result)
+        *result = (unsigned int) value;
+
+    return W_NO;
+}
+
+
+wbool
+w_io_fscan_float (w_io_t *io, float *result)
+{
+    double value;
+    w_assert (io);
+
+    if (w_io_fscan_double (io, &value))
+        return W_YES;
+
+    if (isnan (value) || isinf (value))
+        goto success;
+
+    if (value > FLT_MAX) {
+        if (result)
+            *result = FLT_MAX;
+        return W_YES;
+    }
+    if (value < FLT_MIN) {
+        if (result)
+            *result = FLT_MIN;
+        return W_YES;
+    }
+
+success:
+    if (result)
+        *result = (float) value;
+
+    return W_NO;
+}

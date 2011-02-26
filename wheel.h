@@ -1082,7 +1082,10 @@ W_EXPORT ssize_t w_io_fscanv (w_io_t     *io,
                               va_list     args);
 
 
+W_EXPORT wbool w_io_fscan_float     (w_io_t *io, float         *result);
 W_EXPORT wbool w_io_fscan_double    (w_io_t *io, double        *result);
+W_EXPORT wbool w_io_fscan_int       (w_io_t *io, int           *result);
+W_EXPORT wbool w_io_fscan_uint      (w_io_t *io, unsigned int  *result);
 W_EXPORT wbool w_io_fscan_long      (w_io_t *io, long          *result);
 W_EXPORT wbool w_io_fscan_ulong     (w_io_t *io, unsigned long *result);
 W_EXPORT wbool w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result);
