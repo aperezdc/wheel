@@ -47,7 +47,7 @@ tests: $(libwheel_TESTRUN) tests/test-all
 $(libwheel_TESTRUN): $(libwheel) -lcheck
 $(libwheel_TESTS): $(libwheel_PATH)/wheel.h
 tests/test-all.o: CPPFLAGS += -DTEST_NO_MAIN
-tests/test-all: tests/test-all.o $(libwheel) -lcheck
+tests/test-all: tests/test-all.o $(libwheel) -lcheck -lm
 
 clean: clean-tests
 
