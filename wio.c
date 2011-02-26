@@ -223,10 +223,14 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
             break;
 
         switch (*fmt++) {
+            CHAR_TO_FUN ('i', w_io_fscan_int);
             CHAR_TO_FUN ('l', w_io_fscan_long);
+            CHAR_TO_FUN ('I', w_io_fscan_uint);
             CHAR_TO_FUN ('L', w_io_fscan_ulong);
             CHAR_TO_FUN ('X', w_io_fscan_ulong_hex);
             CHAR_TO_FUN ('O', w_io_fscan_ulong_oct);
+            CHAR_TO_FUN ('f', w_io_fscan_float);
+            CHAR_TO_FUN ('F', w_io_fscan_double);
             default: rfun = NULL;
         }
 
