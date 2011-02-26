@@ -7,6 +7,7 @@
 
 #include "wheel.h"
 #include <check.h>
+#include <math.h>
 
 #define IOSTR(_s) \
     w_buf_t __buf = W_BUF; \
@@ -238,3 +239,87 @@ START_TEST (test_wiofscan_hex_midinvalid)
     w_obj_unref (io);
 }
 END_TEST
+
+
+#define CHECK_DVAL(_s, _f, _n)                                 \
+    START_TEST (test_wiofscan_double_ ## _s) {                 \
+        double dval;                                           \
+        IOSTR (#_s);                                           \
+        fail_if (w_io_fscan_double (io, &dval),                \
+                 "conversion failed for \"" #_s "\"");         \
+        fail_unless (_f (dval), "converted value is not " _n); \
+        w_obj_unref (io);                                      \
+    } END_TEST
+
+#define CHECK_DVALF(_n, _v)                            \
+    START_TEST (test_wiofscan_double_val_ ## _n) {     \
+        double dval;                                   \
+        IOSTR (#_v);                                   \
+        fail_if (w_io_fscan_double (io, &dval),        \
+                 "conversion failed for \"" #_v "\""); \
+        fail_unless (fabs (dval - (_v)) < 0.2e-10,     \
+                     "converted value is not " #_v);   \
+        w_obj_unref (io);                              \
+    } END_TEST
+
+#define CHECK_DFAILF(_n, _v)                                 \
+    START_TEST (test_wiofscan_double_fail_ ## _n) {          \
+        double dval;                                         \
+        IOSTR (_v);                                          \
+        fail_unless (w_io_fscan_double (io, &dval),          \
+                     "conversion succeeded for \"" _v "\""); \
+        w_obj_unref (io);                                    \
+    } END_TEST
+
+CHECK_DVAL (nan, isnan, "NaN") /* Common NaN variations */
+CHECK_DVAL (NaN, isnan, "NaN")
+CHECK_DVAL (NAN, isnan, "NaN")
+CHECK_DVAL (Nan, isnan, "NaN") /* Exotic NaN variations */
+CHECK_DVAL (NAn, isnan, "NaN")
+CHECK_DVAL (nAN, isnan, "NaN")
+CHECK_DVAL (naN, isnan, "NaN")
+CHECK_DVAL (nAn, isnan, "NaN")
+
+CHECK_DVAL (inf,      isinf, "INFINITY") /* Common INF variations */
+CHECK_DVAL (Inf,      isinf, "INFINITY")
+CHECK_DVAL (INF,      isinf, "INFINITY")
+CHECK_DVAL (infinity, isinf, "INFINITY")
+CHECK_DVAL (INFINITY, isinf, "INFINITY")
+CHECK_DVAL (InFiNiTy, isinf, "INFINITY") /* (Some) Exotic INF variations */
+CHECK_DVAL (InFinIty, isinf, "INFINITY")
+CHECK_DVAL (InF,      isinf, "INFINITY")
+CHECK_DVAL (inF,      isinf, "INFINITY")
+CHECK_DVAL (inFiniTY, isinf, "INFINITY")
+
+CHECK_DVALF (zero,                0)
+CHECK_DVALF (pluszero,           +0)
+CHECK_DVALF (minuszero,          -0)
+CHECK_DVALF (dotzero,            .0)
+CHECK_DVALF (plusdotzero,       +.0)
+CHECK_DVALF (minusdotzero,      -.0)
+CHECK_DVALF (zerozero,          0.0)
+CHECK_DVALF (pluszerozero,     +0.0)
+CHECK_DVALF (minuszerozero,    -0.0)
+CHECK_DVALF (one,                 1)
+CHECK_DVALF (plusone,            +1)
+CHECK_DVALF (minusone,           -1)
+CHECK_DVALF (dotone,             .1)
+CHECK_DVALF (plusdotone,        +.1)
+CHECK_DVALF (minusdotone,       -.1)
+CHECK_DVALF (oneone,            1.1)
+CHECK_DVALF (plusoneone,       +1.1)
+CHECK_DVALF (minusoneone,      -1.1)
+CHECK_DVALF (ezero,             0e0)
+CHECK_DVALF (epluszero,        +0e0)
+CHECK_DVALF (eminuszero,       -0e0)
+CHECK_DVALF (ezerozero,       0.0e0)
+CHECK_DVALF (epluszerozero,  +0.0e0)
+CHECK_DVALF (eminuszerozero, -0.0e0)
+CHECK_DVALF (eone,              1e1)
+CHECK_DVALF (eplusone,         +1e1)
+CHECK_DVALF (eminusone,        -1e1)
+CHECK_DVALF (eoneone,         1.1e1)
+CHECK_DVALF (eoneplus,       +1.1e1)
+CHECK_DVALF (eoneminus,      -1.1e1)
+
+CHECK_DFAILF (fail00, "dafda")

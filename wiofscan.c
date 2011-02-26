@@ -8,15 +8,98 @@
 #include "wheel.h"
 #include <limits.h>
 #include <ctype.h>
+#include <float.h>
+#include <math.h>
 
 
 wbool
 w_io_fscan_double (w_io_t *io, double *result)
 {
+    /*
+     * Conversion from string to floating point representation is very hard
+     * to get right. Instead of rolling our own, the idea is to validate the
+     * input, bailing out as soon as possible, and once we have a buffer
+     * with the needed data, pass it to strtod() -- thus letting the libc
+     * handle the hard part.
+     */
+    wbool got_exp = W_NO;
+    wbool got_dot = W_NO;
+    w_buf_t buf = W_BUF;
+    int c;
+
     w_assert (io);
-    w_unused (io);
-    w_unused (result);
+
+    switch ((c = w_io_getchar (io))) {
+        /* If we get an "N", the only option is reading a NaN.  */
+        case 'n':
+        case 'N':
+            if ((c = w_io_getchar (io)) != 'a' && c != 'A') goto failure;
+            if ((c = w_io_getchar (io)) != 'n' && c != 'N') goto failure;
+            if (result)
+                *result = NAN;
+            goto success;
+
+        /* If we get an "I", the only option is reading an INF/INFINITY. */
+        case 'i':
+        case 'I':
+            if ((c = w_io_getchar (io)) != 'n' && c != 'N') goto failure;
+            if ((c = w_io_getchar (io)) != 'f' && c != 'F') goto failure;
+            if ((c = w_io_getchar (io)) == 'i' && c == 'I') {
+                if ((c = w_io_getchar (io)) != 'n' && c != 'N') goto failure;
+                if ((c = w_io_getchar (io)) != 'i' && c != 'I') goto failure;
+                if ((c = w_io_getchar (io)) != 't' && c != 'T') goto failure;
+                if ((c = w_io_getchar (io)) != 'y' && c != 'Y') goto failure;
+            }
+            if (result)
+                *result = INFINITY;
+            goto success;
+
+        /* Sign marker is read, next has to be a number in XX.YY[eZZ] format. */
+        case '-':
+        case '+':
+            w_buf_append_char (&buf, c);
+            break;
+        default:
+            w_io_putback (io, c);
+    }
+
+    while ((c = w_io_getchar (io)) != W_IO_EOF) {
+        if (c == '.') {
+            if (got_dot) break;
+            got_dot = W_YES;
+        }
+        else if (c == 'e' || c == 'E') {
+            if (got_exp) break;
+            /* Take into account sign in exponent */
+            if ((c = w_io_getchar (io)) != W_IO_EOF && (c == '-' || c == '+')) {
+                w_buf_append_char (&buf, 'e');
+            }
+            else {
+                w_io_putback (io, c);
+                c = 'e';
+            }
+            got_exp = W_YES;
+        }
+        else if (!isdigit (c)) {
+            w_io_putback (io, c);
+            break;
+        }
+        w_buf_append_char (&buf, c);
+    }
+
+    if (!w_buf_length (&buf))
+        goto failure;
+
+    if (result)
+        *result = strtod (w_buf_str (&buf), NULL);
+
+success:
+    w_buf_free (&buf);
     return W_NO;
+
+failure:
+    w_buf_free (&buf);
+    return W_YES;
 }
 
 
