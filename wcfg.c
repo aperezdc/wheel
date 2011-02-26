@@ -428,7 +428,10 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
      * This is valid syntax, so take it into account.
      */
     while (p->look != EOF && p->look != '}' && !feof (p->input)) {
-        key = w_parse_ident (p);
+        if (!(key = w_parse_ident (p))) {
+            w_parse_error (p, "%u:%u: identifier expected",
+                           p->line, p->lpos);
+        }
         switch (p->look) {
             case '"':
                 if ((svalue = w_parse_string (p)) == NULL) {
