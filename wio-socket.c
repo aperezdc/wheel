@@ -108,7 +108,7 @@ w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
 
 
 static wbool
-w_io_socket_initv (w_io_socket_t *io, enum w_io_flag kind, va_list args)
+w_io_socket_initv (w_io_socket_t *io, w_io_socket_kind_t kind, va_list args)
 {
     char *host;
     int   port;
