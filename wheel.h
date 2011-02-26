@@ -1018,7 +1018,22 @@ W_EXPORT ssize_t w_io_read (w_io_t *io,
                             size_t len);
 
 /*!
- * Formats text and writes it to an I/O object.
+ * Formats text and writes it to an I/O object. Implements naïve (but
+ * effective) formatting, providing the most common options of the
+ * \c printf() family of functions. Because behavior is different from
+ * those, format specifications use <tt>$</tt> as prefix. The recognized
+ * specifiers are:
+ *
+ *  - \b l : <tt>long int</tt> number.
+ *  - \b L : <tt>unsigned long int</tt> number.
+ *  - \b i : <tt>int</tt> number.
+ *  - \b I : <tt>unsigned int</tt> number.
+ *  - \b X : <tt>unsigned long int</tt> number, formatted in hexadecimal.
+ *  - \b O : <tt>unsigned long int</tt> number, formatted in octal.
+ *  - \b s : <tt>const char*</tt>, a zero-terminated string.
+ *  - \b S : <tt>size_t</tt> and <tt>const char*</tt>, prints a given
+ *    amount of characters from a string.
+ *
  * \param io  An input/output descriptor.
  * \param fmt Format string.
  */
@@ -1028,7 +1043,8 @@ W_EXPORT ssize_t w_io_format (w_io_t     *io,
 
 /*!
  * Formats text and writes it to an I/O object. This version accepts
- * a standard variable argument list.
+ * a standard variable argument list. For the available formatting options,
+ * read the documentation for \ref w_io_format().
  * \param io   An input/output descriptor.
  * \param fmt  Format string.
  * \param args Argument list.
