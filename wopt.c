@@ -408,15 +408,13 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
 
     while (w_likely (p->look != W_IO_EOF)) {
         if ((token = w_parse_word (p)) == NULL) {
-            w_parse_error (p, "%u:%u: identifier expected",
-                           p->line, p->lpos);
+            w_parse_error (p, "Identifier expected");
         }
 
         opt = _opt_lookup_long (options, token);
 
         if (opt == NULL || CLI_LETTER (opt->letter)) {
-            w_parse_ferror (p, "%u:%u: no such option '%s'",
-                            p->line, p->lpos, token);
+            w_parse_ferror (p, "No such option '$s'", token);
             w_free (token);
             w_parse_rerror (p);
         }
@@ -443,8 +441,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
                     w_free (args[i]);
                 w_free (args);
 
-                w_parse_ferror (p, "%u:%u: Insufficient arguments to '%s'",
-                                p->line, p->lpos, token);
+                w_parse_ferror (p, "Insufficient arguments to '$s'", token);
                 w_free (token);
                 w_parse_rerror (p);
             }
@@ -468,8 +465,7 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
 
         /* Did something go wrong? Notify error */
         if (status != W_OPT_OK) {
-            w_parse_ferror (p, "%u:%u: arguments to '%s' are invalid",
-                            p->line, p->lpos, token);
+            w_parse_ferror (p, "Arguments to '$s' are invalid", token);
             w_free (token);
             w_parse_rerror (p);
         }

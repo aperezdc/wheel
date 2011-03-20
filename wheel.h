@@ -660,21 +660,16 @@ W_EXPORT void* w_parse_run     (w_parse_t    *p,
  * Formats an error string and raises an error.
  *
  * \sa w_parse_ferror(), w_parse_rerror()
- * \param fmt Format string (printf-like)
+ * \param fmt Format string (as passed to \ref w_io_format)
  * \param ... Arguments for the format string.
  */
 W_EXPORT void  w_parse_error   (w_parse_t *p, const char *fmt, ...);
 
 /*!
  * Format an error string. The formatted string will be saved in the
- * \ref w_parse_t::error field. A typical formats format is the following
- * one, including the line and column numbers:
+ * \ref w_parse_t::error field.
  *
- * \code
- *    w_parse_ferror (p, "%u:%u: Your error message", p->line, p->lpos);
- * \endcode
- *
- * \param fmt Format string (printf-like).
+ * \param fmt Format string (as passed to \ref w_io_format).
  * \param ... Arguments for the format string.
  */
 W_EXPORT void  w_parse_ferror  (w_parse_t *p, const char *fmt, ...);
@@ -764,16 +759,15 @@ W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
  * \param _c Character to be matched.
  * \param _statement Cleanup statement.
  */
-#define w_parse_match_with_cleanup(_p, _c, _statement)              \
-    do {                                                            \
-        if ((_c) == (_p)->look) {                                   \
-            w_parse_getchar (_p);                                   \
-            w_parse_skip_ws (_p);                                   \
-        } else {                                                    \
-            _statement;                                             \
-            w_parse_error ((_p), "%u:%u: character '%c' expected,", \
-                           (_p)->line, (_p)->lpos, (_c));           \
-        }                                                           \
+#define w_parse_match_with_cleanup(_p, _c, _statement)             \
+    do {                                                           \
+        if ((_c) == (_p)->look) {                                  \
+            w_parse_getchar (_p);                                  \
+            w_parse_skip_ws (_p);                                  \
+        } else {                                                   \
+            _statement;                                            \
+            w_parse_error ((_p), "Character '$c' expected", (_c)); \
+        }                                                          \
     } while (0)
 
 /*!

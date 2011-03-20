@@ -464,15 +464,14 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
      */
     while (p->look != W_IO_EOF && p->look != '}') {
         if (!(key = w_parse_ident (p))) {
-            w_parse_error (p, "%u:%u: identifier expected",
-                           p->line, p->lpos);
+            w_parse_error (p, "Identifier expected");
         }
         switch (p->look) {
             case '"':
                 if ((svalue = w_parse_string (p)) == NULL) {
+                    w_parse_ferror (p, "Malformed string for key '$s'", key);
                     w_free (key);
-                    w_parse_error (p, "%u:%u: error parsing string",
-                                   p->line, p->lpos);
+                    w_parse_rerror (p);
                 }
                 w_cfg_set_string (r, key, svalue);
                 w_free (svalue);
@@ -489,8 +488,7 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
             default:
                 if (!w_parse_double (p, &dvalue)) {
                     w_free (key);
-                    w_parse_error (p, "%u:%u: number expected",
-                                   p->line, p->lpos);
+                    w_parse_error (p, "Number expected");
                 }
                 w_cfg_set_number (r, key, dvalue);
         }

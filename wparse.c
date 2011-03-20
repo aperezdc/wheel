@@ -54,13 +54,18 @@ w_parse_ferror (w_parse_t  *p,
                 ...)
 {
     va_list args;
+    w_buf_t outbuf = W_BUF;
+    w_io_t *outio  = w_io_buf_open (&outbuf);
 
     w_assert (p != NULL);
     w_assert (fmt != NULL);
 
+    w_io_format (outio, "$I:$I ", p->line, p->lpos);
     va_start (args, fmt);
-    p->error = w_strfmtv (fmt, args);
+    w_io_formatv (outio, fmt, args);
     va_end (args);
+    p->error = w_buf_str (&outbuf);
+    w_obj_unref (outio);
 }
 
 
@@ -76,13 +81,18 @@ void
 w_parse_error (w_parse_t *p, const char *fmt, ...)
 {
     va_list args;
+    w_buf_t outbuf = W_BUF;
+    w_io_t *outio  = w_io_buf_open (&outbuf);
 
     w_assert (p != NULL);
     w_assert (fmt != NULL);
 
+    w_io_format (outio, "$I:$I ", p->line, p->lpos);
     va_start (args, fmt);
-    p->error = w_strfmtv (fmt, args);
+    w_io_formatv (outio, fmt, args);
     va_end (args);
+    p->error = w_buf_str (&outbuf);
+    w_obj_unref (outio);
 
     w_parse_rerror (p);
 }
@@ -285,8 +295,7 @@ w_parse_string (w_parse_t *p)
                             num[2] = '\0';
                             if (!isxdigit (num[0]) || !isxdigit (num[1])) {
                                 w_buf_free (&buf);
-                                w_parse_error (p, "%lu:%lu: Invalid hex sequence",
-                                               p->line, p->lpos);
+                                w_parse_error (p, "Invalid hex sequence");
                             }
                             chr = strtol (num, NULL, 16);
                           } break;
