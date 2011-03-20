@@ -70,3 +70,17 @@ w_io_format_ulong_oct (w_io_t *io, unsigned long value)
     w_assert (io);
     return w_io_format_ulong_base (io, value, 8);
 }
+
+
+ssize_t
+w_io_format_double (w_io_t *io, double value)
+{
+    char *str = w_strfmt ("%g", value);
+    ssize_t ret;
+
+    w_assert (io);
+
+    ret = w_io_write (io, str, strlen (str));
+    w_free (str);
+    return ret;
+}

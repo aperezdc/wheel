@@ -1058,6 +1058,7 @@ W_EXPORT ssize_t w_io_formatv (w_io_t     *io,
 
 W_EXPORT ssize_t w_io_format_long      (w_io_t *io, long          value);
 W_EXPORT ssize_t w_io_format_ulong     (w_io_t *io, unsigned long value);
+W_EXPORT ssize_t w_io_format_double    (w_io_t *io, double        value);
 W_EXPORT ssize_t w_io_format_ulong_hex (w_io_t *io, unsigned long value);
 W_EXPORT ssize_t w_io_format_ulong_oct (w_io_t *io, unsigned long value);
 
