@@ -340,6 +340,35 @@ w_cfg_del (w_cfg_t *cf, const char *key)
     } while (0)
 
 
+static wbool
+w_cfg_dump_string (w_io_t *out, const char *str)
+{
+    w_assert (out);
+    w_assert (str);
+
+    w_io_putchar (out, '"');
+    for (; *str; str++) {
+#define ESCAPE(_c, _e) \
+        case _c : w_io_putchar (out, '\\'); \
+                  w_io_putchar (out, (_e)); \
+                  break
+        switch (*str) {
+            ESCAPE ('\n', 'n');
+            ESCAPE ('\r', 'r');
+            ESCAPE ('\b', 'b');
+            ESCAPE (0x1b, 'e');
+            ESCAPE ('\a', 'a');
+            ESCAPE ('\t', 't');
+            ESCAPE ('\v', 'v');
+            default:
+                w_io_putchar (out, *str);
+        }
+#undef ESCAPE
+    }
+    w_io_putchar (out, '"');
+    return W_YES;
+}
+
 
 static wbool
 w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
@@ -366,8 +395,7 @@ w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
                 w_io_putchar (out, '}');
                 break;
             case W_CFG_STRING:
-                /* FIXME Do proper escaping of the string! */
-                w_io_format (out, "\"$s\"", node->string);
+                w_cfg_dump_string (out, node->string);
                 break;
             case W_CFG_NUMBER:
                 w_io_format_double (out, node->number);
