@@ -1024,6 +1024,7 @@ W_EXPORT ssize_t w_io_read (w_io_t *io,
  * those, format specifications use <tt>$</tt> as prefix. The recognized
  * specifiers are:
  *
+ *  - \b c : <tt>char</tt>, a single character.
  *  - \b l : <tt>long int</tt> number.
  *  - \b L : <tt>unsigned long int</tt> number.
  *  - \b i : <tt>int</tt> number.

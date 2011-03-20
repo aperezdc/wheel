@@ -164,6 +164,10 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
                 v.vint = va_arg (args, int);
                 w_io_format_long (io, v.vint);
                 break;
+            case 'c':
+                v.vint = va_arg (args, int);
+                w_io_putchar (io, v.vint);
+                break;
             case 'I':
                 v.vuint = va_arg (args, unsigned int);
                 w_io_format_ulong (io, v.vuint);
