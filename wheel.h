@@ -1311,18 +1311,7 @@ W_OBJ (w_io_buf_t)
 
 
 /*!
- * Initialize an I/O object to be used with a buffer.
- * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
- *            \ref w_buf_t internally which can be retrieved with
- *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
- *            you will be responsible to call \ref w_buf_free on it.
- * \sa W_IO_BUF_BUF
- */
-W_EXPORT void w_io_buf_init (w_io_buf_t *io,
-                             w_buf_t    *buf);
-
-/*!
- * Create an I/O object to be used with a bufffer.
+ * Create an I/O object to be used with a buffer.
  * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
  *            \ref w_buf_t internally which can be retrieved with
  *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
