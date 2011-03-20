@@ -1,7 +1,6 @@
 /*
  * wtty.c
- * Copyright (C) 2006 Connectical Labs.
- * Adrian Perez <moebius@connectical.net>
+ * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
  */

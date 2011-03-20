@@ -2,7 +2,7 @@
  * \file wheel.h
  * \brief Main include file for libwheel.
  *
- * Copyright (C) 2010 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
