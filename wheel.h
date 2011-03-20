@@ -1325,6 +1325,12 @@ W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
 #define W_IO_BUF_BUF(_p) \
     (&((w_io_buf_t*) (_p))->buf)
 
+/*!
+ * Obtain a string representation of a \ref w_io_buf_t I/O object.
+ */
+#define W_IO_BUF_STR(_p) \
+    (w_io_buf_str (W_IO_BUF_BUF (_p)))
+
 /*\}*/
 
 /*---------------------------------------------------[ config files ]-----*/
