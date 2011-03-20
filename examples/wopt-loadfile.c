@@ -27,8 +27,9 @@ int
 main (int argc, char **argv)
 {
     char *errmsg = NULL;
+    w_io_t *io_in = w_io_stdio_open (stdin);
 
-    w_opt_parse_file (option_spec, stdin, &errmsg);
+    w_opt_parse_io (option_spec, io_in, &errmsg);
     if (errmsg != NULL) {
         fprintf (stderr, "stdin:%s\n", errmsg);
         w_free (errmsg);
