@@ -357,7 +357,8 @@ w_strdup(const char *str)
 static inline int
 w_strcasecmp(const char *s1, const char *s2)
 {
-	register int c1, c2;
+	register int c1 = 0;
+	register int c2 = 0;
 	while ((*s1 != '\0') && (*s2 != '\0')) {
 		c1 = tolower(*s1);
 		c2 = tolower(*s2);

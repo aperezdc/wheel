@@ -21,6 +21,11 @@
 #define W_IO_SOCKET_BACKLOG 1024
 #endif /* !W_IO_SOCKET_BACKLOG */
 
+#ifndef SUN_LEN
+#define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + \
+		             strlen ((ptr)->sun_path))
+#endif /* SUN_LEN */
+
 
 static void
 w_io_socket_cleanup (void *obj)
@@ -57,7 +62,7 @@ w_io_socket_init_unix (w_io_socket_t *io, const char *path)
     strcpy (un->sun_path, path);
     un->sun_family = AF_UNIX;
     io->kind = W_IO_SOCKET_UNIX;
-    io->slen = SUN_LEN (un);
+	io->slen = SUN_LEN (un);
 
     w_assert (memcmp (un, io->sa, io->slen) == 0);
 
