@@ -26,6 +26,9 @@ libwheel_SRCS := wcfg.c       \
                  wio-buf.c    \
                  wtty.c
 
+LDFLAGS       += -pthread
+CFLAGS        += -pthread
+CXXFLAGS      += -pthread
 CPPFLAGS      += -I$(libwheel_PATH)
 libwheel      := $(libwheel_PATH)/libwheel.a
 libwheel_SRCS := $(addprefix $(libwheel_PATH)/,$(libwheel_SRCS))

@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/un.h>
+#include <pthread.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -168,19 +169,65 @@ w_io_socket_open (w_io_socket_kind_t kind, ...)
 
 struct w_io_socket_thread
 {
-    wbool   ret;
-    wbool (*hnd) (w_io_t*);
-    w_io_t d[0];
+    pthread_t      thread;
+    wbool        (*hnd) (w_io_socket_t*);
+    w_io_socket_t *io;
 };
+
+
+static void*
+w_io_socket_serve_thread_run (void *udata)
+{
+    struct w_io_socket_thread *st = (struct w_io_socket_thread*) udata;
+
+    /*
+     * Call the handler.
+     *
+     * TODO Take into account the return value that signals the finalization
+     * of the accept-serve loop.
+     */
+    (*st->hnd) (st->io);
+
+    /*
+     * Cleanup after the handler. Make sure we remove the reference the
+     * thread holds to the I/O object.
+     *
+     * XXX It is a bit tricky that the deallocation of this is in a thread
+     * different than the thread that created the object. This may be
+     * revisited to make deallocations happen if problems arise. Let's keep
+     * things simple for the moment, sacrifice a goat and pray...
+     */
+    w_obj_unref (st->io);
+
+    /* XXX Is it safe to free the pthread_t before it finished running? */
+    w_free (st);
+
+    return NULL;
+}
 
 
 static wbool
 w_io_socket_serve_thread (w_io_socket_t *io,
                           wbool (*handler) (w_io_socket_t*))
 {
-    w_unused (io);
-    w_unused (handler);
-    return W_YES; /* Stop serving */
+    struct w_io_socket_thread *st = w_new0 (struct w_io_socket_thread);
+
+    /*
+     * The thread keeps a reference to the I/O object. The reference counter
+     * is incremented here before the thread is spawned to avoid a race
+     * condition with the w_obj_unref() in the accept-serve loop.
+     */
+    st->io  = w_obj_ref (io);
+    st->hnd = handler;
+
+    /*
+     * FIXME This lacks proper error handling... If a thread cannot be
+     * created, the accept-loop just bails out, which is definitely not
+     * the most sane thing to do.
+     */
+    return (pthread_create (&st->thread, NULL,
+                            w_io_socket_serve_thread_run,
+                            st) == 0);
 }
 
 
