@@ -148,12 +148,16 @@ _print_blanks (FILE *f, size_t n)
 static inline void
 _print_lspaced (FILE *f, const char *s, int l)
 {
-    unsigned tty_cols = w_tty_cols () - l;
+    unsigned tty_cols = w_tty_cols () - l - 22;
     const char *spc = s;
     unsigned col = 0;
     int lstart = 1;
     size_t len;
     if (l > 65) l = 20;
+
+    if (tty_cols > 60) {
+        tty_cols = 60;
+    }
 
     /* Reflow words by inserting line breaks at spaces. */
     while (s != NULL) {
