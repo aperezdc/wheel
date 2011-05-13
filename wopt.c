@@ -7,8 +7,8 @@
  */
 
 #include "wheel.h"
+#include <unistd.h>
 #include <ctype.h>
-
 
 
 /*
@@ -115,38 +115,22 @@ _program_name (const char *str)
 }
 
 
-static inline size_t
-_longest_option_width (const w_opt_t *opt)
+static inline void
+_print_some_chars (w_io_t *f, const char *s, size_t n)
 {
-    size_t longest = 4; /* "help" has 4 characters */
-    size_t cur_len;
-    w_assert (opt != NULL);
-
-    for (; opt->string != NULL; opt++) {
-        cur_len = strlen (opt->string);
-        if (cur_len > longest) longest = cur_len;
-    }
-
-    return longest;
+    while (n-- && (*s != '\0')) w_io_putchar (f, *s++);
 }
 
 
 static inline void
-_print_some_chars (FILE *f, const char *s, size_t n)
+_print_blanks (w_io_t *f, size_t n)
 {
-    while (n-- && (*s != '\0')) fputc (*s++, f);
+    while (n--) w_io_putchar (f, ' ');
 }
 
 
 static inline void
-_print_blanks (FILE *f, size_t n)
-{
-    while (n--) fputc (' ', f);
-}
-
-
-static inline void
-_print_lspaced (FILE *f, const char *s, int l)
+_print_lspaced (w_io_t *f, const char *s, int l)
 {
     unsigned tty_cols = w_tty_cols () - l - 22;
     const char *spc = s;
@@ -172,7 +156,7 @@ _print_lspaced (FILE *f, const char *s, int l)
         else if ((col + len) > tty_cols) {
             /* Advance to next line. */
             col = l + len;
-            fputc ('\n', f);
+            w_io_putchar (f, '\n');
             _print_blanks (f, l);
             _print_some_chars (f, s, len);
         }
@@ -181,44 +165,42 @@ _print_lspaced (FILE *f, const char *s, int l)
             _print_some_chars (f, s, len);
         }
         s = (spc == NULL) ? NULL : spc + 1;
-        fputc (' ', f);
+        w_io_putchar (f, ' ');
     }
-    fputc('\n', f);
+    w_io_putchar (f, '\n');
 }
 
 
 void
-w_opt_help (const w_opt_t *opt, FILE *out, const char *progname)
+w_opt_help (const w_opt_t *opt, w_io_t *out, const char *progname)
 {
-    int width;
     w_assert (opt != NULL);
     w_assert (out != NULL);
 
-    width = (int) _longest_option_width (opt);
-    fprintf (out, "Usage: %s [options] [...]\n", progname);
-    fprintf (out, "Command line options:\n\n");
+    w_io_format (out, "Usage: $s [options] [...]\n"
+                      "Command line options:\n\n", progname);
 
     for (; opt->string != NULL; opt++) {
         if (OPT_LETTER (opt->letter) && opt->string) {
-            fprintf (out, "  -%c, --%-*s ",
-                     OPT_LETTER (opt->letter),
-                     width, opt->string);
+            w_io_format (out, "-$c, --$s ",
+                         OPT_LETTER (opt->letter),
+                         opt->string);
         }
         else if (opt->string) {
-            fprintf (out, "       --%-*s ", width, opt->string);
+            w_io_format (out, "--$s ", opt->string);
         }
         else {
-            fprintf (out, "  -%c         ", opt->letter);
+            w_io_format (out, "-$c ", OPT_LETTER (opt->letter));
         }
 
         switch (opt->narg) {
-            case  0: fprintf (out, "      "); break;
-            case  1: fprintf (out, "ARG   "); break;
-            default: fprintf (out, "ARG...");
+            case  0: w_io_format (out, "\n   "); break;
+            case  1: w_io_format (out, "<ARG>\n   "); break;
+            default: w_io_format (out, "<ARG...>\n   ");
         }
-        _print_lspaced (out, opt->info, 15 + width);
+        _print_lspaced (out, opt->info, 3);
+        w_io_putchar (out, '\n');
     }
-    fputc ('\n', out);
 }
 
 
@@ -327,7 +309,9 @@ w_opt_parse (const w_opt_t *options,
                 break;
             }
             if (OPT_LETTER (context.option->letter) == 'h') {
-                w_opt_help (options, stdout, _program_name (argv[0]));
+                w_io_unix_t out;
+                w_io_unix_init (&out, STDOUT_FILENO);
+                w_opt_help (options, (w_io_t*) &out, _program_name (argv[0]));
                 status = W_OPT_EXIT_OK;
                 break;
 			}

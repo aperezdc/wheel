@@ -564,7 +564,7 @@ W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*);
  * \param out Stream where write the message.
  * \param progname Program name (usually <tt>argv[0]</tt>).
  */
-W_EXPORT void w_opt_help(const w_opt_t opt[], FILE *out, const char *progname);
+W_EXPORT void w_opt_help(const w_opt_t opt[], w_io_t *out, const char *progname);
 
 /*!
  * Parses an array of command line arguments.
