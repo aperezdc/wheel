@@ -35,6 +35,7 @@ clean-examples:
 
 libwheel_CHECKS  := $(wildcard tests/check-*.c)
 libwheel_TESTS   := $(patsubst tests/check-%.c,tests/test-%.c,$(libwheel_CHECKS))
+libwheel_TESTS_O := $(patsubst %.c,%.all.o,$(libwheel_TESTS))
 libwheel_TESTRUN := $(patsubst %.c,%,$(libwheel_TESTS))
 
 tests/test-%.c: tests/check-%.c
@@ -43,29 +44,34 @@ tests/test-%.c: tests/check-%.c
 tests/test-all.c: $(libwheel_TESTS)
 	./tests/makealltests $^ > $@
 
-tests: $(libwheel_TESTRUN) tests/test-all
-$(libwheel_TESTRUN): $(libwheel) -lcheck
+tests/%.all.o: tests/%.c
+	$(COMPILE.c) $(OUTPUT_OPTION) $<
+
+tests: tests/test-all
+all-tests: $(libwheel_TESTRUN)
+$(libwheel_TESTRUN): $(libwheel) -lcheck -lm
 $(libwheel_TESTS): $(libwheel_PATH)/wheel.h
-tests/test-all.o: CPPFLAGS += -DTEST_NO_MAIN
-tests/test-all: tests/test-all.o $(libwheel) -lcheck -lm
+tests/test-all: CPPFLAGS += -DTEST_NO_MAIN
+tests/test-all: tests/test-all.o $(libwheel_TESTS_O) $(libwheel) -lcheck -lm
 
 clean: clean-tests
 
 clean-tests:
 	$(RM) $(libwheel_TESTRUN)
 	$(RM) $(libwheel_TESTS:.c=.o)
+	$(RM) $(libwheel_TESTS_O)
 	$(RM) $(libwheel_TESTS)
 	$(RM) tests/test-all.c tests/test-all.o tests/test-all
 
-run-tests: tests
+run-all-tests: all-tests
 	@for test in $(libwheel_TESTRUN) ; do \
 		"$${test}" || break ; \
 	done
 
-run-all-tests: tests/test-all
+run-tests: tests/test-all
 	@./tests/test-all
 
-.PHONY: tests clean-tests run-tests
+.PHONY: tests clean-tests run-tests all-tests
 
 .SECONDARY:
 

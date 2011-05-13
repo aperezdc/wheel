@@ -9,9 +9,14 @@ suite_of_filename ()
 	echo "${n%.c}"
 }
 
+cat <<EOF
+#include <check.h>
+#include <stdlib.h>
+EOF
 
 for filename in "$@" ; do
-	echo "#include \"$(basename "${filename}")\""
+	suite=$(suite_of_filename "${filename}")
+	echo "extern Suite* make_${suite}_suite (void);"
 done
 
 cat <<EOF

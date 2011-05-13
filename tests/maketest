@@ -24,7 +24,7 @@ suite=$(suite_of_filename "$2")
 cat <<EOF
 #include "$1"
 
-static Suite*
+Suite*
 make_${suite}_suite (void)
 {
     Suite *s = suite_create ("${suite}");
