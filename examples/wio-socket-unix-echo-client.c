@@ -40,7 +40,7 @@ main (int argc, char **argv)
     }
 
     if (!(ios = w_io_socket_open (W_IO_SOCKET_UNIX, socketpath))) {
-        w_die ("Problem creating server socket: %s\n", strerror (errno));
+        w_die ("Problem creating server socket: $s\n", strerror (errno));
     }
 
     w_io_socket_connect ((w_io_socket_t*) ios);

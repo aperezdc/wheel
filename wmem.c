@@ -17,7 +17,7 @@ w_malloc(size_t sz)
 {
 	void *p = malloc(sz);
 	if (p == NULL)
-		w_die("virtual memory exhausted (tried to allocate %lu bytes)\n",
+		w_die("virtual memory exhausted (tried to allocate $L bytes)\n",
 				(unsigned long) sz);
 
 	memset(p, 0x00, sz);
@@ -35,7 +35,7 @@ w_realloc(void *ptr, size_t sz)
 		else {
 			ptr = realloc(ptr, sz);
 			if (ptr == NULL)
-				w_die("virtual memory exhausted (tried to allocate %lu bytes)\n",
+				w_die("virtual memory exhausted (tried to allocate $L bytes)\n",
 						(unsigned long) sz);
 			return ptr;
 		}

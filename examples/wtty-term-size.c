@@ -16,7 +16,7 @@ int main (int argc, char **argv)
     w_unused (argv);
 
     if (!w_tty_size (&cols, &rows))
-        w_die ("Could not get terminal size");
+        w_die ("Could not get terminal size\n");
 
     printf ("%u %u\n", cols, rows);
 

@@ -15,11 +15,11 @@ main (int argc, char **argv)
     w_cfg_t *cfg;
 
     if (argc != 2)
-        w_die ("usage: %s <conf-file>\n", argv[0]);
+        w_die ("usage: $s <conf-file>\n", argv[0]);
 
     if ((cfg = w_cfg_load_file (argv[1], &err)) == NULL) {
         w_assert (err);
-        w_die ("%s:%s\n", argv[1], err);
+        w_die ("$s:$s\n", argv[1], err);
     }
 
     w_free (err);

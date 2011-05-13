@@ -62,14 +62,14 @@ main (int argc, char **argv)
     w_opt_parse (options, NULL, NULL, argc, argv);
 
     if (!(io = w_io_socket_open (W_IO_SOCKET_TCP4, serverhost, serverport))) {
-        w_die ("Problem creating socket: %s\n", strerror (errno));
+        w_die ("Problem creating socket: $s\n", strerror (errno));
     }
 
     if (!w_io_socket_serve ((w_io_socket_t*) io,
                             W_IO_SOCKET_SINGLE,
                             serve_request))
     {
-        w_die ("Could not serve: %s\n", strerror (errno));
+        w_die ("Could not serve: $s\n", strerror (errno));
     }
 
     w_obj_unref (io);
