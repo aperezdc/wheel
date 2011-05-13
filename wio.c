@@ -6,6 +6,7 @@
  */
 
 #include "wheel.h"
+#include <stdint.h>
 #include <errno.h>
 
 
@@ -144,6 +145,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
         long          vlong;
         unsigned long vulong;
         const char   *vcharp;
+        intptr_t      vpointer;
     } v;
 
     w_assert (io);
@@ -183,6 +185,10 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
             case 'O':
                 v.vulong = va_arg (args, unsigned long);
                 w_io_format_ulong_oct (io, v.vulong);
+                break;
+            case 'p':
+                v.vpointer = (intptr_t) va_arg (args, void*);
+                w_io_format_ulong_hex (io, v.vpointer);
                 break;
             case 's':
                 v.vcharp = va_arg (args, const char*);

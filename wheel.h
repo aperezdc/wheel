@@ -1026,6 +1026,7 @@ W_EXPORT ssize_t w_io_read (w_io_t *io,
  *  - \b I : <tt>unsigned int</tt> number.
  *  - \b X : <tt>unsigned long int</tt> number, formatted in hexadecimal.
  *  - \b O : <tt>unsigned long int</tt> number, formatted in octal.
+ *  - \b p : <tt>void*</tt> pointer, formatted in hexadecimal.
  *  - \b f : <tt>float</tt> number.
  *  - \b F : <tt>double</tt> number.
  *  - \b s : <tt>const char*</tt>, a zero-terminated string.
