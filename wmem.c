@@ -28,7 +28,6 @@ w_malloc(size_t sz)
 void*
 w_realloc(void *ptr, size_t sz)
 {
-	w_dprintf(("resize: p=%p, sz=%lu", ptr, sz));
 	if (sz) {
 		if (ptr == NULL)
 			return w_malloc(sz);
