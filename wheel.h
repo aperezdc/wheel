@@ -50,7 +50,7 @@
 /*!
  * Obtain the lowest of two numbers.
  */
-# define w_max(_n, _m) \
+# define w_min(_n, _m) \
 	(((_n) < (_m)) ? (_n) : (_m))
 #endif /* __GNUC__ */
 
