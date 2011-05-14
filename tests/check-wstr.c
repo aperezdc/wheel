@@ -11,7 +11,7 @@
 
 START_TEST (test_wstr_hash_neq)
 {
-    fail_if (w_hashstr ("foo") == w_hashstr ("bar"),
+    fail_if (w_str_hash ("foo") == w_str_hash ("bar"),
              "same hash produced for different strings");
 }
 END_TEST
@@ -19,10 +19,10 @@ END_TEST
 
 START_TEST (test_wstr_hash_eq)
 {
-    fail_if (w_hashstr ("foo") != w_hashstrn ("foo", 3),
-             "w_hashstrn and w_hashstr produced different hashes");
-    fail_if (w_hashstr ("foo") != w_hashstrn ("foobar", 3),
-             "w_hashstrn and w_hashstr produced different hashes");
+    fail_if (w_str_hash ("foo") != w_str_hashl ("foo", 3),
+             "w_str_hashl and w_str_hash produced different hashes");
+    fail_if (w_str_hash ("foo") != w_str_hashl ("foobar", 3),
+             "w_str_hashl and w_str_hash produced different hashes");
 }
 END_TEST
 

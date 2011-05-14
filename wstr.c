@@ -51,7 +51,7 @@ w_strfmt(const char *fmt, ...)
 
 
 unsigned
-w_hashstr(const char *str)
+w_str_hash (const char *str)
 {
 	register unsigned ret = 0;
 	register unsigned ctr = 0;
@@ -66,7 +66,7 @@ w_hashstr(const char *str)
 
 
 unsigned
-w_hashstrn(const char *str, size_t len)
+w_str_hashl (const char *str, size_t len)
 {
 	register unsigned ret = 0;
 	register unsigned ctr = 0;

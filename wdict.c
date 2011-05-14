@@ -22,11 +22,11 @@
 #endif /* !W_DICT_COUNT_TO_SIZE_RATIO */
 
 #ifndef W_DICT_HASH
-#define W_DICT_HASH(_k, _s) (w_hashstr(_k) % ((_s) - 1))
+#define W_DICT_HASH(_k, _s) (w_str_hash (_k) % ((_s) - 1))
 #endif /* !W_DICT_HASH */
 
 #ifndef W_DICT_HASHN
-#define W_DICT_HASHN(_k, _s, _n) (w_hashstrn(_k, _n) % ((_s) - 1))
+#define W_DICT_HASHN(_k, _s, _n) (w_str_hashl (_k, _n) % ((_s) - 1))
 #endif /* !W_DICT_HASHN */
 
 #ifndef W_DICT_KEY_EQ

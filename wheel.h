@@ -334,14 +334,14 @@ W_EXPORT char* w_strfmt (const char *fmt, ...);
  * \param len Number of characters to hash.
  * \return Hash value.
  */
-W_EXPORT unsigned w_hashstrn(const char *str, size_t len);
+W_EXPORT unsigned w_str_hashl (const char *str, size_t len);
 
 /*!
  * Hashes a string.
  * \param str String to get the hash of.
  * \return Hash value.
  */
-W_EXPORT unsigned w_hashstr (const char *str);
+W_EXPORT unsigned w_str_hash (const char *str);
 
 /*!
  * Converts a string into a boolean.
