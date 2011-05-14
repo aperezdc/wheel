@@ -402,11 +402,11 @@ w_strdup(const char *str)
 
 
 #ifdef __GLIBC__
-# define w_strcasecmp strcasecmp
+# define w_str_casecmp strcasecmp
 #else  /* __GLIBC__ */
 #include <ctype.h>
 static inline int
-w_strcasecmp(const char *s1, const char *s2)
+w_str_casecmp(const char *s1, const char *s2)
 {
 	register int c1 = 0;
 	register int c2 = 0;

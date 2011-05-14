@@ -65,13 +65,13 @@ END_TEST
 
 START_TEST (test_wstr_casecmp)
 {
-    fail_unless (w_strcasecmp ("foo", "foo") == 0,
+    fail_unless (w_str_casecmp ("foo", "foo") == 0,
                  "comparing 'foo' with itself failed");
-    fail_unless (w_strcasecmp ("FOO", "foo") == 0,
+    fail_unless (w_str_casecmp ("FOO", "foo") == 0,
                  "comparing 'FOO' with 'foo' failed");
-    fail_unless (w_strcasecmp ("F o", "f O") == 0,
+    fail_unless (w_str_casecmp ("F o", "f O") == 0,
                  "comparing 'F o' with 'f O' failed");
-    fail_unless (w_strcasecmp ("0.¬", "0.¬") == 0,
+    fail_unless (w_str_casecmp ("0.¬", "0.¬") == 0,
                  "comparing '0.¬' with itself failed");
 }
 END_TEST
@@ -79,7 +79,7 @@ END_TEST
 
 START_TEST (test_wstr_casecmp_misc)
 {
-    fail_unless (w_strcasecmp ("", "") == 0,
+    fail_unless (w_str_casecmp ("", "") == 0,
                  "comparing an empty string with itself failed");
 }
 END_TEST

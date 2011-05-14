@@ -103,22 +103,22 @@ w_str_bool(const char *str, wbool *opt)
 		/* FIXME Tests below may be speed up. */
 
 		case 2: /* Two characters: "no", "ok" */
-			if (!w_strcasecmp("no", str)) return (*opt = W_NO , W_YES);
-			if (!w_strcasecmp("ok", str)) return (*opt = W_YES, W_YES);
+			if (!w_str_casecmp ("no", str)) return (*opt = W_NO , W_YES);
+			if (!w_str_casecmp ("ok", str)) return (*opt = W_YES, W_YES);
 			return W_NO;
 		case 3: /* Three characters: "yes", "nah", "nop" */
-			if (!w_strcasecmp("yes", str)) return (*opt = W_YES, W_YES);
-			if (!w_strcasecmp("nop", str)) return (*opt = W_NO , W_YES);
-			if (!w_strcasecmp("nah", str)) return (*opt = W_NO , W_YES);
+			if (!w_str_casecmp ("yes", str)) return (*opt = W_YES, W_YES);
+			if (!w_str_casecmp ("nop", str)) return (*opt = W_NO , W_YES);
+			if (!w_str_casecmp ("nah", str)) return (*opt = W_NO , W_YES);
 			return W_NO;
 		case 4: /* Four characters: "yeah", "okay", "nope", true */
-			if (!w_strcasecmp("true", str)) return (*opt = W_YES, W_YES);
-			if (!w_strcasecmp("yeah", str)) return (*opt = W_YES, W_YES);
-			if (!w_strcasecmp("okay", str)) return (*opt = W_YES, W_YES);
-			if (!w_strcasecmp("nope", str)) return (*opt = W_NO , W_YES);
+			if (!w_str_casecmp ("true", str)) return (*opt = W_YES, W_YES);
+			if (!w_str_casecmp ("yeah", str)) return (*opt = W_YES, W_YES);
+			if (!w_str_casecmp ("okay", str)) return (*opt = W_YES, W_YES);
+			if (!w_str_casecmp ("nope", str)) return (*opt = W_NO , W_YES);
 			return W_NO;
 		case 5: /* Five characters: "false". */
-			if (!w_strcasecmp("false", str)) return (*opt = W_NO, W_YES);
+			if (!w_str_casecmp ("false", str)) return (*opt = W_NO, W_YES);
 			return W_NO;
 	}
 
