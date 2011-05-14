@@ -124,7 +124,20 @@ enum wbool
  * \{
  */
 
+/*!
+ * Wrapper around malloc(). This will abort and print a message when the
+ * pointer returned by malloc() is NULL.
+ */
 W_EXPORT void* w_malloc(size_t sz);
+
+/*!
+ * Wrapper around realloc(). This will abort and print a message when the
+ * pointer returned by realloc() is NULL. Plus, it is possible to pass
+ * a NULL pointer and/or a zero size, and it will behave consistently:
+ *
+ *  - <tt>w_realloc(NULL, 42)</tt> is equivalent to <tt>malloc(42)</tt>
+ *  - <tt>w_relloac(ptr, 0)</tt> is equivalent to <tt>free(ptr)</tt>
+ */
 W_EXPORT void* w_realloc(void *ptr, size_t sz);
 
 /*!
@@ -205,6 +218,11 @@ W_OBJ (w_obj_t)
 };
 
 
+/*!
+ * Initializes an object.
+ * Subclasses should do not need to call this base initializer. It will be
+ * automatically called when using \ref w_obj_new().
+ */
 static inline void*
 w_obj_init (w_obj_t *obj)
 {
@@ -213,22 +231,55 @@ w_obj_init (w_obj_t *obj)
     return obj;
 }
 
+/*!
+ * Instantiates an object, with space allocated for a private data area.
+ */
 #define w_obj_new_with_priv_sized(_t, _s) \
     ((_t *) w_obj_init (w_malloc (sizeof (_t) + (_s))))
 
+/*!
+ * Instantiates an object, with space allocated for a private data area.
+ * The size of the private area will be that of a type names after the
+ * object type, with a \c _p suffix added to it.
+ */
 #define w_obj_new_with_priv(_t) \
     w_obj_new_with_priv_sized (_t, sizeof (_t ## _p))
 
+/*!
+ * Instantiates an object.
+ */
 #define w_obj_new(_t) \
     ((_t *) w_obj_init (w_malloc (sizeof (_t))))
 
+/*!
+ * Obtains a pointer to the private data area of an object.
+ */
 #define w_obj_priv(_p, _t) \
     ((void*) (((char*) (_p)) + sizeof (_t)))
 
-void* w_obj_ref     (void *obj);
-void* w_obj_unref   (void *obj);
-void  w_obj_destroy (void *obj);
-void* w_obj_dtor    (void *obj, void (*fini) (void*));
+/*!
+ * Increases the reference counter of an object, returns the object itself.
+ */
+void* w_obj_ref (void *obj);
+
+/*!
+ * Decreases the reference counter of an object, returns the object itself.
+ * Once the reference count for an object reaches zero, it is destroyed by
+ * calling \ref w_obj_destroy().
+ */
+void* w_obj_unref (void *obj);
+
+/*!
+ * Destroys an object. If a destructor function was set for the object
+ * (using \ref w_obj_dtor()), then it will be run prior to the memory
+ * used by the object being freed.
+ */
+void w_obj_destroy (void *obj);
+
+/*!
+ * Registers a destructor to be called when an object is destroyed.
+ */
+void* w_obj_dtor (void *obj, void (*fini) (void*));
 
 /*\}*/
 
