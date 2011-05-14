@@ -38,7 +38,7 @@ w_vdie(const char *fmt, va_list al)
 
 
 void
-__w_dprintf(const char *fmt, ...)
+__w_debug(const char *fmt, ...)
 {
     va_list al;
     w_io_unix_t err;

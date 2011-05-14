@@ -257,11 +257,11 @@ W_EXPORT void  w_die(const char *fmt, ...);
 W_EXPORT void w_vdie(const char *fmt, va_list al);
 
 
-#ifdef _DPRINTF
-# define w_dprintf(_x) __w_dprintf _x
-W_EXPORT void __w_dprintf(const char *fmt, ...);
+#ifdef _DEBUG_PRINT
+# define w_debug(_x) __w_debug _x
+W_EXPORT void __w_debug (const char *fmt, ...);
 #else
-# define w_dprintf(_x) ((void)0)
+# define w_debug(_x) ((void)0)
 #endif
 
 /*\}*/
