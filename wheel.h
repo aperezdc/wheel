@@ -971,34 +971,6 @@ W_EXPORT char* w_buf_str (w_buf_t *buf);
 
 /*\}*/
 
-/*-----------------------------------------------[ text formatting ]------*/
-
-/*!
- * \defgroup formatting Text formatting
- * \addtogroup formatting
- * \{
- */
-
-/*!
- * Formats text into a buffer.
- * \param buf A \ref w_buf_t buffer
- * \param fmt Format string
- */
-W_EXPORT void w_fmt_buf (w_buf_t    *buf,
-                         const char *fmt, ...);
-
-/*!
- * Formats text into a buffer.
- * \param buf A \ref w_buf_t buffer
- * \param fmt Format string
- * \param arg Argument list
- */
-W_EXPORT void w_fmt_bufv (w_buf_t    *buf,
-                          const char *fmt,
-                          va_list     arg);
-
-/*\}*/
-
 /*--------------------------------------------------[ input/output ]------*/
 
 /*!
