@@ -300,12 +300,12 @@ W_OBJ_DECL (w_io_t);
 /*!
  * Prints a message to stderr and aborts execution.
  */
-W_EXPORT void  w_die(const char *fmt, ...);
+W_EXPORT void w_die (const char *fmt, ...);
 
 /*!
  * Prints a message to stderr and aborts execution.
  */
-W_EXPORT void w_vdie(const char *fmt, va_list al);
+W_EXPORT void w_diev (const char *fmt, va_list al);
 
 
 #ifdef _DEBUG_PRINT

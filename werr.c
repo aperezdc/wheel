@@ -19,13 +19,13 @@ w_die(const char *fmt, ...)
 	va_list al;
 
 	va_start(al, fmt);
-	w_vdie(fmt, al);
+	w_diev(fmt, al);
 	va_end(al);
 }
 
 
 void
-w_vdie(const char *fmt, va_list al)
+w_diev(const char *fmt, va_list al)
 {
     w_io_unix_t err;
     w_io_unix_init (&err, STDERR_FILENO);
