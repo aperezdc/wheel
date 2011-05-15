@@ -955,6 +955,16 @@ W_EXPORT void w_buf_append_buf (w_buf_t       *buf,
                                 const w_buf_t *src);
 
 /*!
+ * Appends formatted text into a buffer. Available formatting options are
+ * the same as for \ref w_io_format.
+ * \param buf A \ref w_buf_t buffer.
+ * \param fmt Format string.
+ */
+W_EXPORT void w_buf_format (w_buf_t    *buf,
+                            const char *fmt,
+                            ...);
+
+/*!
  * Frees the contents of a buffer.
  * \param buf A \ref w_buf_t buffer
  */

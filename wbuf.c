@@ -136,3 +136,20 @@ w_buf_free (w_buf_t *buf)
     _buf_xsetlen (buf, 0);
 }
 
+
+void
+w_buf_format (w_buf_t *buf, const char *fmt, ...)
+{
+    w_io_buf_t io;
+    va_list al;
+
+    w_assert (buf);
+    w_assert (fmt);
+
+    w_io_buf_init (&io, buf);
+
+    va_start (al, fmt);
+    w_io_formatv ((w_io_t*) &io, fmt, al);
+    va_end (al);
+}
+
