@@ -288,9 +288,9 @@ w_io_socket_serve (w_io_socket_t *io,
     wbool ret;
     int fd;
 
-    w_assert (handler == W_IO_SOCKET_SINGLE ||
-              handler == W_IO_SOCKET_THREAD ||
-              handler == W_IO_SOCKET_FORK);
+    w_assert (mode == W_IO_SOCKET_SINGLE ||
+              mode == W_IO_SOCKET_THREAD ||
+              mode == W_IO_SOCKET_FORK);
     w_assert (handler);
     w_assert (io);
 
