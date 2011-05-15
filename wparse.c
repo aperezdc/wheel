@@ -1,6 +1,5 @@
-/*!
- * \file wparse.c
- * \brief Support functions for building simple parsers.
+/*
+ * Support functions for building simple parsers.
  *
  * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
  *

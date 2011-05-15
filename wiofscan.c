@@ -21,6 +21,8 @@ w_io_fscan_double (w_io_t *io, double *result)
      * input, bailing out as soon as possible, and once we have a buffer
      * with the needed data, pass it to strtod() -- thus letting the libc
      * handle the hard part.
+     *
+     * TODO Have our own strtod/atod routines.
      */
     wbool got_exp = W_NO;
     wbool got_dot = W_NO;

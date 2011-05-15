@@ -199,8 +199,9 @@ w_io_socket_serve_thread_run (void *udata)
      *
      * XXX It is a bit tricky that the deallocation of this is in a thread
      * different than the thread that created the object. This may be
-     * revisited to make deallocations happen if problems arise. Let's keep
-     * things simple for the moment, sacrifice a goat and pray...
+     * revisited to make deallocations happen in the origin thread if
+     * problems arise. Let's keep things simple for the moment, sacrifice
+     * a goat and pray...
      */
     w_obj_unref (st->io);
 

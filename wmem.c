@@ -21,7 +21,7 @@ w_malloc(size_t sz)
               (unsigned long) sz);
     }
 
-    // FIXME This should be removed
+    /* FIXME This should be removed */
     memset(p, 0x00, sz);
     return p;
 }

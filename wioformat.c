@@ -75,6 +75,9 @@ w_io_format_ulong_oct (w_io_t *io, unsigned long value)
 ssize_t
 w_io_format_double (w_io_t *io, double value)
 {
+    /*
+     * FIXME Avoid head allocation of the temporary string.
+     */
     char *str = w_strfmt ("%g", value);
     ssize_t ret;
 
