@@ -51,10 +51,10 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
 }
 
 
-w_io_t*
-w_io_buf_open (w_buf_t *buf)
+void
+w_io_buf_init (w_io_buf_t *io, w_buf_t *buf)
 {
-    w_io_buf_t *io = w_obj_new (w_io_buf_t);
+    w_assert (io);
 
     w_io_init ((w_io_t*) io);
 
@@ -70,8 +70,8 @@ w_io_buf_open (w_buf_t *buf)
     }
     else {
         /*
-         * FIXME This has knowledge of w_buf_t internals! It assumes that
-         *       setting everything to zero does the right thing.
+         * XXX This has knowledge of w_buf_t internals! It assumes that
+         *     setting everything to zero does the right thing.
          */
         memset (&io->buf, 0x00, sizeof (w_buf_t));
         io->own = W_YES;
@@ -81,7 +81,14 @@ w_io_buf_open (w_buf_t *buf)
     io->parent.write = w_io_buf_write;
     io->parent.read  = w_io_buf_read;
     io->pos = 0;
+}
 
+
+w_io_t*
+w_io_buf_open (w_buf_t *buf)
+{
+    w_io_buf_t *io = w_obj_new (w_io_buf_t);
+    w_io_buf_init (io, buf);
     return (w_io_t*) io;
 }
 

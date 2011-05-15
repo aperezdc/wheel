@@ -1339,6 +1339,14 @@ W_OBJ (w_io_buf_t)
 W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
 
 /*!
+ * Initialize an I/O object in the stack to be used with a buffer.
+ * This function is not meant to be used directly, but is provided as
+ * a convenience for other code extending \ref w_io_buf_t, or wanting to
+ * quickly allocate a \ref w_io_buf_t in the stack.
+ */
+W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf);
+
+/*!
  * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.
  */
 #define W_IO_BUF_BUF(_p) \
