@@ -1065,6 +1065,8 @@ W_EXPORT ssize_t w_io_read (w_io_t *io,
  *  - \b B : <tt>w_buf_t*</tt>, a buffer.
  *  - \b S : <tt>size_t</tt> and <tt>const char*</tt>, prints a given
  *    amount of characters from a string.
+ *  - \b e : Last value of <tt>errno</tt>, as an integer.
+ *  - \b E : Last value of <tt>errno</tt>, as a string.
  *
  * \param io  An input/output descriptor.
  * \param fmt Format string.

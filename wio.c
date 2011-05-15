@@ -138,6 +138,7 @@ w_io_format (w_io_t *io, const char *fmt, ...)
 ssize_t
 w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 {
+    int last_errno = errno;
     size_t len_aux;
     union {
         int           vint;
@@ -203,6 +204,13 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
                 len_aux  = va_arg (args, size_t);
                 v.vcharp = va_arg (args, const char*);
                 w_io_write (io, v.vcharp, len_aux);
+                break;
+            case 'e':
+                w_io_format_long (io, last_errno);
+                break;
+            case 'E':
+                v.vcharp = strerror (last_errno);
+                w_io_write (io, v.vcharp, strlen (v.vcharp));
                 break;
             default:
                 w_io_putchar (io, *fmt);
