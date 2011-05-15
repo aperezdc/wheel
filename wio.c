@@ -145,6 +145,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
         long          vlong;
         unsigned long vulong;
         const char   *vcharp;
+        w_buf_t      *vbufp;
         intptr_t      vpointer;
     } v;
 
@@ -193,6 +194,10 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
             case 's':
                 v.vcharp = va_arg (args, const char*);
                 w_io_write (io, v.vcharp, strlen (v.vcharp));
+                break;
+            case 'B':
+                v.vbufp = va_arg (args, w_buf_t*);
+                w_io_write (io, w_buf_str (v.vbufp), w_buf_length (v.vbufp));
                 break;
             case 'S':
                 len_aux  = va_arg (args, size_t);
