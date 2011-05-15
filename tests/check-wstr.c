@@ -29,7 +29,7 @@ END_TEST
 
 START_TEST (test_wstr_dup)
 {
-    fail_if (strcmp ("foo", w_strdup ("foo")),
+    fail_if (strcmp ("foo", w_str_dup ("foo")),
              "copied string does not match");
 }
 END_TEST
@@ -37,7 +37,7 @@ END_TEST
 
 START_TEST (test_wstr_ndup)
 {
-    fail_if (strcmp ("foo", w_strndup ("foobar", 3)),
+    fail_if (strcmp ("foo", w_str_dupl ("foobar", 3)),
              "copied string does not match");
 }
 END_TEST
@@ -45,9 +45,9 @@ END_TEST
 
 START_TEST (test_wstr_dup_misc)
 {
-    fail_if (strcmp ("", w_strdup ("")),
+    fail_if (strcmp ("", w_str_dup ("")),
              "copied string is not empty");
-    fail_if (strcmp ("", w_strndup ("foofoo", 0)),
+    fail_if (strcmp ("", w_str_dupl ("foofoo", 0)),
              "copied string is not empty");
 }
 END_TEST
@@ -55,9 +55,9 @@ END_TEST
 
 START_TEST (test_wstr_dup_null)
 {
-    fail_if (w_strdup (NULL) != NULL,
+    fail_if (w_str_dup (NULL) != NULL,
              "duplicating NULL resulted in non-NULL");
-    fail_if (w_strndup(NULL, 5) != NULL,
+    fail_if (w_str_dupl (NULL, 5) != NULL,
              "duplicating NULL resulted in non-NULL");
 }
 END_TEST

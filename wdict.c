@@ -60,7 +60,7 @@ w_dict_node_new (const char *key, void *val)
 	w_assert (key != NULL);
 
 	node = w_new (w_dict_node_t);
-	node->key = w_strdup(key);
+	node->key = w_str_dup (key);
 	node->val = val;
 	return node;
 }
@@ -74,7 +74,7 @@ w_dict_node_newn (const char *key, size_t len, void *val)
 	w_assert (len > 0);
 
 	node = w_new(w_dict_node_t);
-	node->key = w_strndup(key, len);
+	node->key = w_str_dupl (key, len);
 	node->val = val;
 	return node;
 }

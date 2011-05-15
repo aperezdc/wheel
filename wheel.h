@@ -380,7 +380,7 @@ W_EXPORT wbool w_str_double(const char *str, double *val);
 
 
 static inline char*
-w_strndup(const char *str, size_t len)
+w_str_dupl (const char *str, size_t len)
 {
     char *r;
     if (str == NULL)
@@ -392,11 +392,11 @@ w_strndup(const char *str, size_t len)
 
 
 static inline char*
-w_strdup(const char *str)
+w_str_dup (const char *str)
 {
 	if (str == NULL)
 	    return NULL;
-	return w_strndup(str, strlen(str));
+	return w_str_dupl (str, strlen (str));
 }
 
 

@@ -150,7 +150,7 @@ w_cfg_setv (w_cfg_t *cf, va_list args)
 				node->number = va_arg (args, double);
 				break;
 			case W_CFG_STRING:
-				node->string = w_strdup (va_arg (args, const char*));
+				node->string = w_str_dup (va_arg (args, const char*));
 				break;
 			case W_CFG_NODE:
 				if (node->node) {

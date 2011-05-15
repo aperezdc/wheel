@@ -100,7 +100,7 @@ W_OPT_STRING (const w_opt_context_t *context)
     w_assert (context->option->extra != NULL);
 
     for (i = 0; i < context->option->narg; i++)
-        ((char**) context->option->extra)[i] = w_strdup (context->argument[i]);
+        ((char**) context->option->extra)[i] = w_str_dup (context->argument[i]);
 
     return W_OPT_OK;
 }
