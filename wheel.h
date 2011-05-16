@@ -1006,6 +1006,7 @@ W_OBJ_DEF (w_io_t)
     wbool   (*close) (w_io_t *io);
     ssize_t (*write) (w_io_t *io, const void *buf, size_t len);
     ssize_t (*read ) (w_io_t *io, void       *buf, size_t len);
+    wbool   (*flush) (w_io_t *io);
 };
 
 
@@ -1146,6 +1147,13 @@ W_EXPORT wbool w_io_putchar (w_io_t *io,
  */
 W_EXPORT void w_io_putback (w_io_t *io,
                             char    ch);
+
+/*!
+ * Flushes pending buffered data.
+ * \param io An input/output descriptor.
+ * \return   Whether there was some error.
+ */
+W_EXPORT wbool w_io_flush (w_io_t *io);
 
 /*!
  * Input/output object on Unix file descriptors.

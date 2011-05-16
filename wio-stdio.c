@@ -53,6 +53,13 @@ w_io_stdio_read (w_io_t *io, void *buf, size_t len)
 }
 
 
+static wbool
+w_io_stdio_flush (w_io_t *io)
+{
+    return fflush (((w_io_stdio_t*) io)->fp) != 0;
+}
+
+
 void
 w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
 {
@@ -64,6 +71,7 @@ w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
     io->parent.close = w_io_stdio_close;
     io->parent.write = w_io_stdio_write;
     io->parent.read  = w_io_stdio_read;
+    io->parent.flush = w_io_stdio_flush;
     io->fp = fp;
 }
 

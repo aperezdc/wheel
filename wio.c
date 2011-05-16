@@ -119,6 +119,16 @@ w_io_putback (w_io_t *io, char ch)
 }
 
 
+wbool
+w_io_flush (w_io_t *io)
+{
+    w_assert (io);
+    return (io->flush)
+        ? (*io->flush) (io)
+        : W_NO;
+}
+
+
 ssize_t
 w_io_format (w_io_t *io, const char *fmt, ...)
 {
