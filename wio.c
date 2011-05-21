@@ -48,8 +48,11 @@ ssize_t
 w_io_read (w_io_t *io, void *buf, size_t len)
 {
     w_assert (io);
+
+    if (w_unlikely (len == 0))
+        return 0;
+
     w_assert (buf);
-    w_assert (len > 0);
 
     /* Handle the putback character... makes things a bit messier */
     if (w_unlikely (io->backch != W_IO_EOF)) {
@@ -72,8 +75,11 @@ ssize_t
 w_io_write (w_io_t *io, const void *buf, size_t len)
 {
     w_assert (io);
+
+    if (w_unlikely (len == 0))
+        return 0;
+
     w_assert (buf);
-    w_assert (len > 0);
 
     return (io->write)
         ? (*io->write) (io, buf, len)
