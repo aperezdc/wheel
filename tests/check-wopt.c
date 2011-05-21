@@ -18,11 +18,11 @@ START_TEST (test_wopt_set_bool)
     };
     char *argv[] = { "prog", "-b" };
 
-    w_opt_parse (options, NULL, NULL, w_lengthof (argv), argv);
+    w_opt_parse (options, NULL, NULL, NULL, w_lengthof (argv), argv);
     fail_unless (value, "boolean value was not set");
 
     /* Parsing for second time should re-set the thing. */
-    w_opt_parse (options, NULL, NULL, w_lengthof (argv), argv);
+    w_opt_parse (options, NULL, NULL, NULL, w_lengthof (argv), argv);
     fail_unless (value, "boolean value was not set");
 }
 END_TEST
@@ -39,13 +39,13 @@ START_TEST (test_wopt_set_int)
     static char *argv2[] = { "prog", "-i", "-42" };
     static char *argv3[] = { "prog", "-i", "0x42" };
 
-    w_opt_parse (options, NULL, NULL, w_lengthof (argv1), argv1);
+    w_opt_parse (options, NULL, NULL, NULL, w_lengthof (argv1), argv1);
     fail_unless (value == 42, "expected 42, got %i", value);
 
-    w_opt_parse (options, NULL, NULL, w_lengthof (argv2), argv2);
+    w_opt_parse (options, NULL, NULL, NULL, w_lengthof (argv2), argv2);
     fail_unless (value == -42, "expected -42, got %i", value);
 
-    w_opt_parse (options, NULL, NULL, w_lengthof (argv3), argv3);
+    w_opt_parse (options, NULL, NULL, NULL, w_lengthof (argv3), argv3);
     fail_unless (value == 0x42, "expected 0x42, got %#x", value);
 }
 END_TEST
