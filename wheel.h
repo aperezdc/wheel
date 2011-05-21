@@ -203,11 +203,16 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
 
 #define W_OBJ_DECL(_c) \
     typedef struct _c ## __class _c
+
 #define W_OBJ_DEF(_c) \
     struct _c ## __class
+
 #define W_OBJ(_c) \
     W_OBJ_DECL (_c); \
     W_OBJ_DEF  (_c)
+
+#define W_OBJ_STATIC(_dtor) \
+    { (size_t) -1, (void (*)(void*)) (_dtor) }
 
 
 W_OBJ (w_obj_t)
