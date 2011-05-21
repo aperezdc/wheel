@@ -87,3 +87,53 @@ w_io_unix_init (w_io_unix_t *io, int fd)
     io->fd = fd;
 }
 
+
+static w_io_unix_t stdout_data =
+{
+    /* w_io_t */
+    {
+        W_OBJ_STATIC (w_io_unix_close),
+
+        W_IO_EOF,        /* backch */
+        w_io_unix_close, /* close  */
+        w_io_unix_write, /* write  */
+        w_io_unix_read,  /* read   */
+        w_io_unix_flush, /* flush  */
+    },
+    STDOUT_FILENO,       /* fd     */
+};
+
+static w_io_unix_t stderr_data =
+{
+    /* w_io_t */
+    {
+        W_OBJ_STATIC (w_io_unix_close),
+
+        W_IO_EOF,        /* backch */
+        w_io_unix_close, /* close  */
+        w_io_unix_write, /* write  */
+        w_io_unix_read,  /* read   */
+        w_io_unix_flush, /* flush  */
+    },
+    STDERR_FILENO,       /* fd     */
+};
+
+static w_io_unix_t stdin_data =
+{
+    /* w_io_t */
+    {
+        W_OBJ_STATIC (w_io_unix_close),
+
+        W_IO_EOF,        /* backch */
+        w_io_unix_close, /* close  */
+        w_io_unix_write, /* write  */
+        w_io_unix_read,  /* read   */
+        w_io_unix_flush, /* flush  */
+    },
+    STDIN_FILENO,        /* fd     */
+};
+
+/* Public standard I/O objects */
+w_io_t *w_stdout = (w_io_t*) &stdout_data;
+w_io_t *w_stderr = (w_io_t*) &stderr_data;
+w_io_t *w_stdin  = (w_io_t*) &stdin_data;

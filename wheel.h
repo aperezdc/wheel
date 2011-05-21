@@ -671,6 +671,23 @@ W_EXPORT wbool w_opt_parse_io (const w_opt_t *opt,
                                w_io_t        *input,
                                char         **msg);
 
+/*!
+ * Standard error output stream. By default, this points to a \ref
+ * w_io_unix_t output stream. It can be reassigned.
+ */
+W_EXPORT w_io_t *w_stderr;
+
+/*!
+ * Standard output stream. By default, this points to a \ref w_io_unix_t
+ * output stream. It can be reassigned.
+ */
+W_EXPORT w_io_t *w_stdout;
+
+/*!
+ * Standard input stream. By default, this points to a \ref w_io_unix_t
+ * input stream. It can be reassigned.
+ */
+W_EXPORT w_io_t *w_stdin;
 
 /*\}*/
 
