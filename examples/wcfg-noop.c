@@ -1,6 +1,6 @@
 /*
  * wcfg-noop.c
- * Copyright (C) 2010 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
