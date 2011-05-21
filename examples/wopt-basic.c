@@ -35,7 +35,7 @@ file_arg_cb (void *filename, void *ctx)
 int
 main (int argc, char **argv)
 {
-    w_opt_parse (option_spec, file_arg_cb, NULL, argc, argv);
+    w_opt_parse (option_spec, file_arg_cb, NULL, "<filename>", argc, argv);
 
     return EXIT_SUCCESS;
 }

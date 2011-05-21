@@ -70,10 +70,7 @@ static const w_opt_t option_spec[] = {
 int
 main (int argc, char **argv)
 {
-    w_opt_parse (option_spec,
-                 NULL, NULL,
-                 argc, argv);
-
+    w_opt_parse (option_spec, NULL, NULL, NULL, argc, argv);
     printf ("Time value, in seconds: %lu\n", seconds);
 
     return EXIT_SUCCESS;

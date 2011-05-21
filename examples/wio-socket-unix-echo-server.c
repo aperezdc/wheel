@@ -55,7 +55,7 @@ main (int argc, char **argv)
 {
     w_io_t *io;
 
-    w_opt_parse (options, set_socketpath, NULL, argc, argv);
+    w_opt_parse (options, set_socketpath, NULL, "[socket-path]", argc, argv);
 
     if (!socketpath) {
         socketpath = "/tmp/w-echo";

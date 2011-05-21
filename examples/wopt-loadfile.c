@@ -36,7 +36,7 @@ main (int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    w_opt_parse (option_spec, NULL, NULL, argc, argv);
+    w_opt_parse (option_spec, NULL, NULL, NULL, argc, argv);
 
     if (verbose) {
         printf ("sleeping %i seconds\n", sleeptime);

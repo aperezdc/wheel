@@ -36,7 +36,7 @@ main (int argc, char **argv)
     char buf[BUFFER_SIZE];
     ssize_t ret;
 
-    w_opt_parse (options, NULL, NULL, argc, argv);
+    w_opt_parse (options, NULL, NULL, NULL, argc, argv);
 
     if (!(ios = w_io_socket_open (W_IO_SOCKET_TCP4, serverhost, serverport))) {
         w_die ("Problem creating socket: $s\n", strerror (errno));

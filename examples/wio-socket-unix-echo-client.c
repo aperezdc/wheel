@@ -33,7 +33,7 @@ main (int argc, char **argv)
     char buf[BUFFER_SIZE];
     ssize_t ret;
 
-    w_opt_parse (options, set_socketpath, NULL, argc, argv);
+    w_opt_parse (options, set_socketpath, NULL, "[socket-path]", argc, argv);
 
     if (!socketpath) {
         socketpath = "/tmp/w-echo";
