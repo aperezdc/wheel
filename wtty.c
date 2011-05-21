@@ -24,12 +24,8 @@
 
 
 #ifdef SIGWINCH
-/*
- * These are (-1) when we're not tracking terminal size with the signal
- * handler for SIGWINCH.
- */
-static int s_terminal_rows = -1;
-static int s_terminal_cols = -1;
+static w_tty_notify_fun_t s_terminal_resize_cb  = NULL;
+static void              *s_terminal_resize_ctx = NULL;
 #endif /* SIGWINCH */
 
 
@@ -89,6 +85,21 @@ w_tty_size(unsigned *cols, unsigned *rows)
 }
 
 
+#ifdef SIGWINCH
+static void
+update_tty_size (int signum)
+{
+    unsigned cols, rows;
+    w_assert (signum == SIGWINCH);
+
+    if (s_terminal_resize_cb) {
+        w_tty_size (&cols, &rows);
+        (*s_terminal_resize_cb) (cols, rows, s_terminal_resize_ctx);
+    }
+}
+#endif /* SIGWINCH */
+
+
 /* TODO Finish implementation of this function. */
 wbool
 w_tty_size_notify(w_tty_notify_fun_t function, void *context)
@@ -96,12 +107,19 @@ w_tty_size_notify(w_tty_notify_fun_t function, void *context)
 	w_unused(function);
 	w_unused(context);
 #ifdef SIGWINCH
-	w_unused(s_terminal_cols);
-	w_unused(s_terminal_rows);
-	return W_YES;
-#else
+	struct sigaction sa;
+
+    s_terminal_resize_cb  = function;
+    s_terminal_resize_ctx = context;
+
+    sa.sa_handler = (function == NULL) ? SIG_DFL : update_tty_size;
+    sa.sa_flags  |= SA_RESTART;
+    sigfillset (&sa.sa_mask);
+
+    return sigaction (SIGWINCH, &sa, NULL) < 0;
+#else /* !SIGWINCH */
 	return W_NO;
-#endif
+#endif /* SIGWINCH */
 }
 
 
