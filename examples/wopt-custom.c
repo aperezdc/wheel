@@ -71,7 +71,7 @@ int
 main (int argc, char **argv)
 {
     w_opt_parse (option_spec, NULL, NULL, NULL, argc, argv);
-    printf ("Time value, in seconds: %lu\n", seconds);
+    w_io_format (w_stdout, "Time value, in seconds: $L\n", seconds);
 
     return EXIT_SUCCESS;
 }

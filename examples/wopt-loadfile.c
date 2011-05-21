@@ -6,7 +6,6 @@
  */
 
 #include "wheel.h"
-#include <stdio.h>
 #include <unistd.h>
 
 
@@ -27,11 +26,10 @@ int
 main (int argc, char **argv)
 {
     char *errmsg = NULL;
-    w_io_t *io_in = w_io_stdio_open (stdin);
 
-    w_opt_parse_io (option_spec, io_in, &errmsg);
+    w_opt_parse_io (option_spec, w_stdin, &errmsg);
     if (errmsg != NULL) {
-        fprintf (stderr, "stdin:%s\n", errmsg);
+        w_io_format (w_stderr, "<stdin>:$s\n", errmsg);
         w_free (errmsg);
         return EXIT_FAILURE;
     }

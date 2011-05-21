@@ -7,7 +7,6 @@
 
 #include "wheel.h"
 #include <unistd.h>
-#include <errno.h>
 
 
 static char *socketpath = NULL;
@@ -29,7 +28,7 @@ set_socketpath (void *path, void *ctx)
 int
 main (int argc, char **argv)
 {
-    w_io_t *ioo, *ioi, *ios;
+    w_io_t *ios;
     char buf[BUFFER_SIZE];
     ssize_t ret;
 
@@ -40,25 +39,20 @@ main (int argc, char **argv)
     }
 
     if (!(ios = w_io_socket_open (W_IO_SOCKET_UNIX, socketpath))) {
-        w_die ("Problem creating server socket: $s\n", strerror (errno));
+        w_die ("Problem creating server socket: $E\n");
     }
 
     w_io_socket_connect ((w_io_socket_t*) ios);
 
-    ioi = w_io_unix_open (STDIN_FILENO);
-    ioo = w_io_unix_open (STDOUT_FILENO);
-
-    while ((ret = w_io_read (ioi, buf, BUFFER_SIZE)) > 0) {
+    while ((ret = w_io_read (w_stdin, buf, BUFFER_SIZE)) > 0) {
         w_io_write (ios, buf, ret);
     }
     w_io_socket_send_eof ((w_io_socket_t*) ios);
 
     while ((ret = w_io_read (ios, buf, BUFFER_SIZE)) > 0) {
-        w_io_write (ioo, buf, ret);
+        w_io_write (w_stdout, buf, ret);
     }
 
-    w_obj_unref (ioi);
-    w_obj_unref (ioo);
     w_obj_unref (ios);
 
     return EXIT_SUCCESS;

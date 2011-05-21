@@ -32,7 +32,7 @@ main (int argc, char **argv)
     w_unused (argv);
 
     obj = my_obj_new (10);
-    printf ("%i\n", obj->val);
+    w_io_format (w_stdout, "$i\n", obj->val);
     w_obj_unref (obj);
 
     return EXIT_SUCCESS;

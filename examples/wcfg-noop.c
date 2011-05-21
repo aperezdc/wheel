@@ -23,8 +23,7 @@ main (int argc, char **argv)
     }
 
     w_free (err);
-
-    w_cfg_dump (cfg, w_io_stdio_open (stdout));
+    w_cfg_dump (cfg, w_stdout);
 
     return EXIT_SUCCESS;
 }

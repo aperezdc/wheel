@@ -27,7 +27,7 @@ file_arg_cb (void *filename, void *ctx)
     w_unused (ctx);
 
     if (verbose) {
-        printf ("File name: %s\n", (const char*) filename);
+        w_io_format (w_stdout, "File name: $s\n", filename);
     }
 }
 

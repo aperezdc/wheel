@@ -25,10 +25,7 @@ int main (int argc, char **argv)
     w_unused (argc);
     w_unused (argv);
 
-    w_io_unix_t out;
-    w_io_unix_init (&out, STDOUT_FILENO);
-
-    w_opt_help (options, (w_io_t*) &out, argv[0], NULL);
+    w_opt_help (options, w_stdout, argv[0], NULL);
 
     return EXIT_SUCCESS;
 }

@@ -6,7 +6,6 @@
  */
 
 #include "wheel.h"
-#include <errno.h>
 #include <unistd.h>
 
 
@@ -21,7 +20,7 @@ serve_request (w_io_socket_t *io)
     char buf[BUFFER_SIZE];
     ssize_t ret;
 
-    printf ("BEGIN REQUEST\n");
+    w_io_format (w_stdout, "BEGIN REQUEST\n");
 
     while ((ret = w_io_read ((w_io_t*) io, buf, BUFFER_SIZE)) > 0) {
         ret = write (STDOUT_FILENO, buf, ret);
@@ -31,10 +30,10 @@ serve_request (w_io_socket_t *io)
     w_io_socket_send_eof (io);
 
     if (ret < 0) {
-        fprintf (stderr, "Error: %s\n", strerror (errno));
+        w_io_format (w_stderr, "Error: $E\n");
     }
 
-    printf ("END REQUEST\n");
+    w_io_format (w_stdout, "END REQUEST\n");
 
     return W_YES;
 }
@@ -62,14 +61,14 @@ main (int argc, char **argv)
     w_opt_parse (options, NULL, NULL, NULL, argc, argv);
 
     if (!(io = w_io_socket_open (W_IO_SOCKET_TCP4, serverhost, serverport))) {
-        w_die ("Problem creating socket: $s\n", strerror (errno));
+        w_die ("Problem creating socket: $E\n");
     }
 
     if (!w_io_socket_serve ((w_io_socket_t*) io,
                             W_IO_SOCKET_SINGLE,
                             serve_request))
     {
-        w_die ("Could not serve: $s\n", strerror (errno));
+        w_die ("Could not serve: $E\n");
     }
 
     w_obj_unref (io);
