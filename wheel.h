@@ -610,25 +610,44 @@ W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*);
 
 /*!
  * Generates a long help message for a set of options.
+ *
  * \param opt Array of options.
  * \param out Stream where write the message.
  * \param progname Program name (usually <tt>argv[0]</tt>).
+ * \param syntax Additional command line syntax information. May be \c NULL.
+ *
+ * The generated output looks like this:
+ * <pre>
+ * Usage: <i>progname</i> [options] <i>syntax</i>
+ * Command line options:
+ *
+ * <i>--option, -x</i> <ARG>
+ *    <i>Option help text.</i>
+ * </pre>
  */
-W_EXPORT void w_opt_help(const w_opt_t opt[], w_io_t *out, const char *progname);
+W_EXPORT void w_opt_help(const w_opt_t opt[],
+                         w_io_t       *out,
+                         const char   *progname,
+                         const char   *syntax);
 
 /*!
  * Parses an array of command line arguments.
+ *
  * \param options  Array of options.
  * \param file_cb  Callback invoked for each non-option argument found (most
  *                 likely files, thus the name).
  * \param userdata User data, this is passed to the \c file_cb callback.
+ * \param syntax   Description on how to pass extra command line argument.
+ *                 This is passed directly to \ref w_opt_help.
  * \param argc     Number of command line arguments.
  * \param argv     Array of command line arguments.
- * \return Number of consmed arguments.
+ *
+ * \return         Number of consumed arguments.
  */
 W_EXPORT unsigned w_opt_parse(const w_opt_t  *options,
                               w_action_fun_t file_cb,
                               void          *userdata,
+                              const char    *syntax,
                               int            argc,
                               char         **argv);
 

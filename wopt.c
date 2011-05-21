@@ -172,13 +172,17 @@ _print_lspaced (w_io_t *f, const char *s, int l)
 
 
 void
-w_opt_help (const w_opt_t *opt, w_io_t *out, const char *progname)
+w_opt_help (const w_opt_t *opt,
+            w_io_t        *out,
+            const char    *progname,
+            const char    *syntax)
 {
     w_assert (opt != NULL);
     w_assert (out != NULL);
 
-    w_io_format (out, "Usage: $s [options] [...]\n"
-                      "Command line options:\n\n", progname);
+    w_io_format (out, "Usage: $s [options] $s\n"
+                      "Command line options:\n\n", progname,
+                      (syntax != NULL) ? syntax : "");
 
     for (; opt->string != NULL; opt++) {
         if (OPT_LETTER (opt->letter) && opt->string) {
@@ -275,22 +279,11 @@ _opt_lookup_long (const w_opt_t *opt, const char *str)
 }
 
 
-/*!
- * Parses command line options.
- *
- * \param options An array of %w_opt_t structures which specify what options
- *      are acceptable.
- * \param file_cb Callback function called when a file argument is found.
- * \param userdata Arbitrary user-provided data which is passed back to the
- *      file argument callback as part of its %w_opt_context_t argument.
- * \param argc Number of command line arguments.
- * \param argv Actual command line arguments.
- * \return Number of options consumed.
- */
 unsigned
 w_opt_parse (const w_opt_t *options,
              w_action_fun_t file_cb,
              void          *userdata,
+             const char    *syntax,
              int            argc,
              char         **argv)
 {
@@ -322,7 +315,7 @@ w_opt_parse (const w_opt_t *options,
             if (OPT_LETTER (context.option->letter) == 'h') {
                 w_io_unix_t out;
                 w_io_unix_init (&out, STDOUT_FILENO);
-                w_opt_help (options, (w_io_t*) &out, _program_name (argv[0]));
+                w_opt_help (options, (w_io_t*) &out, _program_name (argv[0]), syntax);
                 status = W_OPT_EXIT_OK;
                 break;
 			}
