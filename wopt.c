@@ -225,13 +225,10 @@ _opt_lookup_fuzz (const w_opt_t *opt, const char *str, const char *prg)
 {
     size_t len;
     const w_opt_t *ret;
-    w_io_unix_t err;
 
     w_assert (opt != NULL);
     w_assert (str != NULL);
     w_assert (prg != NULL);
-
-    w_io_unix_init (&err, STDERR_FILENO);
 
     len = strlen (str);
     for (; opt->string != NULL; opt++)
@@ -253,15 +250,15 @@ _opt_lookup_fuzz (const w_opt_t *opt, const char *str, const char *prg)
         return ret;
 
     /* ...otherwise, we are in trouble. */
-    w_io_format ((w_io_t*) &err,
+    w_io_format (w_stderr,
                  "$s: option '$s' is ambiguous, possibilities:\n",
                  prg, str);
     for (; ret->string != NULL; ret++) {
         if (!strncmp (ret->string, str, len)) {
-            w_io_format ((w_io_t*) &err, "    --$s\n", ret->string);
+            w_io_format (w_stderr, "    --$s\n", ret->string);
         }
     }
-    w_io_format ((w_io_t*) &err, "Hint: try '$s --help'\n", prg);
+    w_io_format (w_stderr, "Hint: try '$s --help'\n", prg);
 
     exit (EXIT_FAILURE);
     return NULL; /* Never reached -- but keeps compiler happy =) */
@@ -287,7 +284,6 @@ w_opt_parse (const w_opt_t *options,
              int            argc,
              char         **argv)
 {
-    w_io_unix_t err;
     w_opt_status_t status = W_OPT_OK;
     w_opt_context_t context = { argc, argv, NULL, userdata, NULL };
     wbool files_only = W_NO;
@@ -295,8 +291,6 @@ w_opt_parse (const w_opt_t *options,
 
     w_assert (options != NULL);
     w_assert (argv != NULL);
-
-    w_io_unix_init (&err, STDERR_FILENO);
 
     while (i < (unsigned) argc) {
         if (!files_only && (argv[i][0] == '-')) {
@@ -313,9 +307,7 @@ w_opt_parse (const w_opt_t *options,
                 break;
             }
             if (OPT_LETTER (context.option->letter) == 'h') {
-                w_io_unix_t out;
-                w_io_unix_init (&out, STDOUT_FILENO);
-                w_opt_help (options, (w_io_t*) &out, _program_name (argv[0]), syntax);
+                w_opt_help (options, w_stdout, _program_name (argv[0]), syntax);
                 status = W_OPT_EXIT_OK;
                 break;
 			}
@@ -360,13 +352,13 @@ w_opt_parse (const w_opt_t *options,
         case W_OPT_BAD_ARG: /* Handle errors. */
         case W_OPT_MISSING_ARG:
             if (context.option == NULL) {
-                w_io_format ((w_io_t*) &err,
+                w_io_format (w_stderr,
                              "$s: unknown option '$s'\nHint: try '$s --help'\n",
                              _program_name (argv[0]), argv[i],
                              _program_name (argv[0]));
             }
             else {
-                w_io_format ((w_io_t*) &err,
+                w_io_format (w_stderr,
                              "$s: $s --%$\nTry \"$s --help\" for more information.\n",
                              _program_name (argv[0]), (status == W_OPT_BAD_ARG)
                                                        ? "bad argument passed to"
