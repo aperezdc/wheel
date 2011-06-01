@@ -10,6 +10,11 @@
 #include <errno.h>
 
 
+#ifndef W_IO_READ_UNTIL_BYTES
+#define W_IO_READ_UNTIL_BYTES 4096
+#endif /* !W_IO_READ_UNTIL_BYTES */
+
+
 static void
 w_io_cleanup (void *obj)
 {
@@ -294,5 +299,58 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
     }
 
     return retval;
+}
+
+
+ssize_t
+w_io_read_until (w_io_t  *io,
+                 w_buf_t *buffer,
+                 w_buf_t *overflow,
+                 int      stopchar,
+                 unsigned readbytes)
+{
+    w_assert (io);
+    w_assert (buffer);
+    w_assert (overflow);
+
+    if (!readbytes)
+        readbytes = W_IO_READ_UNTIL_BYTES;
+
+    for (;;) {
+        ssize_t c;
+        char *pos;
+
+        pos = memchr (overflow->buf, stopchar, w_buf_length (overflow));
+        if (pos != NULL) {
+            /*
+             * Stop character is in overflow buffer: remove it from the
+             * overflow buffer, copy data to result buffer.
+             */
+            unsigned len = pos - overflow->buf + 1;
+            w_buf_append_mem (buffer, overflow->buf, len);
+            overflow->len -= len;
+            memmove (overflow->buf, overflow->buf + len, overflow->len);
+            w_buf_length_set (buffer, buffer->len - 1);
+            return w_buf_length (buffer);
+        }
+
+        if (overflow->bsz < (overflow->len + readbytes)) {
+            /*
+             * XXX Calling w_buf_length_set() will *both* resize the buffer
+             * data area and set overflow->bsz *and* overflow->len. But we
+             * do not want the later to be changed we save and restore it.
+             */
+            size_t oldlen = overflow->len;
+            w_buf_length_set (overflow, overflow->len + readbytes);
+            overflow->len = oldlen;
+        }
+
+        c = w_io_read (io, overflow->buf + overflow->len, readbytes);
+
+        if (c > 0)
+            overflow->len += c;
+        else
+            return c;
+    }
 }
 

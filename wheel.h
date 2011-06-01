@@ -1087,6 +1087,30 @@ W_EXPORT ssize_t w_io_read (w_io_t *io,
                             size_t len);
 
 /*!
+ * Reads data, until a given character or end of file is reached.
+ * \param io        An input/output object.
+ * \param data      Buffer where the read data is stored.
+ * \param overflow  Buffer where temporary extra data is stored.
+ * \param stopchar  Character used to determine when to stop reading.
+ * \param readbytes Maximum read chunk size. If zero, a default size
+ *                  is used.
+ * \return Number of bytes read. Negative value on error.
+ */
+W_EXPORT ssize_t w_io_read_until (w_io_t  *io,
+                                  w_buf_t *data,
+                                  w_buf_t *overflow,
+                                  int      stopchar,
+                                  unsigned maxbytes);
+
+/*!
+ * Reads a line from an input stream.
+ * This is a convenience macro that calls \ref w_io_read_until passing \c
+ * '\n' as stop character.
+ */
+#define w_io_read_line(_io, _data, _overflow, _maxbytes) \
+       (w_io_read_until ((_io), (_data), (_overflow), '\n', (_maxbytes)))
+
+/*!
  * Formats text and writes it to an I/O object. Implements naïve (but
  * effective) formatting, providing the most common options of the
  * \c printf() family of functions. Because behavior is different from
