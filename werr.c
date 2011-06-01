@@ -27,12 +27,8 @@ w_die(const char *fmt, ...)
 void
 w_diev(const char *fmt, va_list al)
 {
-    w_io_unix_t err;
-    w_io_unix_init (&err, STDERR_FILENO);
-
-    w_io_formatv ((w_io_t*) &err, fmt, al);
-    fsync (STDERR_FILENO);
-
+    w_io_formatv (w_stderr, fmt, al);
+    fsync (W_IO_UNIX_FD (w_stderr));
     exit(EXIT_FAILURE);
 }
 
@@ -41,14 +37,11 @@ void
 __w_debug(const char *fmt, ...)
 {
     va_list al;
-    w_io_unix_t err;
-
-    w_io_unix_init (&err, STDERR_FILENO);
 
     va_start(al, fmt);
-    w_io_format  ((w_io_t*) &err, "DEBUG: ");
-    w_io_formatv ((w_io_t*) &err, fmt, al);
-    w_io_putchar ((w_io_t*) &err, '\n');
+    w_io_format  (w_stderr, "DEBUG: ");
+    w_io_formatv (w_stderr, fmt, al);
+    w_io_putchar (w_stderr, '\n');
     va_end(al);
 }
 
