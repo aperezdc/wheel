@@ -41,7 +41,7 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
     size_t to_read;
 
     if (io->pos >= io->buf.len) {
-        return 0;
+        return W_IO_EOF;
     }
 
     to_read = w_min (len, io->buf.len - io->pos);

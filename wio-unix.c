@@ -53,6 +53,9 @@ w_io_unix_read (w_io_t *io, void *buf, size_t len)
         ret = read (((w_io_unix_t*) io)->fd, buf, len);
     } while (ret < 0 && errno == EINTR);
 
+    if (ret == 0)
+        ret = W_IO_EOF;
+
     return ret;
 }
 

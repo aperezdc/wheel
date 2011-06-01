@@ -40,7 +40,10 @@ w_io_stdio_read (w_io_t *io, void *buf, size_t len)
     size_t ret;
 
     if ((ret = fread (buf, sizeof (char), len, ((w_io_stdio_t*) io)->fp)) < len) {
-        if (ferror (((w_io_stdio_t*) io)->fp)) {
+        if (ret == 0 && feof (((w_io_stdio_t*) io)->fp)) {
+            return W_IO_EOF;
+        }
+        else if (ferror (((w_io_stdio_t*) io)->fp)) {
             return -1;
         }
         else {
