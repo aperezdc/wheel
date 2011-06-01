@@ -91,6 +91,7 @@ update_tty_size (int signum)
 {
     unsigned cols, rows;
     w_assert (signum == SIGWINCH);
+    w_unused (signum);
 
     if (s_terminal_resize_cb) {
         w_tty_size (&cols, &rows);
