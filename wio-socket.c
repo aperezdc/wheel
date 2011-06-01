@@ -59,7 +59,7 @@ w_io_socket_init_unix (w_io_socket_t *io, const char *path)
 
     un = (struct sockaddr_un*) io->sa;
 
-    w_io_unix_init ((w_io_unix_t*) io, fd);
+    w_io_unix_init_fd ((w_io_unix_t*) io, fd);
 
     strcpy (un->sun_path, path);
     un->sun_family = AF_UNIX;
@@ -103,7 +103,7 @@ w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
         return W_NO;
     }
 
-    w_io_unix_init ((w_io_unix_t*) io, fd);
+    w_io_unix_init_fd ((w_io_unix_t*) io, fd);
 
     io->slen = sizeof (struct sockaddr_in);
     io->kind = W_IO_SOCKET_TCP4;
@@ -332,7 +332,7 @@ w_io_socket_serve (w_io_socket_t *io,
     while ((fd = accept (W_IO_SOCKET_FD(io), &sa, &slen)) != -1) {
         w_io_socket_t *nio = w_obj_new (w_io_socket_t);
 
-        w_io_unix_init ((w_io_unix_t*) nio, fd);
+        w_io_unix_init_fd ((w_io_unix_t*) nio, fd);
         memcpy (io->sa, &sa, slen);
         nio->kind = io->kind;
         nio->slen = slen;

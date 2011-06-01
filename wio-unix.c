@@ -7,6 +7,7 @@
 
 #include "wheel.h"
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 
@@ -64,16 +65,44 @@ w_io_unix_flush (w_io_t *io)
 
 
 w_io_t*
-w_io_unix_open (int fd)
+w_io_unix_open (const char *path,
+                int         mode,
+                unsigned    perm)
+{
+    int fd;
+    w_assert (path);
+
+    return ((fd = open (path, mode, perm)) < 0) ? NULL : w_io_unix_open_fd (fd);
+}
+
+w_io_t*
+w_io_unix_open_fd (int fd)
 {
     w_io_unix_t *io = w_obj_new (w_io_unix_t);
-    w_io_unix_init (io, fd);
+    w_io_unix_init_fd (io, fd);
     return (w_io_t*) io;
 }
 
 
+wbool
+w_io_unix_init (w_io_unix_t *io,
+                const char  *path,
+                int          mode,
+                unsigned     perm)
+{
+    int fd;
+    w_assert (io);
+    w_assert (path);
+
+    if ((fd = open (path, mode, perm)) < 0)
+        return W_NO;
+
+    w_io_unix_init_fd (io, fd);
+    return W_YES;
+}
+
 void
-w_io_unix_init (w_io_unix_t *io, int fd)
+w_io_unix_init_fd (w_io_unix_t *io, int fd)
 {
     w_assert (io);
     w_assert (fd >= 0);

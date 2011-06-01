@@ -1214,10 +1214,35 @@ W_OBJ (w_io_unix_t)
 
 /*!
  * Create an I/O object to be used with an Unix file descriptor.
+ * This is a convenience function that calls \c open() and then uses
+ * \ref w_io_unix_open_fd.
+ * \param path File path.
+ * \param mode Open mode flags (\c O_CREAT, \c O_RDWR...)
+ * \param perm Permissions.
+ */
+W_EXPORT w_io_t* w_io_unix_open (const char *path,
+                                 int         mode,
+                                 unsigned    perm);
+
+/*!
+ * Create an I/O object to be used with an Unix file descriptor.
+ * This function allows initialization from an existing, valid file
+ * descriptor.
  * \param fd Unix file descriptor.
  * \sa W_IO_UNIX_FD
  */
-W_EXPORT w_io_t* w_io_unix_open (int fd);
+W_EXPORT w_io_t* w_io_unix_open_fd (int fd);
+
+/*!
+ * Initialize an I/O object to be used with an Unix file descriptor.
+ * This calls \c open() and then uses \ref w_io_unix_init_fd.
+ * This function is not intended to be used directly, but it is provided as
+ * a convenience for code extending \ref w_io_unix_t
+ */
+W_EXPORT wbool w_io_unix_init (w_io_unix_t *io,
+                               const char  *path,
+                               int          mode,
+                               unsigned     perm);
 
 /*!
  * Initialize an I/O object to be used with an Unix file descriptor.
@@ -1225,7 +1250,7 @@ W_EXPORT w_io_t* w_io_unix_open (int fd);
  * a convenience for code extending \ref w_io_unix_t.
  * \sa W_IO_UNIX_FD
  */
-W_EXPORT void w_io_unix_init (w_io_unix_t *io, int fd);
+W_EXPORT void w_io_unix_init_fd (w_io_unix_t *io, int fd);
 
 
 /*!
