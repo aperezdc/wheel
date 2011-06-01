@@ -1206,6 +1206,13 @@ W_OBJ (w_io_unix_t)
 };
 
 /*!
+ * Obtain the Unix file descriptor used in an I/O stream.
+ * \param _io Pointer to a \ref w_io_t
+ */
+#define W_IO_UNIX_FD(_io) \
+    (((w_io_unix_t*) (_io))->fd)
+
+/*!
  * Create an I/O object to be used with an Unix file descriptor.
  * \param fd Unix file descriptor.
  * \sa W_IO_UNIX_FD
@@ -1262,8 +1269,7 @@ W_OBJ (w_io_socket_t)
 /*!
  * Obtain the Unix file descriptor associated to a socket.
  */
-#define W_IO_SOCKET_FD(_io) \
-    ((_io)->parent.fd)
+#define W_IO_SOCKET_FD W_IO_UNIX_FD
 
 /*!
  * Obtain the kind of a socket.
