@@ -935,7 +935,7 @@ struct w_buf_t
 /*!
  * Get the length of a buffer
  */
-#define w_buf_length(_b)  (w_assert (_b), (_b)->len)
+#define w_buf_length(_b) ((_b)->len)
 
 /*!
  * Reset a buffer to its initial (empty) state
