@@ -359,7 +359,7 @@ w_opt_parse (const w_opt_t *options,
             }
             else {
                 w_io_format (w_stderr,
-                             "$s: $s --%$\nTry \"$s --help\" for more information.\n",
+                             "$s: $s --$s\nTry \"$s --help\" for more information.\n",
                              _program_name (argv[0]), (status == W_OPT_BAD_ARG)
                                                        ? "bad argument passed to"
                                                        : "missing argument(s) to",
