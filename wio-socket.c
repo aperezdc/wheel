@@ -238,7 +238,7 @@ w_io_socket_serve_thread (w_io_socket_t *io,
                             w_io_socket_serve_thread_run,
                             st) == 0);
 }
-#endif // CONF_PTHREAD
+#endif /* CONF_PTHREAD */
 
 
 static wbool
