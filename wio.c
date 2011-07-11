@@ -107,10 +107,17 @@ w_io_getchar (w_io_t *io)
         return ch;
     }
 
-    if ((ret = w_io_read (io, &ch, 1)) == 1)
-        return ch;
+    switch ((ret = w_io_read (io, &ch, 1))) {
+        case 1: /* One byte read, return character */
+            return ch;
 
-    return (ret == 0) ? W_IO_EOF : W_IO_ERR;
+        case W_IO_EOF: /* Concrete return values */
+        case W_IO_ERR:
+            return ret;
+
+        default: /* Any other value is an error */
+            return W_IO_ERR;
+    }
 }
 
 
