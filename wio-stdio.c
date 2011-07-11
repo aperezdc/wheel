@@ -5,6 +5,14 @@
  * Distributed under terms of the MIT license.
  */
 
+/*
+ * In this particular compilation unit we always want to incllude the
+ * declarations for the C library stdio-related functions.
+ */
+#ifndef CONF_STDIO
+#define CONF_STDIO 1
+#endif /* CONF_STDIO */
+
 #include "wheel.h"
 #include <stdio.h>
 
