@@ -19,7 +19,7 @@ main (int argc, char **argv)
 
     if ((cfg = w_cfg_load_file (argv[1], &err)) == NULL) {
         w_assert (err);
-        w_die ("$s:$s\n", argv[1], err);
+        w_die ("$s:$s\n", argv[0], err);
     }
 
     w_free (err);
