@@ -112,7 +112,10 @@ enum wbool
 #include <stdarg.h>
 #include <string.h>
 #include <setjmp.h>
+
+#ifdef CONF_STDIO
 #include <stdio.h>
+#endif /* CONF_STDIO */
 
 
 /*------------------------------------------------[ memory handling ]-----*/
@@ -1409,6 +1412,7 @@ W_EXPORT wbool w_io_socket_send_eof (w_io_socket_t *io);
 W_EXPORT const char* w_io_socket_unix_path (w_io_socket_t *io);
 
 
+#ifdef CONF_STDIO
 /*!
  * Perform input/output in standard C file descriptors.
  */
@@ -1431,6 +1435,8 @@ W_EXPORT w_io_t* w_io_stdio_open (FILE *fp);
  * a convenience for other code extending \ref w_io_stdio_t.
  */
 W_EXPORT void w_io_stdio_init (w_io_stdio_t *io, FILE *fp);
+
+#endif /* CONF_STDIO */
 
 
 /*!
