@@ -7,6 +7,7 @@
  */
 
 #include "wheel.h"
+#include <fcntl.h>
 
 
 typedef struct w_cfg_node w_cfg_node_t;
@@ -428,15 +429,13 @@ w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 {
     w_io_t *io;
     wbool ret;
-    FILE *fp;
 
     w_assert (cf != NULL);
     w_assert (path != NULL);
 
-    if ((fp = fopen (path, "wb")) == NULL)
+    if ((io = w_io_unix_open (path, O_WRONLY | O_CREAT | O_TRUNC, 0666)) == NULL)
         return W_NO;
 
-    io = w_io_stdio_open (fp);
     ret = w_cfg_dump (cf, io);
     w_obj_unref (io);
 
@@ -531,15 +530,17 @@ w_cfg_t*
 w_cfg_load_file (const char *path, char **msg)
 {
     w_io_t *io;
-    FILE *fp;
     w_cfg_t *ret;
 
     w_assert (path != NULL);
 
-    if ((fp = fopen (path, "rb")) == NULL)
+    if ((io = w_io_unix_open (path, O_RDONLY, 0)) == NULL) {
+        if (msg) {
+            *msg = w_strfmt ("Could not open file '%s' for reading", path);
+        }
         return NULL;
+    }
 
-    io = w_io_stdio_open (fp);
     ret = w_cfg_load (io, msg);
     w_obj_unref (io);
 
