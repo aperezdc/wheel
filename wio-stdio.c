@@ -9,9 +9,9 @@
  * In this particular compilation unit we always want to incllude the
  * declarations for the C library stdio-related functions.
  */
-#ifndef CONF_STDIO
-#define CONF_STDIO 1
-#endif /* CONF_STDIO */
+#ifndef W_CONF_STDIO
+#define W_CONF_STDIO 1
+#endif /* W_CONF_STDIO */
 
 #include "wheel.h"
 #include <stdio.h>

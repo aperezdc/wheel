@@ -30,11 +30,11 @@ ifneq ($(libwheel_PTHREAD),0)
 LDFLAGS       += -pthread
 CFLAGS        += -pthread
 CXXFLAGS      += -pthread
-CPPFLAGS      += -DCONF_PTHREAD
+CPPFLAGS      += -DW_CONF_PTHREAD
 endif
 
 ifneq ($(libwheel_STDIO),0)
-CPPFLAGS      += -DCONF_STDIO
+CPPFLAGS      += -DW_CONF_STDIO
 endif
 
 CPPFLAGS      += -I$(libwheel_PATH)

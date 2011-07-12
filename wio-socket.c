@@ -15,9 +15,9 @@
 #include <unistd.h>
 #include <errno.h>
 
-#ifdef CONF_PTHREAD
+#ifdef W_CONF_PTHREAD
 #include <pthread.h>
-#endif /* CONF_PTHREAD */
+#endif /* W_CONF_PTHREAD */
 
 #ifndef W_IO_SOCKET_BACKLOG
 #define W_IO_SOCKET_BACKLOG 1024
@@ -174,7 +174,7 @@ w_io_socket_open (w_io_socket_kind_t kind, ...)
 }
 
 
-#ifdef CONF_PTHREAD
+#ifdef W_CONF_PTHREAD
 struct w_io_socket_thread
 {
     pthread_t      thread;
@@ -238,7 +238,7 @@ w_io_socket_serve_thread (w_io_socket_t *io,
                             w_io_socket_serve_thread_run,
                             st) == 0);
 }
-#endif /* CONF_PTHREAD */
+#endif /* W_CONF_PTHREAD */
 
 
 static wbool
@@ -293,20 +293,20 @@ w_io_socket_serve (w_io_socket_t *io,
     int fd;
 
     w_assert (mode == W_IO_SOCKET_SINGLE ||
-#ifdef CONF_PTHREAD
+#ifdef W_CONF_PTHREAD
               mode == W_IO_SOCKET_THREAD ||
-#endif /* CONF_PTHREAD */
+#endif /* W_CONF_PTHREAD */
               mode == W_IO_SOCKET_FORK);
     w_assert (handler);
     w_assert (io);
 
     switch (mode) {
-#ifdef CONF_PTHREAD
+#ifdef W_CONF_PTHREAD
         case W_IO_SOCKET_THREAD:
             mode_handler = w_io_socket_serve_thread;
-#else /* !CONF_PTHREAD */
+#else /* !W_CONF_PTHREAD */
             w_die ("libwheel was built without pthread support\n");
-#endif /* CONF_PTHREAD */
+#endif /* W_CONF_PTHREAD */
             break;
         case W_IO_SOCKET_SINGLE:
             mode_handler = w_io_socket_serve_single;
