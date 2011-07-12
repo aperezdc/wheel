@@ -306,11 +306,18 @@ W_OBJ_DECL (w_io_t);
 
 /*!
  * Prints a message to stderr and aborts execution.
+ * \param fmt Format string for the message. If \c NULL is passed, then no
+ *            message is written to stderr.
  */
 W_EXPORT void w_die (const char *fmt, ...);
 
 /*!
  * Prints a message to stderr and aborts execution.
+ *
+ * \param fmt Format string for the message. If \c NULL is passed, then no
+ *            message is written to stderr.
+ * \param al  List of arguments to be consumed as specified in the format
+ *            string.
  */
 W_EXPORT void w_diev (const char *fmt, va_list al);
 

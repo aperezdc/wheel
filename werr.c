@@ -27,8 +27,10 @@ w_die(const char *fmt, ...)
 void
 w_diev(const char *fmt, va_list al)
 {
-    w_io_formatv (w_stderr, fmt, al);
-    fsync (W_IO_UNIX_FD (w_stderr));
+    if (fmt) {
+        w_io_formatv (w_stderr, fmt, al);
+        fsync (W_IO_UNIX_FD (w_stderr));
+    }
     exit(EXIT_FAILURE);
 }
 
