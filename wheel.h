@@ -925,7 +925,7 @@ typedef struct w_buf_t w_buf_t;
  * Can hold any kind of data, including null characters, as data length is
  * tracked separately. To initialize a buffer, do something like this:
  * \code
- *   w_buf_t mybuffer = W_BUFFER;
+ *   w_buf_t mybuffer = W_BUF;
  * \endcode
  */
 struct w_buf_t
