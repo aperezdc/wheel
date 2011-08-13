@@ -1425,7 +1425,6 @@ W_OBJ (w_io_stdio_t)
 /*!
  * Initialize an I/O object to be used with a C standard file descriptor.
  * \param fp Standard C file descriptor.
- * \sa W_IO_STDIO, W_IO_STDIO_FILEP
  */
 W_EXPORT w_io_t* w_io_stdio_open (FILE *fp);
 
