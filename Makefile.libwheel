@@ -17,6 +17,7 @@ libwheel_SRCS := wcfg.c       \
                  wparse.c     \
                  wstr.c       \
                  wbuf.c       \
+                 wevent.c     \
                  wio.c        \
                  wlist.c      \
                  wvariant.c   \
@@ -35,6 +36,8 @@ CFLAGS        += -pthread
 CXXFLAGS      += -pthread
 CPPFLAGS      += -DW_CONF_PTHREAD
 endif
+
+LDFLAGS       += -lrt
 
 ifneq ($(libwheel_STDIO),0)
 CPPFLAGS      += -DW_CONF_STDIO

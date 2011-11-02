@@ -65,6 +65,8 @@
 #define _W_MAKE_STRING(__s) #__s
 #define W_STRINGIZE(_s) _W_MAKE_STRING(_s)
 
+#define W_HAS_FLAG(_bitfield, _bits) \
+    (((_bitfield) & (_bits)) == (_bits))
 
 typedef void** w_iterator_t;
 typedef void* (*w_traverse_fun_t)(void *data, void *context);
@@ -2173,6 +2175,147 @@ _W_G( node,   W_CFG_NODE,   w_cfg_t*    )
 
 /*! Check whether a node contains a string. */
 #define w_cfg_isstring(cf, key)  (W_CFG_STRING == w_cfg_type (cf, key))
+
+/*\}*/
+
+/*---------------------------------------------------------[ events ]-----*/
+
+/*!
+ * \defgroup wev Event handling
+ * \addtogroup wev
+ * \{
+ */
+
+W_OBJ_DECL (w_event_t);
+W_OBJ_DECL (w_event_loop_t);
+
+enum w_event_type
+{
+    W_EVENT_TIMER,
+    W_EVENT_SIGNAL,
+    W_EVENT_IO,
+    W_EVENT_FD,
+};
+typedef enum w_event_type w_event_type_t;
+
+enum {
+    W_EVENT_IN  = 0x01,
+    W_EVENT_OUT = 0x02,
+};
+
+typedef double w_timestamp_t;
+
+
+typedef w_bool_t (*w_event_callback_t) (w_event_loop_t*, w_event_t*);
+
+
+/*!
+ * Returns the current time as used by the event system.
+ * Whenever possible, use \ref w_loop_now instead, which is faster.
+ */
+w_timestamp_t w_timestamp_now (void);
+
+
+W_OBJ_DEF (w_event_t)
+{
+    w_obj_t            parent;
+    w_event_type_t     type;
+    w_event_callback_t callback;
+    long               flags;
+
+    /* Value in use depends on the value of "type" */
+    union {
+        int            fd;      /* W_EVENT_FD     */
+        w_io_t        *io;      /* W_EVENT_IO     */
+        int            signum;  /* W_EVENT_SIGNAL */
+        double         timeout; /* W_EVENT_TIMER  */
+    };
+};
+
+
+#define w_event_type(_event) \
+    (((w_event_t*) (_event))->type)
+
+w_event_t* w_event_new (w_event_type_t     type,
+                        w_event_callback_t callback,
+                        ...);
+
+
+W_OBJ_DEF (w_event_loop_t)
+{
+    w_obj_t       parent;
+    w_bool_t      running;
+    w_list_t     *events;
+    w_timestamp_t now;
+};
+
+
+/*!
+ * Get the current time from the event loop.
+ * Actually, this returns the time when the last event started to be
+ * handled, which is usually enough for most operation, while still being
+ * much faster than \ref w_timestamp_now.
+ *
+ * \return A \ref w_timestamp_t value.
+ */
+#define w_event_loop_now(_loop) \
+    ((_loop)->now)
+
+/*!
+ * Obtains the list of events registered in an event loop.
+ */
+#define w_event_loop_events(_loop) \
+    ((_loop)->events)
+
+/*!
+ * Checks whether an event loop is running.
+ */
+#define w_event_loop_is_running(_loop) \
+    ((_loop)->running)
+
+/*!
+ * Creates a new event loop. Event loops can be used to listen for
+ * notifications on signals, timers, and input/output streams (both
+ * low-level Unix file descriptors and \ref w_io_t instances).
+ *
+ * For each platform, the most efficient mechanism available is used:
+ *
+ *  - \c epoll() on Linux.
+ *  - \c kqueue() on BSD.
+ *
+ * This function may return \c NULL if the platform is not supported,
+ * or an error happened during initialization of the platform dependant
+ * mechanism.
+ *
+ * \todo Fall-back based on \c poll(2) or \c select(2).
+ */
+w_event_loop_t* w_event_loop_new (void);
+
+/*!
+ * Runs an event loop indefinitely, until it is stopped. The function
+ * will continously keep handling events, and will not return until
+ * \ref w_event_loop_stop is used.
+ * \return Whether the event loop exited due to errors.
+ */
+w_bool_t w_event_loop_run (w_event_loop_t *loop);
+
+/*!
+ * Stops an event loop. Note that already-received events will still
+ * be handled before \ref w_event_loop_run returns.
+ */
+void w_event_loop_stop (w_event_loop_t *loop);
+
+/*!
+ * Adds an event to the event loop.
+ * \return Whether there was an error when trying to add the event.
+ */
+w_bool_t w_event_loop_add (w_event_loop_t *loop, w_event_t *event);
+
+/*!
+ * Removes an event from an event loop.
+ * \return Whether there was an error when trying to remove the event.
+ */
+w_bool_t w_event_loop_del (w_event_loop_t *loop, w_event_t *event);
 
 /*\}*/
 

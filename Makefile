@@ -3,7 +3,7 @@
 # Adrian Perez, 2010-08-09 20:45
 #
 
-CFLAGS += -Os -g -W -Wall -Werror
+CFLAGS += -O0 -D_DEBUG -g -W -Wall -Werror
 
 all:
 
