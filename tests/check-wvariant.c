@@ -56,7 +56,7 @@ START_TEST (test_wvariant_store_vals)
     w_obj_unref (list);
     w_obj_unref (var);
 
-    dict = w_dict_new ();
+    dict = w_dict_new (W_NO);
     var = w_variant_new (W_VARIANT_DICT, dict);
     ck_assert_int_eq (W_VARIANT_DICT, w_variant_type (var));
     fail_if (dict != w_variant_dict (var),
@@ -72,7 +72,7 @@ END_TEST
 START_TEST (test_wvariant_mutate)
 {
     w_list_t *list = w_list_new (W_NO);
-    w_dict_t *dict = w_dict_new ();
+    w_dict_t *dict = w_dict_new (W_NO);
     w_variant_t *var = w_variant_new (W_VARIANT_INVALID);
 
     /* mutate to a list, the list gets an extra ref */

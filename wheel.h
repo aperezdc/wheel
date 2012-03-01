@@ -660,12 +660,16 @@ W_OBJ (w_dict_t)
     w_dict_node_t  *first;
     size_t          count;
     size_t          size;
+    wbool           refs;
 };
 
 /*!
  * Create a new dictionary.
+ * \param refs Automatically update reference-count for values stored in the
+ *             hash table. Passing \c W_YES assumes that all items in the
+ *             dictionary will be objects (derived from \ref w_obj_t).
  */
-W_EXPORT w_dict_t* w_dict_new (void);
+W_EXPORT w_dict_t* w_dict_new (wbool refs);
 
 /*!
  * Clears the contents of a dictionary.

@@ -98,6 +98,8 @@ w_dict_free_nodes(w_dict_t *d)
 
 	while (node) {
 		next = node->nextNode;
+		if (d->refs)
+		    w_obj_unref (node->val);
 		w_dict_node_free (node);
 		node = next;
 	}
@@ -115,11 +117,12 @@ w_dict_free (void *obj)
 
 
 w_dict_t*
-w_dict_new (void)
+w_dict_new (wbool refs)
 {
 	w_dict_t *d = w_obj_new (w_dict_t);
 	d->size  = W_DICT_DEFAULT_SIZE;
 	d->nodes = w_alloc (w_dict_node_t*, d->size);
+	d->refs  = refs;
 	d->count = 0;
 	return w_obj_dtor (d, w_dict_free);
 }
@@ -229,13 +232,19 @@ w_dict_setn (w_dict_t *d, const char *key, size_t len, void *val)
 
 	while (node) {
 		if (W_DICT_KEY_EQN (node->key, key, len)) {
-			node->val = val;
+		    if (d->refs) {
+		        w_obj_unref (node->val);
+		        node->val = w_obj_ref (val);
+            }
+            else {
+                node->val = val;
+            }
 			return;
 		}
 		node = node->next;
 	}
 
-	node = w_dict_node_newn(key, len, val);
+	node = w_dict_node_newn(key, len, d->refs ? w_obj_ref (val) : val);
 
 	if (d->nodes[hval]) node->next = d->nodes[hval];
 	d->nodes[hval] = node;
@@ -279,6 +288,9 @@ w_dict_deln (w_dict_t *d, const char *key, size_t keylen)
 
 			if (lastNode) lastNode->next = node->next;
 			else d->nodes[hval] = node->next;
+
+			if (d->refs)
+				w_obj_unref (node->val);
 
 			w_dict_node_free (node);
 			d->count--;

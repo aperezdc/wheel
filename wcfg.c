@@ -55,7 +55,7 @@ w_cfg_free (void *cf)
 w_cfg_t*
 w_cfg_new (void)
 {
-	return w_obj_dtor (w_dict_new (), w_dict_free);
+	return w_obj_dtor (w_dict_new (W_NO), w_dict_free);
 }
 
 
