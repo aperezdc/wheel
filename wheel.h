@@ -1,7 +1,7 @@
 /*
  * Main include file for libwheel.
  *
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2012 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
@@ -283,10 +283,12 @@ void* w_obj_unref (void *obj);
  */
 void w_obj_destroy (void *obj);
 
+typedef void (*w_obj_dtor_t)(void*);
+
 /*!
  * Registers a destructor to be called when an object is destroyed.
  */
-void* w_obj_dtor (void *obj, void (*fini) (void*));
+void* w_obj_dtor (void *obj, w_obj_dtor_t fini);
 
 /*\}*/
 
@@ -443,6 +445,164 @@ w_strncpy(char *dst, const char *src, size_t n)
 	dst[n] = '\0';
 	return result;
 }
+
+/*\}*/
+
+/*----------------------------------------------------------[ lists ]-----*/
+
+/*!
+ * \defgroup wlist Lists
+ * \addtogroup wlist
+ * \{
+ *
+ * List data structure. The implementation uses a doubly-linked list,
+ * meaning that most operations are very efficient, and the list can be
+ * traversed both forward and backward. Slow operations are those that
+ * use numeric indexes to refer to elements in the list: \ref w_list_at,
+ * \ref w_list_insert_at and \ref w_list_del_at. The later should be
+ * avoided if possible, but still they are provided as a convenience.
+ *
+ * Negative numeric indexes may be passed to functions, with the same
+ * meaning as in Python: \c -1 refers to the last element, \c -2 to the
+ * element before the last, and so on.
+ */
+
+/*!
+ * List type.
+ */
+W_OBJ (w_list_t)
+{
+    w_obj_t parent;
+    size_t  count;
+    /* actual data is stored in the private area of the list */
+};
+
+/*! Get the number of elements in a list. */
+#define w_list_count(_l) \
+    (w_assert (_l), (_l)->count)
+
+/*! Checks whether a list is empty. */
+#define w_list_empty(_l) \
+    (w_assert (_l), (_l)->count > 0)
+
+/*!
+ * Creates a new list.
+ * \return A new, empty list.
+ */
+W_EXPORT w_list_t* w_list_new (void);
+
+/*! Clears all elements from a list. */
+W_EXPORT void w_list_clear (w_list_t *list);
+
+/*!
+ * Obtains the value stored at a given position.
+ * \param index Position in the list. Negative indexes count from the end of
+ *              the list, i.e. \c -1 would be the last element.
+ */
+W_EXPORT void* w_list_at (const w_list_t *list, long index);
+
+/* Commonly-used aliases */
+#define w_list_insert w_list_insert_before
+#define w_list_append w_list_push_tail
+#define w_list_pop    w_list_pop_tail
+
+/*! Appends an element to the end of a list. */
+W_EXPORT void w_list_push_head (w_list_t *list, void *item);
+
+/*! Inserts an element in the beginning of the list. */
+W_EXPORT void w_list_push_tail (w_list_t *list, void *item);
+
+/*! Removes the element from the beginning of the list and returns it. */
+W_EXPORT void* w_list_pop_head (w_list_t *list);
+
+/*! Removes the element from the end of the list and returns it. */
+W_EXPORT void* w_list_pop_tail (w_list_t *list);
+
+/*! Obtains a pointer to the first element in the list. */
+W_EXPORT w_iterator_t w_list_first (const w_list_t *list);
+
+/*! Obtains a pointer to the last element in the list. */
+W_EXPORT w_iterator_t w_list_last (const w_list_t *list);
+
+/*! Obtains a pointer to the next element. */
+W_EXPORT w_iterator_t w_list_next (const w_list_t *list, w_iterator_t i);
+
+/*! Obtains a pointer to the previous element. */
+W_EXPORT w_iterator_t w_list_prev (const w_list_t *list, w_iterator_t i);
+
+/*!
+ * Applies a function to each element in a list, in forward order.
+ *
+ * Each element in the list, in forward order, will be passed to function
+ * \e f. The function can mutate the element and return a different one,
+ * which will replace the original element in the list. An optional context
+ * (\e ctx) pointer will be passed to \e f every time it is called.
+ */
+W_EXPORT void w_list_traverse (const w_list_t *list, w_traverse_fun_t f, void *ctx);
+
+/*!
+ * Applies a function to each element in a list, in reverse order.
+ *
+ * \see w_list_traverse
+ */
+W_EXPORT void w_list_traverse_rev (const w_list_t *list, w_traverse_fun_t f, void *ctx);
+
+/*!
+ * Defines a loop over all items in a list. This can be used as an
+ * alternative to \ref w_list_traverse. Typical usage:
+ * \code
+ * w_list_t *list = make_string_list ();
+ * w_iterator_t i;
+ *
+ * w_list_foreach (list, i)
+ *    w_io_format ("$s\n", (const char*) *i);
+ * \endcode
+ *
+ * \see w_list_foreach_rev, w_list_traverse.
+ */
+#define w_list_foreach(_l, _v) \
+    for ((_v) = w_list_first (_l); (_v) != NULL; (_v) = w_list_next ((_l), (_v)))
+
+/*!
+ * Defines a loop, in reverse order, over all items in a list. This can be
+ * used as an alternative to \ref w_list_traverse_rev.
+ *
+ * \see w_list_foreach, w_list_traverse_rev.
+ */
+#define w_list_foreach_rev(_l, _v) \
+    for ((_v) = w_list_last (_l); (_v) != NULL; (_v) = w_list_prev ((_l), (_v)))
+
+/*!
+ * Inserts an element in a list before a particular position.
+ * The \e item is inserted in the \e list before the position pointed by
+ * \e i.
+ */
+W_EXPORT void w_list_insert_before (w_list_t *list, w_iterator_t i, void *item);
+
+/*!
+ * Inserts an element in a list after a particular position.
+ * The \e item is inserted in the \e list after the position pointed by
+ * \e i.
+ */
+W_EXPORT void w_list_insert_after (w_list_t *list, w_iterator_t i, void *item);
+
+/*!
+ * Inserts an element in a list at a given position.
+ * The \e item is inserted at the given numeric \e index. Note that some
+ * particular indexes like \c 0 (first position) and \c -1 (last position)
+ * will be optimized out, but in general this function runs in \e O(n).
+ */
+W_EXPORT void w_list_insert_at (w_list_t *list, long index, void *item);
+
+/*!
+ * Deletes the element at a given position in a list.
+ */
+W_EXPORT void w_list_del (w_list_t *list, w_iterator_t i);
+
+/*!
+ * Deletes the element at a given (numeric) position in a list.
+ */
+W_EXPORT void w_list_del_at (w_list_t *list, long index);
 
 /*\}*/
 

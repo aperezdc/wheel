@@ -18,6 +18,7 @@ libwheel_SRCS := wcfg.c       \
                  wstr.c       \
                  wbuf.c       \
                  wio.c        \
+                 wlist.c      \
                  wiofscan.c   \
                  wioformat.c  \
                  wio-unix.c   \
