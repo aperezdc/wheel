@@ -1685,6 +1685,207 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf);
 
 /*\}*/
 
+
+/*---------------------------------------------------[ variant type ]-----*/
+
+/*!
+ * \defgroup wvariant Variant type
+ * \addtogroup wvariant
+ * \{
+ *
+ * Box-like container that can hold values of different types. Currently,
+ * the following type are suported:
+ *  - Strings (internally stored as a \ref w_buf_t).
+ *  - Integral numbers (internally stored as \c long).
+ *  - Floating point numbers (internally stored as \c double).
+ *  - Booleans (internally stored as a \c wbool).
+ *  - Dictionaries (\ref w_dict_t).
+ *  - Lists (\ref w_list_t).
+ *  - Null value.
+ *  - Invalid value (none of the above).
+ *
+ * The stored value can be mutated at any time, and the container will
+ * handle freeing the memory used by string buffers, and calling
+ * \ref w_obj_ref and \ref w_obj_unref as needed for object types (e.g.
+ * lists).
+ *
+ * Most of the functionality is implemented as macros, therefore operations
+ * on \ref w_variant_t tend to be fast, particularly when using base types.
+ */
+
+/*! Possible types to be stored in a \ref w_variant_t */
+enum w_variant_type
+{
+    W_VARIANT_STRING  = ',', /*!< String                */
+    W_VARIANT_NUMBER  = '#', /*!< Number                */
+    W_VARIANT_FLOAT   = '^', /*!< Floating point number */
+    W_VARIANT_BOOL    = '!', /*!< Boolean               */
+    W_VARIANT_NULL    = '~', /*!< Null                  */
+    W_VARIANT_DICT    = '}', /*!< Dictionary            */
+    W_VARIANT_LIST    = ']', /*!< List                  */
+    W_VARIANT_INVALID = 'Z', /*!< Invalid / no value    */
+
+    /*
+     * Note that this is used as a convenience that allows to easily
+     * instantiate W_VARIANT_STRING values from a w_buf_t, but the
+     * actual type of the created value will be always W_VARIANT_STRING.
+     */
+    W_VARIANT_BUFFER  = 'B',
+};
+
+typedef enum w_variant_type w_variant_type_t;
+
+union w_variant_value
+{
+    w_buf_t   stringbuf;
+    long      number;
+    double    fpnumber;
+    wbool     boolean;
+    w_list_t *list;
+    w_dict_t *dict;
+};
+
+typedef union w_variant_value w_variant_value_t;
+
+/*!
+ * Variant box-container type.
+ */
+W_OBJ (w_variant_t)
+{
+    w_obj_t           parent;
+    w_variant_type_t  type;
+    w_variant_value_t value;
+};
+
+
+/*! Obtains the type of the value stored in a variant. */
+#define w_variant_type(_v) \
+    ((_v)->type)
+
+/*! Checks whether a variant contains a numeric value. */
+#define w_variant_is_number(_v) \
+    ((_v)->type == W_VARIANT_NUMBER)
+
+/*! Checks whether a variant contains a string value. */
+#define w_variant_is_string(_v) \
+    ((_v)->type == W_VARIANT_STRING)
+
+/*! Checks whether a variant contains a floating point numeric value. */
+#define w_variant_is_float(_v) \
+    ((_v)->type == W_VARIANT_FLOAT)
+
+/*! Checks whether a variant contains a boolean value. */
+#define w_variant_is_bool(_v) \
+    ((_v)->type == W_VARIANT_BOOL)
+
+/*! Checks whether a variant is a null value. */
+#define w_variant_is_null(_v) \
+    ((_v)->type == W_VARIANT_NULL)
+
+/*! Checks whether a variant contains a dictionary. */
+#define w_variant_is_dict(_v) \
+    ((_v)->type == W_VARIANT_DICT)
+
+/*! Checks whether a variant contains a list. */
+#define w_variant_is_list(_v) \
+    ((_v)->type == W_VARIANT_LIST)
+
+/*! Checks whether a variant is invalid. */
+#define w_variant_is_invalid(_v) \
+    ((_v)->type == W_VARIANT_INVALID)
+
+/*! Obtains the numeric value stored in a variant. */
+#define w_variant_number(_v) \
+    ((_v)->value.number)
+
+/*! Obtains the floating point numeric value stored in a variant. */
+#define w_variant_float(_v) \
+    ((_v)->value.fpnumber)
+
+/*! Obtains the boolean value stored in a variant. */
+#define w_variant_bool(_v) \
+    ((_v)->value.boolean)
+
+/*! Obtains the dictionary stored in a variant. */
+#define w_variant_dict(_v) \
+    ((_v)->value.dict)
+
+/*! Obtains the list stored in a variant. */
+#define w_variant_list(_v) \
+    ((_v)->value.list)
+
+/*! Obtains the string value stored in a variant. */
+#define w_variant_string(_v) \
+    (w_buf_str (&((_v)->value.stringbuf)))
+
+/*! Assigns buffer contents as string value to a variant, mutating it if needed. */
+#define w_variant_set_buffer(_v, _b)               \
+    (w_variant_clear(_v)->type = W_VARIANT_STRING, \
+     w_buf_append_buf (&((_v)->value.stringbuf), (_b)))
+
+/*! Assigns a string value to a variant, mutating it if needed. */
+#define w_variant_set_string(_v, _s)               \
+    (w_variant_clear(_v)->type = W_VARIANT_STRING, \
+     w_buf_set_str (&((_v)->value.stringbuf), (_s)))
+
+/*! Assigns a numeric value to a variant, mutating it if needed. */
+#define w_variant_set_number(_v, _n)               \
+    (w_variant_clear(_v)->type = W_VARIANT_NUMBER, \
+     (_v)->value.number = (_n))
+
+/*! Assigns a floating point number value to a variant, mutating it if needed. */
+#define w_variant_set_float(_v, _f)               \
+    (w_variant_clear(_v)->type = W_VARIANT_FLOAT, \
+     (_v)->value.fpnumber = (_f))
+
+/*! Assigns a boolean value to a variant, mutating it if needed. */
+#define w_variant_set_bool(_v, _b)               \
+    (w_variant_clear(_v)->type = W_VARIANT_BOOL, \
+     (_v)->value.boolean  = (_b))
+
+/*! Assigns a list to a variant, mutating it if needed. */
+#define w_variant_set_list(_v, _l)               \
+    (w_variant_clear(_v)->type = W_VARIANT_LIST, \
+     (_v)->value.list = w_obj_ref (_l))
+
+/*! Assigns a dictionary to a variant, mutating it if needed. */
+#define w_variant_set_dict(_v, _d)               \
+    (w_variant_clear(_v)->type = W_VARIANT_DICT, \
+     (_v)->value.dict = w_obj_ref (_d))
+
+/*! Assigns \e null to a variant, mutating it if needed. */
+#define w_variant_set_null(_v) \
+    (w_variant_clear(_v)->type = W_VARIANT_NULL)
+
+/*! Makes a variant to be invalid. */
+#define w_variant_set_invalid w_variant_clear
+
+
+/*!
+ * Create a new variant and assign it a value.
+ * If you do not want to set an initial value, pass \ref
+ * W_VARIANT_INVALID as \e type. Also, for most types it is needed to
+ * pass the value itself:
+ *
+ * \code
+ * variant = w_variant_new (W_VARIANT_STRING, "Hello");
+ * \endcode
+ *
+ * Types who do not have an associated value (mainly nulls and invalid
+ * values) do not need the extra function argument:
+ *
+ * \code
+ * variant = w_variant_new (W_VARIANT_INVALID);
+ * variant = w_variant_new (W_VARIANT_NULL);
+ * \endcode
+ */
+W_EXPORT w_variant_t* w_variant_new (w_variant_type_t type, ...);
+
+/*! Clears a variant, setting it to invalid. */
+W_EXPORT w_variant_t* w_variant_clear (w_variant_t *variant);
+
+/*\}*/
+
 /*---------------------------------------------------[ config files ]-----*/
 
 /*!
