@@ -27,11 +27,12 @@ struct w_list_entry
 
 
 w_list_t*
-w_list_new (void)
+w_list_new (wbool refs)
 {
     w_list_t *list = w_obj_new_with_priv_sized (w_list_t,
                                                 sizeof (struct w_list_head));
     struct w_list_head *h = w_obj_priv (list, w_list_t);
+    list->refs  = refs;
     list->count = 0;
     TAILQ_INIT (h);
     return w_obj_dtor (list, (w_obj_dtor_t) w_list_clear);
@@ -46,6 +47,8 @@ w_list_clear (w_list_t *list)
     while (!TAILQ_EMPTY (h)) {
         e = TAILQ_FIRST (h);
         TAILQ_REMOVE (h, e, tailq);
+        if (list->refs)
+            w_obj_unref (e->value);
         w_free (e);
     }
     list->count = 0;
@@ -58,7 +61,7 @@ w_list_push_tail (w_list_t *list, void *item)
     _W_LIST_HE;
 
     e = w_new (struct w_list_entry);
-    e->value = item;
+    e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_TAIL (h, e, tailq);
     list->count++;
@@ -71,7 +74,7 @@ w_list_push_head (w_list_t *list, void *item)
     _W_LIST_HE;
 
     e = w_new (struct w_list_entry);
-    e->value = item;
+    e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_HEAD (h, e, tailq);
     list->count++;
@@ -200,7 +203,7 @@ w_list_insert_before (w_list_t *list, w_iterator_t i, void *item)
     w_unused (h);
 
     e = w_new (struct w_list_entry);
-    e->value = item;
+    e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_BEFORE ((struct w_list_entry*) i, e, tailq);
     list->count++;
@@ -213,7 +216,7 @@ w_list_insert_after (w_list_t *list, w_iterator_t i, void *item)
     _W_LIST_HE;
 
     e = w_new (struct w_list_entry);
-    e->value = item;
+    e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_AFTER (h, (struct w_list_entry*) i, e, tailq);
     list->count++;
@@ -226,7 +229,7 @@ w_list_insert_at (w_list_t *list, long index, void *item)
     _W_LIST_HE;
 
     e = w_new (struct w_list_entry);
-    e->value = item;
+    e->value = list->refs ? w_obj_ref (item) : item;
 
     if (index == -1) {
         TAILQ_INSERT_TAIL (h, e, tailq);
@@ -253,6 +256,8 @@ w_list_del (w_list_t *list, w_iterator_t i)
     _W_LIST_HE;
     e = (struct w_list_entry*) i;
     TAILQ_REMOVE (h, e, tailq);
+    if (list->refs)
+        w_obj_unref (e->value);
     list->count--;
 }
 
@@ -270,5 +275,7 @@ w_list_del_at (w_list_t *list, long index)
     while (pos--)
         e = TAILQ_NEXT (e, tailq);
     TAILQ_REMOVE (h, e, tailq);
+    if (list->refs)
+        w_obj_unref (e->value);
     list->count--;
 }

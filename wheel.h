@@ -465,6 +465,15 @@ w_strncpy(char *dst, const char *src, size_t n)
  * Negative numeric indexes may be passed to functions, with the same
  * meaning as in Python: \c -1 refers to the last element, \c -2 to the
  * element before the last, and so on.
+ *
+ * <b>Lists of objects</b>
+ *
+ * If a list is meant to contain objects (see \ref wobj), it is possible
+ * to let the list reference-count the objects (using \ref w_obj_ref and
+ * \ref w_obj_unref) by passing \c W_YES when creating a list with
+ * \ref w_list_new. If enabled, whenever an item is added to the list,
+ * its reference count will be increased, and it will be decreased when
+ * the item is removed from the list.
  */
 
 /*!
@@ -474,6 +483,7 @@ W_OBJ (w_list_t)
 {
     w_obj_t parent;
     size_t  count;
+    wbool   refs;
     /* actual data is stored in the private area of the list */
 };
 
@@ -487,9 +497,10 @@ W_OBJ (w_list_t)
 
 /*!
  * Creates a new list.
+ * \param refs Whether to handle references to objects in the list.
  * \return A new, empty list.
  */
-W_EXPORT w_list_t* w_list_new (void);
+W_EXPORT w_list_t* w_list_new (wbool refs);
 
 /*! Clears all elements from a list. */
 W_EXPORT void w_list_clear (w_list_t *list);
@@ -512,10 +523,20 @@ W_EXPORT void w_list_push_head (w_list_t *list, void *item);
 /*! Inserts an element in the beginning of the list. */
 W_EXPORT void w_list_push_tail (w_list_t *list, void *item);
 
-/*! Removes the element from the beginning of the list and returns it. */
+/*!
+ * Removes the element from the beginning of the list and returns it.
+ * Note that this will \b not decrease the reference counter when reference
+ * counting is enabled: it is assumed that the caller will use the returned
+ * item.
+ */
 W_EXPORT void* w_list_pop_head (w_list_t *list);
 
-/*! Removes the element from the end of the list and returns it. */
+/*!
+ * Removes the element from the end of the list and returns it.
+ * Note that this will \b not decrease the reference counter when reference
+ * counting is enabled: it is assumed that the caller will use the returned
+ * item.
+ */
 W_EXPORT void* w_list_pop_tail (w_list_t *list);
 
 /*! Obtains a pointer to the first element in the list. */
@@ -603,6 +624,22 @@ W_EXPORT void w_list_del (w_list_t *list, w_iterator_t i);
  * Deletes the element at a given (numeric) position in a list.
  */
 W_EXPORT void w_list_del_at (w_list_t *list, long index);
+
+/*!
+ * Deletes the element at the beginning of the list. Contrary to
+ * \ref w_list_pop_head, the element is \b not returned, and the
+ * reference counter decresed (if reference counting enabled).
+ */
+#define w_list_del_head(_l) \
+    w_list_del ((_l), w_list_first (_l))
+
+/*!
+ * Deletes the element at the end of the list. Contrary to
+ * \ref w_list_pop_tail, the element is \b not returned, and the
+ * reference counter decresed (if reference counting enabled).
+ */
+#define w_list_del_tail(_l) \
+    w_list_del ((_l), w_list_last (_l))
 
 /*\}*/
 
