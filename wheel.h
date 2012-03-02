@@ -741,8 +741,6 @@ typedef struct w_dict_item w_dict_item_t;
 #define w_dict_foreach(_d, _i) \
     for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
 
-W_EXPORT void w_dict_free (void *d);
-
 /*\}*/
 
 /*----------------------------------------------------[ CLI parsing ]-----*/

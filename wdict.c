@@ -106,8 +106,8 @@ w_dict_free_nodes(w_dict_t *d)
 }
 
 
-void
-w_dict_free (void *obj)
+static void
+_w_dict_dtor (void *obj)
 {
 	w_dict_t *d = (w_dict_t*) obj;
 	w_assert (d != NULL);
@@ -124,7 +124,7 @@ w_dict_new (wbool refs)
 	d->nodes = w_alloc (w_dict_node_t*, d->size);
 	d->refs  = refs;
 	d->count = 0;
-	return w_obj_dtor (d, w_dict_free);
+	return w_obj_dtor (d, _w_dict_dtor);
 }
 
 
