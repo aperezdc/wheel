@@ -1905,20 +1905,11 @@ typedef w_dict_t w_cfg_t;
  */
 enum w_cfg_type_t
 {
-	/* Marks en of parameter list for set/get. */
-	W_CFG_END       = 0,    /*!< Marker for ending parameter lists. */
-
-	/* Types for element nodes. */
-	W_CFG_NONE      = 0,    /*!< Invalid node.                      */
-	W_CFG_STRING    = 0x01, /*!< Node containing a string.          */
-	W_CFG_NUMBER    = 0x02, /*!< Node containing a number.          */
-	W_CFG_NODE      = 0x04, /*!< Node containing a subnode.         */
-
-	/* Mask for the type. */
-	W_CFG_TYPE_MASK =  W_CFG_STRING | W_CFG_NUMBER | W_CFG_NODE,
-
-	/* Mask for the flags use in get/set. */
-	W_CFG_FLAG_MASK = ~W_CFG_TYPE_MASK,
+	W_CFG_END    = W_VARIANT_NULL,    /*!< Marks end of parameter lists. */
+	W_CFG_NONE   = W_VARIANT_INVALID, /*!< Invalid node.                 */
+	W_CFG_STRING = W_VARIANT_STRING,  /*!< Node containing a string.     */
+	W_CFG_NUMBER = W_VARIANT_FLOAT,   /*!< Node containing a number.     */
+	W_CFG_NODE   = W_VARIANT_DICT,    /*!< Node containing a subnode.    */
 };
 
 typedef enum w_cfg_type_t w_cfg_type_t;
@@ -1926,7 +1917,8 @@ typedef enum w_cfg_type_t w_cfg_type_t;
 /*!
  * Create a new configuration object.
  */
-W_EXPORT w_cfg_t* w_cfg_new (void);
+#define w_cfg_new( ) \
+    w_dict_new (W_YES)
 
 /*!
  * Checks whether a key exists in a configuration object.
