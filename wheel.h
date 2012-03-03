@@ -1649,10 +1649,10 @@ W_EXPORT void w_io_stdio_init (w_io_stdio_t *io, FILE *fp);
  */
 W_OBJ (w_io_buf_t)
 {
-    w_io_t  parent;
-    w_buf_t buf;
-    size_t  pos;
-    wbool   own;
+    w_io_t   parent;
+    w_buf_t  buf;
+    size_t   pos;
+    w_buf_t *bufp;
 };
 
 
@@ -1677,7 +1677,7 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf);
  * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.
  */
 #define W_IO_BUF_BUF(_p) \
-    (&((w_io_buf_t*) (_p))->buf)
+    ((_p)->bufp)
 
 /*!
  * Obtain a string representation of a \ref w_io_buf_t I/O object.

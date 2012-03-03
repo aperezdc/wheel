@@ -20,10 +20,11 @@ static const char *msg = "Too much work and no joy makes Jack a dull boy.\n"
 START_TEST (test_wio_buf_open_empty)
 {
     w_io_t *io = w_io_buf_open (NULL);
+    w_buf_t *buf = W_IO_BUF_BUF ((w_io_buf_t*) io);
 
-    fail_unless (W_IO_BUF_BUF (io) != NULL,
+    fail_unless (buf != NULL,
                  "I/O has no autocreated buffer");
-    fail_unless (w_buf_length (W_IO_BUF_BUF (io)) == 0,
+    fail_unless (w_buf_length (buf) == 0,
                  "I/O autocreated buffer does not have zero length");
 
     w_obj_unref (io);
@@ -39,12 +40,14 @@ START_TEST (test_wio_buf_open_nonempty)
     w_buf_set_str (&b, msg);
     io = w_io_buf_open (&b);
 
-    fail_unless (W_IO_BUF_BUF (io) != NULL,
+    fail_unless (W_IO_BUF_BUF ((w_io_buf_t*) io) != NULL,
                 "I/O has no buffer");
-    fail_unless (w_buf_length (W_IO_BUF_BUF (io)) == strlen (msg),
+    fail_unless (W_IO_BUF_BUF ((w_io_buf_t*) io) == &b,
+                 "I/O buffer is not the same as the specified one");
+    fail_unless (w_buf_length (W_IO_BUF_BUF ((w_io_buf_t*) io)) == strlen (msg),
                  "I/O buffer has different length than message, "
                  "buffer = %lu, message = %lu",
-                 w_buf_length (W_IO_BUF_BUF (io)),
+                 w_buf_length (W_IO_BUF_BUF ((w_io_buf_t*) io)),
                  strlen (msg));
 
     w_obj_unref (io);
@@ -85,7 +88,7 @@ START_TEST (test_wio_buf_write)
     w_io_write (io, msg, 10);
     w_io_write (io, msg, 10);
 
-    b = W_IO_BUF_BUF (io);
+    b = W_IO_BUF_BUF ((w_io_buf_t*) io);
     fail_if (b == NULL, "null autocreated buffer");
 
     fail_unless (w_buf_length (b) == 30,
