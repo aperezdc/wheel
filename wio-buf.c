@@ -14,7 +14,7 @@ w_io_buf_close (w_io_t *iobase)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
 
-    if (io->own) {
+    if (io->bufp == &io->buf) {
         w_buf_free (&io->buf);
     }
 
@@ -27,8 +27,8 @@ w_io_buf_write (w_io_t *iobase, const void *buf, size_t len)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
 
-    w_buf_length_set (&io->buf, io->pos);
-    w_buf_append_mem (&io->buf, buf, len);
+    w_buf_length_set (io->bufp, io->pos);
+    w_buf_append_mem (io->bufp, buf, len);
     io->pos += len;
     return len;
 }
@@ -40,12 +40,12 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
     w_io_buf_t *io = (w_io_buf_t*) iobase;
     size_t to_read;
 
-    if (io->pos >= io->buf.len) {
+    if (io->pos >= io->bufp->len) {
         return W_IO_EOF;
     }
 
-    to_read = w_min (len, io->buf.len - io->pos);
-    memcpy (buf, io->buf.buf + io->pos, to_read);
+    to_read = w_min (len, io->bufp->len - io->pos);
+    memcpy (buf, io->bufp->buf + io->pos, to_read);
     io->pos += to_read;
     return to_read;
 }
@@ -58,28 +58,15 @@ w_io_buf_init (w_io_buf_t *io, w_buf_t *buf)
 
     w_io_init ((w_io_t*) io);
 
-    if (buf) {
-        /*
-         * XXX This makes the data memory area *shared* by the passed buffer
-         *     and the I/O object. Should not be a problem but having a note
-         *     here is nice in case problems arise. Quick solution would be
-         *     to just *copy* the data in the passed buffer.
-         */
-        memcpy (&io->buf, buf, sizeof (w_buf_t));
-        io->own = W_NO;
-    }
-    else {
-        /*
-         * XXX This has knowledge of w_buf_t internals! It assumes that
-         *     setting everything to zero does the right thing.
-         */
-        memset (&io->buf, 0x00, sizeof (w_buf_t));
-        io->own = W_YES;
-    }
-
+    /*
+     * XXX This has knowledge of w_buf_t internals! It assumes that
+     *     setting everything to zero does the right thing.
+     */
+    memset (&io->buf, 0x00, sizeof (w_buf_t));
     io->parent.close = w_io_buf_close;
     io->parent.write = w_io_buf_write;
     io->parent.read  = w_io_buf_read;
+    io->bufp = buf ? buf : &io->buf;
     io->pos = 0;
 }
 

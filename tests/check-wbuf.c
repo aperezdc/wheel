@@ -151,3 +151,15 @@ START_TEST (test_wbuf_append_buf)
     w_buf_free (&b3);
 }
 END_TEST
+
+
+START_TEST (test_wbuf_format)
+{
+    w_buf_t b = W_BUF;
+
+    w_buf_format (&b, "string: $s number: $l", "the answer", 42);
+    ck_assert_str_eq ("string: the answer number: 42", w_buf_str (&b));
+
+    w_buf_free (&b);
+}
+END_TEST
