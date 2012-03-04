@@ -146,7 +146,7 @@ w_buf_format (w_buf_t *buf, const char *fmt, ...)
     w_assert (buf);
     w_assert (fmt);
 
-    w_io_buf_init (&io, buf);
+    w_io_buf_init (&io, buf, W_YES);
 
     va_start (al, fmt);
     w_io_formatv ((w_io_t*) &io, fmt, al);
