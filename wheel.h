@@ -1917,6 +1917,29 @@ W_EXPORT w_variant_t* w_variant_clear (w_variant_t *variant);
 
 /*\}*/
 
+/*---------------------------------------[ tnetstring serialization ]-----*/
+
+/*!
+ * \defgroup wtnets Serialization to/from tnetstrings.
+ * \addtogroup wtnets
+ * \{
+ *
+ * A more-or-less formal definition of tnetstrings can be found at
+ * http://tnetstrings.org/
+ */
+
+W_EXPORT wbool w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value);
+W_EXPORT wbool w_tnetstr_dump_null (w_buf_t *buffer);
+W_EXPORT wbool w_tnetstr_dump_float (w_buf_t *buffer, double value);
+W_EXPORT wbool w_tnetstr_dump_number (w_buf_t *buffer, long value);
+W_EXPORT wbool w_tnetstr_dump_string (w_buf_t *buffer, const char *value);
+W_EXPORT wbool w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value);
+W_EXPORT wbool w_tnetstr_dump_boolean (w_buf_t *buffer, wbool value);
+W_EXPORT wbool w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
+W_EXPORT wbool w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
+
+/*\}*/
+
 /*---------------------------------------------------[ config files ]-----*/
 
 /*!
