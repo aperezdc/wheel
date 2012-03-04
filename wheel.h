@@ -1718,21 +1718,21 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf);
 /*! Possible types to be stored in a \ref w_variant_t */
 enum w_variant_type
 {
-    W_VARIANT_STRING  = ',', /*!< String                */
-    W_VARIANT_NUMBER  = '#', /*!< Number                */
-    W_VARIANT_FLOAT   = '^', /*!< Floating point number */
-    W_VARIANT_BOOL    = '!', /*!< Boolean               */
-    W_VARIANT_NULL    = '~', /*!< Null                  */
-    W_VARIANT_DICT    = '}', /*!< Dictionary            */
-    W_VARIANT_LIST    = ']', /*!< List                  */
-    W_VARIANT_INVALID = 'Z', /*!< Invalid / no value    */
+    W_VARIANT_INVALID, /*!< Invalid / no value    */
+    W_VARIANT_NULL,    /*!< Null                  */
+    W_VARIANT_STRING,  /*!< String                */
+    W_VARIANT_NUMBER,  /*!< Number                */
+    W_VARIANT_FLOAT,   /*!< Floating point number */
+    W_VARIANT_BOOL,    /*!< Boolean               */
+    W_VARIANT_DICT,    /*!< Dictionary            */
+    W_VARIANT_LIST,    /*!< List                  */
 
     /*
      * Note that this is used as a convenience that allows to easily
      * instantiate W_VARIANT_STRING values from a w_buf_t, but the
      * actual type of the created value will be always W_VARIANT_STRING.
      */
-    W_VARIANT_BUFFER  = 'B',
+    W_VARIANT_BUFFER,
 };
 
 typedef enum w_variant_type w_variant_type_t;
