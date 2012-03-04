@@ -1759,6 +1759,27 @@ W_OBJ (w_variant_t)
     w_variant_value_t value;
 };
 
+/*!
+ * Static initilizer for variant values. This can be used to create
+ * variant values in the stack. Note that it it still needed to use
+ * \ref w_variant_clear before the variable goes out of scope, to
+ * ensure that the reference counter of lists and dicts is properly
+ * updated:
+ *
+ * \code
+ * w_list_t *l = w_list_new (W_NO);
+ * w_variant_t v = W_VARIANT;
+ * w_variant_set_list (&v, l);
+ * w_obj_unref (l);
+ * // use the variant...
+ * w_variant_clear (&v);
+ * \endcode
+ *
+ * Variants initialized this way will have invalid type until a
+ * value of some type is stored in them.
+ */
+#define W_VARIANT \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_INVALID, { W_BUF } }
 
 /*! Obtains the type of the value stored in a variant. */
 #define w_variant_type(_v) \
