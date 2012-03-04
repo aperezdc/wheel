@@ -1820,6 +1820,10 @@ W_OBJ (w_variant_t)
 #define w_variant_string(_v) \
     (w_buf_str (&((_v)->value.stringbuf)))
 
+/*! Obtains a pointer to the buffer used to store a string. */
+#define w_variant_string_buf(_v) \
+    (&((_v)->value.stringbuf))
+
 /*! Assigns buffer contents as string value to a variant, mutating it if needed. */
 #define w_variant_set_buffer(_v, _b)               \
     (w_variant_clear(_v)->type = W_VARIANT_STRING, \
