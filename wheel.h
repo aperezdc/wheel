@@ -1464,8 +1464,12 @@ W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
  * This function is not meant to be used directly, but is provided as
  * a convenience for other code extending \ref w_io_buf_t, or wanting to
  * quickly allocate a \ref w_io_buf_t in the stack.
+ *
+ * \param io I/O buffer object.
+ * \param buf Buffer with optional initial data.
+ * \param append Whether \i buf will be used for appending data.
  */
-W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf);
+W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, wbool append);
 
 /*!
  * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.

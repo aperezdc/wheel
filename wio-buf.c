@@ -52,7 +52,7 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
 
 
 void
-w_io_buf_init (w_io_buf_t *io, w_buf_t *buf)
+w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, wbool append)
 {
     w_assert (io);
 
@@ -63,11 +63,12 @@ w_io_buf_init (w_io_buf_t *io, w_buf_t *buf)
      *     setting everything to zero does the right thing.
      */
     memset (&io->buf, 0x00, sizeof (w_buf_t));
+
     io->parent.close = w_io_buf_close;
     io->parent.write = w_io_buf_write;
     io->parent.read  = w_io_buf_read;
     io->bufp = buf ? buf : &io->buf;
-    io->pos = 0;
+    io->pos = append ? w_buf_length (io->bufp) : 0;
 }
 
 
@@ -75,7 +76,7 @@ w_io_t*
 w_io_buf_open (w_buf_t *buf)
 {
     w_io_buf_t *io = w_obj_new (w_io_buf_t);
-    w_io_buf_init (io, buf);
+    w_io_buf_init (io, buf, W_NO);
     return (w_io_t*) io;
 }
 
