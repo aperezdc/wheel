@@ -176,6 +176,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
         const char   *vcharp;
         w_buf_t      *vbufp;
         intptr_t      vpointer;
+        double        vfpnum;
     } v;
 
     w_assert (io);
@@ -215,6 +216,11 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
             case 'O':
                 v.vulong = va_arg (args, unsigned long);
                 w_io_format_ulong_oct (io, v.vulong);
+                break;
+            case 'f':
+            case 'F':
+                v.vfpnum = va_arg (args, double);
+                w_io_format_double (io, v.vfpnum);
                 break;
             case 'p':
                 v.vpointer = (intptr_t) va_arg (args, void*);
