@@ -1992,6 +1992,41 @@ W_EXPORT wbool w_tnetstr_parse_boolean (const w_buf_t *buffer, wbool *value);
 W_EXPORT wbool w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value);
 W_EXPORT wbool w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value);
 
+W_EXPORT wbool w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer);
+
+static inline w_variant_t*
+w_tnetstr_read (w_io_t *io)
+{
+    w_buf_t buf = W_BUF;
+    w_variant_t *variant = NULL;
+    w_assert (io);
+    if (w_tnetstr_read_to_buffer (io, &buf)) goto E;
+    variant = w_tnetstr_parse (&buf);
+E:  w_buf_free (&buf);
+    return variant;
+}
+
+#define _W_TNS_READF(_name, _type)                           \
+    static inline wbool                                      \
+    w_tnetstr_read_ ## _name (w_io_t *io, _type *value) {    \
+        w_buf_t buf = W_BUF;                                 \
+        w_assert (io);                                       \
+        w_assert (value);                                    \
+        if (w_tnetstr_read_to_buffer (io, &buf)) goto E;     \
+        if (w_tnetstr_parse_ ## _name (&buf, value)) goto E; \
+        w_buf_free (&buf); return W_NO;                      \
+    E:  w_buf_free (&buf); return W_YES;                     \
+    }
+
+_W_TNS_READF (float,   double  )
+_W_TNS_READF (number,  long int)
+_W_TNS_READF (string,  w_buf_t )
+_W_TNS_READF (boolean, wbool   )
+_W_TNS_READF (list,    w_list_t)
+_W_TNS_READF (dict,    w_dict_t)
+
+#undef _W_TNS_READF
+
 /*\}*/
 
 /*---------------------------------------------------[ config files ]-----*/

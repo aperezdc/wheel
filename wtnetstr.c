@@ -370,6 +370,41 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
 
 
 wbool
+w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
+{
+    unsigned blen = _W_TNS_SIZE_DIGITS + 1; /* number + colon */
+    unsigned plen;
+    int ch = '\0';
+
+    w_assert (io);
+    w_assert (buffer);
+
+    for (plen = 0; blen-- && (ch = w_io_getchar (io)) != ':'; plen *= 10) {
+        w_buf_append_char (buffer, ch);
+        plen += ch - '0';
+    }
+    plen /= 10;
+
+    if (w_unlikely (plen > _W_TNS_MAX_PAYLOAD || ch != ':'))
+        goto return_error;
+
+    w_buf_append_char (buffer, ':');
+
+    /*
+     * Extend buffer to fit the payload data plus the terminating character.
+     */
+    blen = w_buf_length (buffer);
+    w_buf_length_set (buffer, ++plen + blen);
+
+    return w_io_read (io, buffer->buf + blen, plen) != plen;
+
+return_error:
+    w_buf_free (buffer);
+    return W_YES;
+}
+
+
+wbool
 w_tnetstr_parse_null (const w_buf_t *buffer)
 {
     w_assert (buffer);
