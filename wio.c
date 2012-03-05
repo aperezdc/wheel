@@ -65,9 +65,7 @@ w_io_read (w_io_t *io, void *buf, size_t len)
         io->backch = W_IO_EOF;
 
         /* Check whether more characters are to be read */
-        if (!--len) {
-            return W_YES;
-        }
+        if (!--len) return 1;
     }
 
     return (io->read)
@@ -99,13 +97,6 @@ w_io_getchar (w_io_t *io)
     char ch;
 
     w_assert (io);
-
-    /* If there is a putback character, just return it */
-    if (w_unlikely (io->backch != W_IO_EOF)) {
-        ch = io->backch;
-        io->backch = W_IO_EOF;
-        return ch;
-    }
 
     switch ((ret = w_io_read (io, &ch, 1))) {
         case 1: /* One byte read, return character */

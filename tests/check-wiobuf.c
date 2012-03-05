@@ -78,6 +78,30 @@ START_TEST (test_wio_buf_read)
 END_TEST
 
 
+START_TEST (test_wio_buf_getchar)
+{
+    w_buf_t buf = W_BUF;
+    w_io_t *io;
+    int ch;
+
+    w_buf_set_str (&buf, "abcde");
+    io = w_io_buf_open (&buf);
+
+    ch = w_io_getchar (io); ck_assert_int_eq ('a', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('b', ch);
+    w_io_putback (io, 'X');
+    ch = w_io_getchar (io); ck_assert_int_eq ('X', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('c', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('d', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('e', ch);
+    w_io_putback (io, 'Y');
+    ch = w_io_getchar (io); ck_assert_int_eq ('Y', ch);
+
+    w_obj_unref (io);
+}
+END_TEST
+
+
 START_TEST (test_wio_buf_write)
 {
     w_io_t *io;
