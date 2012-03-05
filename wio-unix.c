@@ -23,9 +23,10 @@ w_io_unix_close (w_io_t *iobase)
 
 
 static ssize_t
-w_io_unix_write (w_io_t *io, const void *buf, size_t len)
+w_io_unix_write (w_io_t *io, const void *bufp, size_t len)
 {
     ssize_t ret, n = len;
+    const char *buf = bufp;
 
     while (len > 0) {
         do {
