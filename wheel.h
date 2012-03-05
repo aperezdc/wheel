@@ -70,8 +70,6 @@ typedef void** w_iterator_t;
 typedef void* (*w_traverse_fun_t)(void *data, void *context);
 typedef void  (*w_action_fun_t)(void *object, void *context);
 
-typedef enum wbool wbool;
-
 /*!
  * Boolean data type.
  */
@@ -80,6 +78,9 @@ enum wbool
     W_NO = 0, /*!< False value. */
     W_YES     /*!< True value. */
 };
+
+typedef enum wbool wbool;
+
 
 /*
  * Use this macros to control symbol visibility with recent GCC compilers
