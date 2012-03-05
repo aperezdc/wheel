@@ -326,6 +326,29 @@ CHECK_DFAILF (fail00, "dafda")
 CHECK_DFAILF (dotonly,    ".")
 
 
+START_TEST (test_wio_fscan_two_mixed)
+{
+    long lval;
+    long xval;
+    IOSTR ("foo45:bar0xbabar");
+
+    fail_unless (w_io_fscan (io, "foo$l:bar$Xr", &lval, &xval) == 2,
+                 "Could not scan two values");
+    ck_assert_int_eq (45, lval);
+    ck_assert_int_eq (0xbaba, xval);
+    w_obj_unref (io);
+}
+END_TEST
+
+START_TEST (test_wio_fscan_empty_input)
+{
+    IOSTR ("");
+    fail_unless (w_io_fscan (io, "") == 0,
+                 "Coult not scan zero values");
+    w_obj_unref (io);
+}
+END_TEST
+
 START_TEST (test_wio_fscan_trailing_stuff)
 {
     double dval;

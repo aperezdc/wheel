@@ -269,6 +269,7 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
 {
     wbool (*rfun) (w_io_t*, void*);
     ssize_t retval = 0;
+    int ch;
 
     w_assert (io);
     w_assert (fmt);
@@ -276,31 +277,33 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
 #define CHAR_TO_FUN(_c, _f) \
         case _c : rfun = (wbool (*)(w_io_t*, void*)) _f; break
 
-    while (*fmt) {
-        void *dptr = va_arg (args, void*);
+    for (; *fmt ; fmt++) {
+        if (*fmt == '$') {
+            void *dptr = va_arg (args, void*);
 
-        if (!dptr)
-            break;
+            switch (*(++fmt)) {
+                CHAR_TO_FUN ('i', w_io_fscan_int);
+                CHAR_TO_FUN ('l', w_io_fscan_long);
+                CHAR_TO_FUN ('I', w_io_fscan_uint);
+                CHAR_TO_FUN ('L', w_io_fscan_ulong);
+                CHAR_TO_FUN ('X', w_io_fscan_ulong_hex);
+                CHAR_TO_FUN ('O', w_io_fscan_ulong_oct);
+                CHAR_TO_FUN ('f', w_io_fscan_float);
+                CHAR_TO_FUN ('F', w_io_fscan_double);
+                default: rfun = NULL;
+            }
 
-        switch (*fmt++) {
-            CHAR_TO_FUN ('i', w_io_fscan_int);
-            CHAR_TO_FUN ('l', w_io_fscan_long);
-            CHAR_TO_FUN ('I', w_io_fscan_uint);
-            CHAR_TO_FUN ('L', w_io_fscan_ulong);
-            CHAR_TO_FUN ('X', w_io_fscan_ulong_hex);
-            CHAR_TO_FUN ('O', w_io_fscan_ulong_oct);
-            CHAR_TO_FUN ('f', w_io_fscan_float);
-            CHAR_TO_FUN ('F', w_io_fscan_double);
-            default: rfun = NULL;
+            if (rfun) {
+                if (!(*rfun) (io, dptr))
+                    retval++;
+                continue;
+            }
         }
 
-        if (!rfun)
+        if ((ch = w_io_getchar (io)) != *fmt) {
+            w_io_putback (io, ch);
             break;
-
-        if ((*rfun) (io, dptr))
-            break;
-
-        retval++;
+        }
     }
 
     return retval;
