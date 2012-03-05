@@ -1939,6 +1939,50 @@ W_EXPORT wbool w_tnetstr_dump_boolean (w_buf_t *buffer, wbool value);
 W_EXPORT wbool w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
 W_EXPORT wbool w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
 
+W_EXPORT wbool w_tnetstr_write (w_io_t *io, const w_variant_t *value);
+W_EXPORT wbool w_tnetstr_write_null (w_io_t *io);
+W_EXPORT wbool w_tnetstr_write_string (w_io_t *io, const char *value);
+W_EXPORT wbool w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value);
+W_EXPORT wbool w_tnetstr_write_boolean (w_io_t *io, wbool value);
+
+static inline wbool
+w_tnetstr_write_float (w_io_t *io, double value)
+{
+    w_buf_t buf = W_BUF;
+    w_assert (io);
+    return w_tnetstr_dump_float (&buf, value)
+        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+}
+
+static inline wbool
+w_tnetstr_write_number (w_io_t *io, long value)
+{
+    w_buf_t buf = W_BUF;
+    w_assert (io);
+    return w_tnetstr_dump_number (&buf, value)
+        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+}
+
+static inline wbool
+w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
+{
+    w_buf_t buf = W_BUF;
+    w_assert (io);
+    w_assert (value);
+    return w_tnetstr_dump_list (&buf, value)
+        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+}
+
+static inline wbool
+w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
+{
+    w_buf_t buf = W_BUF;
+    w_assert (io);
+    w_assert (value);
+    return w_tnetstr_dump_dict (&buf, value)
+        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+}
+
 W_EXPORT w_variant_t* w_tnetstr_parse (const w_buf_t *buffer);
 W_EXPORT wbool w_tnetstr_parse_null (const w_buf_t *buffer);
 W_EXPORT wbool w_tnetstr_parse_float (const w_buf_t *buffer, double *value);
