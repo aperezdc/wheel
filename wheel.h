@@ -483,18 +483,18 @@ w_strncpy(char *dst, const char *src, size_t n)
 W_OBJ (w_list_t)
 {
     w_obj_t parent;
-    size_t  count;
+    size_t  size;
     wbool   refs;
     /* actual data is stored in the private area of the list */
 };
 
 /*! Get the number of elements in a list. */
-#define w_list_count(_l) \
-    (w_assert (_l), (_l)->count)
+#define w_list_size(_l) \
+    (w_assert (_l), (_l)->size)
 
 /*! Checks whether a list is empty. */
 #define w_list_empty(_l) \
-    (w_assert (_l), (_l)->count > 0)
+    (w_assert (_l), (_l)->size > 0)
 
 /*!
  * Creates a new list.

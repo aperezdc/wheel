@@ -287,13 +287,13 @@ START_TEST (test_wtnetstr_parse_list)
     w_buf_set_str (&b, "0:]");
     fail_if (w_tnetstr_parse_list (&b, list),
              "Could not parse empty list");
-    ck_assert_int_eq (0, w_list_count (list));
+    ck_assert_int_eq (0, w_list_size (list));
 
     /* one item */
     w_buf_set_str (&b, "3:0:~]");
     fail_if (w_tnetstr_parse_list (&b, list),
              "Coult not parse 1-item list");
-    ck_assert_int_eq (1, w_list_count (list));
+    ck_assert_int_eq (1, w_list_size (list));
     fail_unless (w_variant_is_null ((w_variant_t*) w_list_at (list, 0)),
                  "Item in list is not a null");
     w_list_clear (list);
@@ -302,7 +302,7 @@ START_TEST (test_wtnetstr_parse_list)
     w_buf_set_str (&b, "6:0:~0:~]");
     fail_if (w_tnetstr_parse_list (&b, list),
              "Coult not parse 2-item list");
-    ck_assert_int_eq (2, w_list_count (list));
+    ck_assert_int_eq (2, w_list_size (list));
     fail_unless (w_variant_is_null ((w_variant_t*) w_list_at (list, 0)),
                  "Item[0] in list is not a null");
     fail_unless (w_variant_is_null ((w_variant_t*) w_list_at (list, 1)),
@@ -313,7 +313,7 @@ START_TEST (test_wtnetstr_parse_list)
     w_buf_set_str (&b, "9:0:~3:0:~]]"); /* [null, [null]] */
     fail_if (w_tnetstr_parse_list (&b, list),
              "Coult not parse 2-item list");
-    ck_assert_int_eq (2, w_list_count (list));
+    ck_assert_int_eq (2, w_list_size (list));
     fail_unless (w_variant_is_null ((w_variant_t*) w_list_at (list, 0)),
                  "Item[0] in list is not a null");
     fail_unless (w_variant_is_list ((w_variant_t*) w_list_at (list, 1)),

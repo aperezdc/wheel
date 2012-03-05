@@ -32,8 +32,8 @@ w_list_new (wbool refs)
     w_list_t *list = w_obj_new_with_priv_sized (w_list_t,
                                                 sizeof (struct w_list_head));
     struct w_list_head *h = w_obj_priv (list, w_list_t);
-    list->refs  = refs;
-    list->count = 0;
+    list->refs = refs;
+    list->size = 0;
     TAILQ_INIT (h);
     return w_obj_dtor (list, (w_obj_dtor_t) w_list_clear);
 }
@@ -51,7 +51,7 @@ w_list_clear (w_list_t *list)
             w_obj_unref (e->value);
         w_free (e);
     }
-    list->count = 0;
+    list->size = 0;
 }
 
 
@@ -64,7 +64,7 @@ w_list_push_tail (w_list_t *list, void *item)
     e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_TAIL (h, e, tailq);
-    list->count++;
+    list->size++;
 }
 
 
@@ -77,7 +77,7 @@ w_list_push_head (w_list_t *list, void *item)
     e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_HEAD (h, e, tailq);
-    list->count++;
+    list->size++;
 }
 
 
@@ -87,11 +87,11 @@ w_list_pop_head (w_list_t *list)
     void *r;
     _W_LIST_HE;
 
-    w_assert (list->count > 0);
+    w_assert (list->size > 0);
 
     e = TAILQ_FIRST (h);
     TAILQ_REMOVE (h, e, tailq);
-    list->count--;
+    list->size--;
     r = e->value;
     w_free (e);
     return r;
@@ -104,11 +104,11 @@ w_list_pop_tail (w_list_t *list)
     void *r;
     _W_LIST_HE;
 
-    w_assert (list->count > 0);
+    w_assert (list->size > 0);
 
     e = TAILQ_LAST (h, w_list_head);
     TAILQ_REMOVE (h, e, tailq);
-    list->count--;
+    list->size--;
     r = e->value;
     w_free (e);
     return r;
@@ -121,8 +121,8 @@ w_list_at (const w_list_t *list, long index)
     size_t pos;
     _W_LIST_HE;
 
-    pos = (index < 0) ? list->count + index : (size_t) index;
-    w_assert (pos < list->count);
+    pos = (index < 0) ? list->size + index : (size_t) index;
+    w_assert (pos < list->size);
 
     e = TAILQ_FIRST (h);
     while (pos--)
@@ -206,7 +206,7 @@ w_list_insert_before (w_list_t *list, w_iterator_t i, void *item)
     e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_BEFORE ((struct w_list_entry*) i, e, tailq);
-    list->count++;
+    list->size++;
 }
 
 
@@ -219,7 +219,7 @@ w_list_insert_after (w_list_t *list, w_iterator_t i, void *item)
     e->value = list->refs ? w_obj_ref (item) : item;
 
     TAILQ_INSERT_AFTER (h, (struct w_list_entry*) i, e, tailq);
-    list->count++;
+    list->size++;
 }
 
 
@@ -236,9 +236,9 @@ w_list_insert_at (w_list_t *list, long index, void *item)
     }
     else {
         struct w_list_entry *ref;
-        size_t pos = (index < 0) ? list->count + index : (size_t) index;
+        size_t pos = (index < 0) ? list->size + index : (size_t) index;
 
-        w_assert (pos <= list->count);
+        w_assert (pos <= list->size);
 
         ref = TAILQ_FIRST (h);
         while (pos--)
@@ -246,7 +246,7 @@ w_list_insert_at (w_list_t *list, long index, void *item)
 
         TAILQ_INSERT_BEFORE (ref, e, tailq);
     }
-    list->count++;
+    list->size++;
 }
 
 
@@ -258,7 +258,7 @@ w_list_del (w_list_t *list, w_iterator_t i)
     TAILQ_REMOVE (h, e, tailq);
     if (list->refs)
         w_obj_unref (e->value);
-    list->count--;
+    list->size--;
 }
 
 
@@ -268,8 +268,8 @@ w_list_del_at (w_list_t *list, long index)
     size_t pos;
     _W_LIST_HE;
 
-    pos = (index < 0) ? list->count + index : (size_t) index;
-    w_assert (pos < list->count);
+    pos = (index < 0) ? list->size + index : (size_t) index;
+    w_assert (pos < list->size);
 
     e = TAILQ_FIRST (h);
     while (pos--)
@@ -277,5 +277,5 @@ w_list_del_at (w_list_t *list, long index)
     TAILQ_REMOVE (h, e, tailq);
     if (list->refs)
         w_obj_unref (e->value);
-    list->count--;
+    list->size--;
 }

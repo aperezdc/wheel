@@ -11,13 +11,13 @@
 START_TEST (test_wlist_itemcount)
 {
     w_list_t *l = w_list_new (W_NO);
-    ck_assert_int_eq (0, w_list_count (l));
+    ck_assert_int_eq (0, w_list_size (l));
 
     w_list_append (l, (void*) 0xcafebabe);
-    ck_assert_int_eq (1, w_list_count (l));
+    ck_assert_int_eq (1, w_list_size (l));
 
     w_list_append (l, (void*) 0xdeadface);
-    ck_assert_int_eq (2, w_list_count (l));
+    ck_assert_int_eq (2, w_list_size (l));
 
     w_obj_unref (l);
 }
@@ -80,7 +80,7 @@ START_TEST (test_wlist_iterate)
     for (i = 0; i < w_lengthof (items); i++)
         w_list_append (l, items[i]);
 
-    ck_assert_int_eq (w_lengthof (items), w_list_count (l));
+    ck_assert_int_eq (w_lengthof (items), w_list_size (l));
 
     i = 0;
     w_list_foreach (l, iter)
