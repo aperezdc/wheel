@@ -43,7 +43,7 @@ _buf_xsetlen(w_buf_t *buf, size_t len)
 
 
 void
-w_buf_length_set (w_buf_t *buf, size_t len)
+w_buf_resize (w_buf_t *buf, size_t len)
 {
     w_assert (buf);
     _buf_xsetlen (buf, len);
@@ -130,7 +130,7 @@ w_buf_str (w_buf_t *buf)
 
 
 void
-w_buf_free (w_buf_t *buf)
+w_buf_clear (w_buf_t *buf)
 {
     w_assert (buf);
     _buf_xsetlen (buf, 0);

@@ -293,7 +293,7 @@ w_parse_string (w_parse_t *p)
                             num[1] = w_io_getchar (p->input);
                             num[2] = '\0';
                             if (!isxdigit (num[0]) || !isxdigit (num[1])) {
-                                w_buf_free (&buf);
+                                w_buf_clear (&buf);
                                 w_parse_error (p, "Invalid hex sequence");
                             }
                             chr = strtol (num, NULL, 16);

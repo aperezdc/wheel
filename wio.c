@@ -224,7 +224,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
                 break;
             case 'B':
                 v.vbufp = va_arg (args, w_buf_t*);
-                w_io_write (io, w_buf_str (v.vbufp), w_buf_length (v.vbufp));
+                w_io_write (io, w_buf_str (v.vbufp), w_buf_size (v.vbufp));
                 break;
             case 'S':
                 len_aux  = va_arg (args, size_t);
@@ -328,7 +328,7 @@ w_io_read_until (w_io_t  *io,
         ssize_t c;
         char *pos;
 
-        pos = memchr (overflow->buf, stopchar, w_buf_length (overflow));
+        pos = memchr (overflow->buf, stopchar, w_buf_size (overflow));
         if (pos != NULL) {
             /*
              * Stop character is in overflow buffer: remove it from the
@@ -338,22 +338,22 @@ w_io_read_until (w_io_t  *io,
             w_buf_append_mem (buffer, overflow->buf, len);
             overflow->len -= len;
             memmove (overflow->buf, overflow->buf + len, overflow->len);
-            w_buf_length_set (buffer, buffer->len - 1);
-            return w_buf_length (buffer);
+            w_buf_resize (buffer, w_buf_size (buffer) - 1);
+            return w_buf_size (buffer);
         }
 
         if (overflow->bsz < (overflow->len + readbytes)) {
             /*
-             * XXX Calling w_buf_length_set() will *both* resize the buffer
+             * XXX Calling w_buf_resize() will *both* resize the buffer
              * data area and set overflow->bsz *and* overflow->len. But we
              * do not want the later to be changed we save and restore it.
              */
-            size_t oldlen = overflow->len;
-            w_buf_length_set (overflow, overflow->len + readbytes);
-            overflow->len = oldlen;
+            size_t oldlen = w_buf_size (overflow);
+            w_buf_resize (overflow, overflow->len + readbytes);
+            w_buf_size (overflow) = oldlen;
         }
 
-        c = w_io_read (io, overflow->buf + overflow->len, readbytes);
+        c = w_io_read (io, overflow->buf + w_buf_size (overflow), readbytes);
 
         if (c > 0)
             overflow->len += c;

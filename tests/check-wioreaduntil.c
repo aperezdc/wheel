@@ -28,26 +28,26 @@ START_TEST (test_wio_read_line)
     ret = w_io_read_line (io, &line, &over, 0);
     ck_assert_int_ne (W_IO_EOF, ret);
     ck_assert_int_ne (W_IO_ERR, ret);
-    ck_assert_int_eq (8, w_buf_length (&line));
+    ck_assert_int_eq (8, w_buf_size (&line));
     ck_assert_str_eq ("Line one", w_buf_str (&line));
-    fail_if (w_buf_length (&over) <= 0, "No overflow?");
-    w_buf_reset (&line);
+    fail_if (w_buf_size (&over) <= 0, "No overflow?");
+    w_buf_clear (&line);
 
     /* Read next line */
     ret = w_io_read_line (io, &line, &over, 0);
     ck_assert_int_ne (W_IO_EOF, ret);
     ck_assert_int_ne (W_IO_ERR, ret);
     ck_assert_str_eq ("Another line, number two", w_buf_str (&line));
-    fail_if (w_buf_length (&over) <= 0, "No overflow?");
-    w_buf_reset (&line);
+    fail_if (w_buf_size (&over) <= 0, "No overflow?");
+    w_buf_clear (&line);
 
     /* And now for the last one */
     ret = w_io_read_line (io, &line, &over, 0);
     ck_assert_int_eq (W_IO_EOF, ret);
     ck_assert_str_eq ("And one more line, making it the third.", w_buf_str (&over));
-    fail_if (w_buf_length (&line), "Line should be empty");
-    w_buf_reset (&line);
-    w_buf_reset (&over);
+    fail_if (w_buf_size (&line), "Line should be empty");
+    w_buf_clear (&line);
+    w_buf_clear (&over);
 
     w_obj_unref (io);
 }
@@ -69,26 +69,26 @@ START_TEST (test_wio_read_line_smallbuf)
     ret = w_io_read_line (io, &line, &over, 10);
     ck_assert_int_ne (W_IO_EOF, ret);
     ck_assert_int_ne (W_IO_ERR, ret);
-    ck_assert_int_eq (8, w_buf_length (&line));
+    ck_assert_int_eq (8, w_buf_size (&line));
     ck_assert_str_eq ("Line one", w_buf_str (&line));
-    fail_if (w_buf_length (&over) <= 0, "No overflow?");
-    w_buf_reset (&line);
+    fail_if (w_buf_size (&over) <= 0, "No overflow?");
+    w_buf_clear (&line);
 
     /* Read next line */
     ret = w_io_read_line (io, &line, &over, 10);
     ck_assert_int_ne (W_IO_EOF, ret);
     ck_assert_int_ne (W_IO_ERR, ret);
     ck_assert_str_eq ("Another line, number two", w_buf_str (&line));
-    fail_if (w_buf_length (&over) <= 0, "No overflow?");
-    w_buf_reset (&line);
+    fail_if (w_buf_size (&over) <= 0, "No overflow?");
+    w_buf_clear (&line);
 
     /* And now for the last one */
     ret = w_io_read_line (io, &line, &over, 10);
     ck_assert_int_eq (W_IO_EOF, ret);
     ck_assert_str_eq ("And one more line, making it the third.", w_buf_str (&over));
-    fail_if (w_buf_length (&line), "Line should be empty");
-    w_buf_reset (&line);
-    w_buf_reset (&over);
+    fail_if (w_buf_size (&line), "Line should be empty");
+    w_buf_clear (&line);
+    w_buf_clear (&over);
 
     w_obj_unref (io);
 }
@@ -113,8 +113,8 @@ START_TEST (test_wio_read_empty_line)
     /* Read empty line */
     ret = w_io_read_line (io, &line, &over, 0);
     ck_assert_int_eq (0, ret);
-    ck_assert_int_eq (0, w_buf_length (&line));
-    ck_assert_int_eq (0, w_buf_length (&over));
+    ck_assert_int_eq (0, w_buf_size (&line));
+    ck_assert_int_eq (0, w_buf_size (&over));
     ck_assert_int_ne (W_IO_ERR, ret);
     ck_assert_int_ne (W_IO_EOF, ret);
 
@@ -122,8 +122,8 @@ START_TEST (test_wio_read_empty_line)
     ret = w_io_read_line (io, &line, &over, 0);
     ck_assert_int_eq (W_IO_EOF, ret);
 
-    w_buf_free (&line);
-    w_buf_free (&over);
+    w_buf_clear (&line);
+    w_buf_clear (&over);
     w_obj_unref (io);
 
 }

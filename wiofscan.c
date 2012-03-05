@@ -92,10 +92,10 @@ w_io_fscan_double (w_io_t *io, double *result)
         w_buf_append_char (&buf, c);
     }
 
-    if (!w_buf_length (&buf))
+    if (!w_buf_size (&buf))
         goto failure;
 
-    if (got_dot && w_buf_length (&buf) == 1) {
+    if (got_dot && w_buf_size (&buf) == 1) {
         w_assert (buf.buf[0] == '.');
         c = '.';
         goto failure;
@@ -105,12 +105,12 @@ w_io_fscan_double (w_io_t *io, double *result)
         *result = strtod (w_buf_str (&buf), NULL);
 
 success:
-    w_buf_free (&buf);
+    w_buf_clear (&buf);
     return W_NO;
 
 failure:
     w_io_putback (io, c);
-    w_buf_free (&buf);
+    w_buf_clear (&buf);
     return W_YES;
 }
 

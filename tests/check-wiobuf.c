@@ -24,7 +24,7 @@ START_TEST (test_wio_buf_open_empty)
 
     fail_unless (buf != NULL,
                  "I/O has no autocreated buffer");
-    fail_unless (w_buf_length (buf) == 0,
+    fail_unless (w_buf_size (buf) == 0,
                  "I/O autocreated buffer does not have zero length");
 
     w_obj_unref (io);
@@ -44,10 +44,10 @@ START_TEST (test_wio_buf_open_nonempty)
                 "I/O has no buffer");
     fail_unless (W_IO_BUF_BUF ((w_io_buf_t*) io) == &b,
                  "I/O buffer is not the same as the specified one");
-    fail_unless (w_buf_length (W_IO_BUF_BUF ((w_io_buf_t*) io)) == strlen (msg),
+    fail_unless (w_buf_size (W_IO_BUF_BUF ((w_io_buf_t*) io)) == strlen (msg),
                  "I/O buffer has different length than message, "
                  "buffer = %lu, message = %lu",
-                 w_buf_length (W_IO_BUF_BUF ((w_io_buf_t*) io)),
+                 w_buf_size (W_IO_BUF_BUF ((w_io_buf_t*) io)),
                  strlen (msg));
 
     w_obj_unref (io);
@@ -115,9 +115,9 @@ START_TEST (test_wio_buf_write)
     b = W_IO_BUF_BUF ((w_io_buf_t*) io);
     fail_if (b == NULL, "null autocreated buffer");
 
-    fail_unless (w_buf_length (b) == 30,
+    fail_unless (w_buf_size (b) == 30,
                  "buffer length %lu, expected 30",
-                 (unsigned long) w_buf_length (b));
+                 (unsigned long) w_buf_size (b));
 
     fail_if (memcmp (b->buf +  0, msg, 10), "buffers do not match");
     fail_if (memcmp (b->buf + 10, msg, 10), "buffers do not match");

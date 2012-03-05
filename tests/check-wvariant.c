@@ -37,7 +37,7 @@ START_TEST (test_wvariant_store_vals)
 
     w_buf_append_str (&buf, "Welcome Mr. Marshall");
     var = w_variant_new (W_VARIANT_BUFFER, &buf);
-    w_buf_reset (&buf);
+    w_buf_clear (&buf);
     ck_assert_int_eq (W_VARIANT_STRING, w_variant_type (var));
     ck_assert_str_eq ("Welcome Mr. Marshall", w_variant_string (var));
     w_obj_unref (var);

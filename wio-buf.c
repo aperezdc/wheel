@@ -14,9 +14,8 @@ w_io_buf_close (w_io_t *iobase)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
 
-    if (io->bufp == &io->buf) {
-        w_buf_free (&io->buf);
-    }
+    if (io->bufp == &io->buf)
+        w_buf_clear (&io->buf);
 
     return W_YES;
 }
@@ -27,7 +26,7 @@ w_io_buf_write (w_io_t *iobase, const void *buf, size_t len)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
 
-    w_buf_length_set (io->bufp, io->pos);
+    w_buf_resize (io->bufp, io->pos);
     w_buf_append_mem (io->bufp, buf, len);
     io->pos += len;
     return len;
@@ -68,7 +67,7 @@ w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, wbool append)
     io->parent.write = w_io_buf_write;
     io->parent.read  = w_io_buf_read;
     io->bufp = buf ? buf : &io->buf;
-    io->pos = append ? w_buf_length (io->bufp) : 0;
+    io->pos = append ? w_buf_size (io->bufp) : 0;
 }
 
 

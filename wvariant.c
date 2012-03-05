@@ -22,7 +22,7 @@ _w_variant_clear (w_variant_t *v)
 
         case W_VARIANT_BUFFER:
         case W_VARIANT_STRING:
-            w_buf_free (&v->value.stringbuf);
+            w_buf_clear (&v->value.stringbuf);
             break;
 
         case W_VARIANT_LIST:

@@ -1103,8 +1103,8 @@ W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
  * it is tracked, so it is even possible to add null bytes to a buffer.
  * Allocating a buffer is done in the stack, so it is very fast, the macro
  * \ref W_BUF is provided to intialize them; once that is done all buffer
- * functions can be used, and once working with tha buffer has finished,
- * its contents must be deallocated using \ref w_buf_free:
+ * functions can be used, and once working with the buffer has finished,
+ * its contents must be deallocated using \ref w_buf_clear:
  *
  * \code
  * w_buf_t b = W_BUF;
@@ -1115,7 +1115,7 @@ W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
  *
  * printf ("%s\n", w_buf_str (&b));
  *
- * w_buf_free (&b);
+ * w_buf_clear (&b);
  * \endcode
  *
  * In the above example, a buffer is created, some strings appended to it
@@ -1149,24 +1149,23 @@ struct w_buf_t
 
 
 /*!
- * Get the length of a buffer
+ * Get the length of a buffer.
  */
-#define w_buf_length(_b) ((_b)->len)
+#define w_buf_size(_b) ((_b)->len)
 
 /*!
- * Reset a buffer to its initial (empty) state
+ * Checks whether a buffer is empty.
  */
-#define w_buf_reset w_buf_free
+#define w_buf_empty(_b) ((_b)->len == 0)
 
 /*!
- * Adjust the length of a buffer keeping contents.
+ * Adjust the size of a buffer keeping contents.
  * This is mostly useful for trimming contents, when shrinking the buffer.
  * When a buffer grows, random data is liklely to appear at the end.
  * \param buf A \ref w_buf_t buffer
- * \param len New length of the buffer
+ * \param size New size of the buffer
  */
-W_EXPORT void w_buf_length_set (w_buf_t *buf,
-                                size_t  len);
+W_EXPORT void w_buf_resize (w_buf_t *buf, size_t size);
 
 /*!
  * Set the contents of a buffer to a C string.
@@ -1224,7 +1223,7 @@ W_EXPORT void w_buf_format (w_buf_t    *buf,
  * Frees the contents of a buffer.
  * \param buf A \ref w_buf_t buffer
  */
-W_EXPORT void w_buf_free (w_buf_t *buf);
+W_EXPORT void w_buf_clear (w_buf_t *buf);
 
 /*!
  * Get the buffer as a C string.
@@ -1668,7 +1667,7 @@ W_OBJ (w_io_buf_t)
  * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
  *            \ref w_buf_t internally which can be retrieved with
  *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
- *            you will be responsible to call \ref w_buf_free on it.
+ *            you will be responsible to call \ref w_buf_clear on it.
  */
 W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
 
@@ -2008,7 +2007,7 @@ w_tnetstr_read (w_io_t *io)
     w_assert (io);
     if (w_tnetstr_read_to_buffer (io, &buf)) goto E;
     variant = w_tnetstr_parse (&buf);
-E:  w_buf_free (&buf);
+E:  w_buf_clear (&buf);
     return variant;
 }
 
@@ -2020,8 +2019,8 @@ E:  w_buf_free (&buf);
         w_assert (value);                                    \
         if (w_tnetstr_read_to_buffer (io, &buf)) goto E;     \
         if (w_tnetstr_parse_ ## _name (&buf, value)) goto E; \
-        w_buf_free (&buf); return W_NO;                      \
-    E:  w_buf_free (&buf); return W_YES;                     \
+        w_buf_clear (&buf); return W_NO;                     \
+    E:  w_buf_clear (&buf); return W_YES;                    \
     }
 
 _W_TNS_READF (float,   double  )

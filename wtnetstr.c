@@ -111,10 +111,10 @@ w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value)
     w_assert (buffer);
     w_assert (value);
 
-    if (w_unlikely (w_buf_length (value) > _W_TNS_MAX_PAYLOAD))
+    if (w_unlikely (w_buf_size (value) > _W_TNS_MAX_PAYLOAD))
         return W_YES;
 
-    w_buf_format (buffer, "$L:$B,", w_buf_length (value), value);
+    w_buf_format (buffer, "$L:$B,", w_buf_size (value), value);
     return W_NO;
 }
 
@@ -125,10 +125,10 @@ w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value)
     w_assert (io);
     w_assert (value);
 
-    if (w_unlikely (w_buf_length (value) > _W_TNS_MAX_PAYLOAD))
+    if (w_unlikely (w_buf_size (value) > _W_TNS_MAX_PAYLOAD))
         return W_YES;
 
-    return w_io_format (io, "$L:$B,", w_buf_length (value), value) == W_IO_ERR;
+    return w_io_format (io, "$L:$B,", w_buf_size (value), value) == W_IO_ERR;
 }
 
 
@@ -143,15 +143,15 @@ w_tnetstr_dump_number (w_buf_t *buffer, long value)
     w_io_buf_init (&iobuf, &buf, W_NO);
     w_io_format_long ((w_io_t*) &iobuf, value);
 
-    if (w_unlikely (w_buf_length (&buf) > _W_TNS_MAX_PAYLOAD))
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
         goto return_error;
 
-    w_buf_format (buffer, "$L:$B#", w_buf_length (&buf), &buf);
-    w_buf_free (&buf);
+    w_buf_format (buffer, "$L:$B#", w_buf_size (&buf), &buf);
+    w_buf_clear (&buf);
     return W_NO;
 
 return_error:
-    w_buf_free (&buf);
+    w_buf_clear (&buf);
     return W_YES;
 }
 
@@ -167,15 +167,15 @@ w_tnetstr_dump_float (w_buf_t *buffer, double value)
     w_io_buf_init (&iobuf, &buf, W_NO);
     w_io_format_double ((w_io_t*) &iobuf, value);
 
-    if (w_unlikely (w_buf_length (&buf) > _W_TNS_MAX_PAYLOAD))
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
         goto return_error;
 
-    w_buf_format (buffer, "$L:$B^", w_buf_length (&buf), &buf);
-    w_buf_free (&buf);
+    w_buf_format (buffer, "$L:$B^", w_buf_size (&buf), &buf);
+    w_buf_clear (&buf);
     return W_NO;
 
 return_error:
-    w_buf_free (&buf);
+    w_buf_clear (&buf);
     return W_YES;
 }
 
@@ -193,15 +193,15 @@ w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value)
         if (w_unlikely (w_tnetstr_dump (&buf, (w_variant_t*) *item)))
             goto return_error;
 
-    if (w_unlikely (w_buf_length (&buf) > _W_TNS_MAX_PAYLOAD))
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
         goto return_error;
 
-    w_buf_format (buffer, "$L:$B]", w_buf_length (&buf), &buf);
-    w_buf_free (&buf);
+    w_buf_format (buffer, "$L:$B]", w_buf_size (&buf), &buf);
+    w_buf_clear (&buf);
     return W_NO;
 
 return_error:
-    w_buf_free (&buf);
+    w_buf_clear (&buf);
     return W_YES;
 }
 
@@ -220,15 +220,15 @@ w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value)
                         w_tnetstr_dump (&buf, (const w_variant_t*) *item)))
             goto return_error;
 
-    if (w_unlikely (w_buf_length (&buf) > _W_TNS_MAX_PAYLOAD))
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
         goto return_error;
 
-    w_buf_format (buffer, "$L:$B}", w_buf_length (&buf), &buf);
-    w_buf_free (&buf);
+    w_buf_format (buffer, "$L:$B}", w_buf_size (&buf), &buf);
+    w_buf_clear (&buf);
     return W_NO;
 
 return_error:
-    w_buf_free (&buf);
+    w_buf_clear (&buf);
     return W_YES;
 }
 
@@ -322,7 +322,7 @@ peek_item_size (const w_buf_t *buffer)
 
     w_assert (buffer);
 
-    for (pbuf = buffer->buf, blen = w_buf_length (buffer);
+    for (pbuf = buffer->buf, blen = w_buf_size (buffer);
          blen-- && *pbuf != ':';
          pbuf++, plen *= 10)
         plen += *pbuf - '0';
@@ -342,10 +342,10 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
 
     w_assert (buffer);
 
-    if (w_buf_length (buffer) < _W_TNS_MIN_LENGTH)
+    if (w_buf_size (buffer) < _W_TNS_MIN_LENGTH)
         return W_YES;
 
-    for (pbuf = buffer->buf, blen = w_buf_length (buffer);
+    for (pbuf = buffer->buf, blen = w_buf_size (buffer);
          blen-- && *pbuf != ':';
          pbuf++, plen *= 10)
         plen += *pbuf - '0';
@@ -353,7 +353,7 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
     plen /= 10;
 
     if (plen > _W_TNS_MAX_PAYLOAD ||
-        w_buf_length (buffer) < (size_t) ((pbuf - buffer->buf) + plen + 2) ||
+        w_buf_size (buffer) < (size_t) ((pbuf - buffer->buf) + plen + 2) ||
         *(pbuf + plen + 1) != type_tag)
         return W_YES;
 
@@ -393,13 +393,13 @@ w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
     /*
      * Extend buffer to fit the payload data plus the terminating character.
      */
-    blen = w_buf_length (buffer);
-    w_buf_length_set (buffer, ++plen + blen);
+    blen = w_buf_size (buffer);
+    w_buf_resize (buffer, ++plen + blen);
 
     return w_io_read (io, buffer->buf + blen, plen) != plen;
 
 return_error:
-    w_buf_free (buffer);
+    w_buf_clear (buffer);
     return W_YES;
 }
 
@@ -408,7 +408,7 @@ wbool
 w_tnetstr_parse_null (const w_buf_t *buffer)
 {
     w_assert (buffer);
-    return w_buf_length (buffer) < 3
+    return w_buf_size (buffer) < 3
         || buffer->buf[0] != '0'
         || buffer->buf[1] != ':'
         || buffer->buf[2] != _W_TNS_TAG_NULL;
@@ -425,7 +425,7 @@ w_tnetstr_parse_float (const w_buf_t *buffer, double *value)
     w_assert (value);
 
     /* Shortest length value: 1:0^ */
-    if (w_buf_length (buffer) < 4 ||
+    if (w_buf_size (buffer) < 4 ||
         slice_payload (buffer, &payload, _W_TNS_TAG_FLOAT))
         return W_YES;
 
@@ -444,7 +444,7 @@ w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
     w_assert (value);
 
     /* Shortest length value: 1:0# */
-    if (w_buf_length (buffer) < 4 ||
+    if (w_buf_size (buffer) < 4 ||
         slice_payload (buffer, &payload, _W_TNS_TAG_NUMBER))
         return W_YES;
 
@@ -463,7 +463,7 @@ w_tnetstr_parse_boolean (const w_buf_t *buffer, wbool *value)
      *   4:true!
      *   5:false!
      */
-    switch (w_buf_length (buffer)) {
+    switch (w_buf_size (buffer)) {
         case 7:
             *value = W_YES;
             return buffer->buf[0] != '4'
@@ -517,7 +517,7 @@ w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
     if (slice_payload (buffer, &payload, _W_TNS_TAG_LIST))
         return W_YES;
 
-    while (szdone < w_buf_length (&payload)) {
+    while (szdone < w_buf_size (&payload)) {
         w_buf_t curitem = W_BUF;
         w_variant_t *variant;
 
@@ -549,7 +549,7 @@ w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
     if (slice_payload (buffer, &payload, _W_TNS_TAG_DICT))
         return W_YES;
 
-    while (szdone < w_buf_length (&payload)) {
+    while (szdone < w_buf_size (&payload)) {
         w_buf_t curitem = W_BUF;
         w_buf_t key = W_BUF;
         w_variant_t *variant;
@@ -618,7 +618,7 @@ w_tnetstr_parse (const w_buf_t *buffer)
         case _W_TNS_TAG_STRING:
             if (!w_tnetstr_parse_string (buffer, &v.vbuf))
                 ret = w_variant_new (W_VARIANT_BUFFER, &v.vbuf);
-            w_buf_free (&v.vbuf);
+            w_buf_clear (&v.vbuf);
             break;
 
         case _W_TNS_TAG_BOOLEAN:
