@@ -292,11 +292,15 @@ w_io_socket_serve (w_io_socket_t *io,
     wbool ret;
     int fd;
 
+#ifdef W_CONF_PTHREAD
     w_assert (mode == W_IO_SOCKET_SINGLE ||
-#ifdef CONF_PTHREAD
               mode == W_IO_SOCKET_THREAD ||
-#endif /* CONF_PTHREAD */
               mode == W_IO_SOCKET_FORK);
+#else  /* W_CONF_PTHREAD */
+    w_assert (mode == W_IO_SOCKET_SINGLE ||
+              mode == W_IO_SOCKET_FORK);
+#endif /* W_CONF_PTHREAD */
+
     w_assert (handler);
     w_assert (io);
 
