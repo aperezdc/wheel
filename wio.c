@@ -61,7 +61,8 @@ w_io_read (w_io_t *io, void *buf, size_t len)
 
     /* Handle the putback character... makes things a bit messier */
     if (w_unlikely (io->backch != W_IO_EOF)) {
-        *((char*) buf++) = io->backch;
+        *((char*) buf) = io->backch;
+        buf = (char*) buf + 1;
         io->backch = W_IO_EOF;
 
         /* Check whether more characters are to be read */
