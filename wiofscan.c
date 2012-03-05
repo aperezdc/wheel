@@ -67,7 +67,10 @@ w_io_fscan_double (w_io_t *io, double *result)
 
     while ((c = w_io_getchar (io)) != W_IO_EOF) {
         if (c == '.') {
-            if (got_dot) break;
+            if (got_dot) {
+                w_io_putback (io, c);
+                break;
+            }
             got_dot = W_YES;
         }
         else if (c == 'e' || c == 'E') {
@@ -92,6 +95,12 @@ w_io_fscan_double (w_io_t *io, double *result)
     if (!w_buf_length (&buf))
         goto failure;
 
+    if (got_dot && w_buf_length (&buf) == 1) {
+        w_assert (buf.buf[0] == '.');
+        c = '.';
+        goto failure;
+    }
+
     if (result)
         *result = strtod (w_buf_str (&buf), NULL);
 
@@ -100,6 +109,7 @@ success:
     return W_NO;
 
 failure:
+    w_io_putback (io, c);
     w_buf_free (&buf);
     return W_YES;
 }

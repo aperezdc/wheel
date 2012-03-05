@@ -323,3 +323,49 @@ CHECK_DVALF (eoneplus,       +1.1e1)
 CHECK_DVALF (eoneminus,      -1.1e1)
 
 CHECK_DFAILF (fail00, "dafda")
+CHECK_DFAILF (dotonly,    ".")
+
+
+START_TEST (test_wio_fscan_trailing_stuff)
+{
+    double dval;
+    int ch;
+    IOSTR ("pi=3.14... and moar");
+
+    fail_unless (w_io_fscan (io, "pi=$F", &dval) == 1,
+                 "Could not scan a double value");
+    fail_unless (dval == 3.14, "Read value is not 3.14");
+
+    /* Next has to be the dots */
+    ch = w_io_getchar (io); ck_assert_int_eq ('.', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('.', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('.', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq (' ', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('a', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('n', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('d', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq (' ', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('m', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('o', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('a', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq ('r', ch);
+    ch = w_io_getchar (io); ck_assert_int_eq (W_IO_EOF, ch);
+
+    w_obj_unref (io);
+}
+END_TEST
+
+START_TEST (test_wio_fscan_badinput)
+{
+    double dval;
+    int ch;
+    IOSTR ("pi=foo!bar:baz");
+
+    fail_if (w_io_fscan (io, "pi=$F", &dval) != 0,
+             "Elements were scanned on bad input.");
+
+    ch = w_io_getchar (io); ck_assert_int_eq ('f', ch);
+
+    w_obj_unref (io);
+}
+END_TEST
