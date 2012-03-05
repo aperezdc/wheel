@@ -1938,6 +1938,15 @@ W_EXPORT wbool w_tnetstr_dump_boolean (w_buf_t *buffer, wbool value);
 W_EXPORT wbool w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
 W_EXPORT wbool w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
 
+W_EXPORT w_variant_t* w_tnetstr_parse (const w_buf_t *buffer);
+W_EXPORT wbool w_tnetstr_parse_null (const w_buf_t *buffer);
+W_EXPORT wbool w_tnetstr_parse_float (const w_buf_t *buffer, double *value);
+W_EXPORT wbool w_tnetstr_parse_number (const w_buf_t *buffer, long *value);
+W_EXPORT wbool w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value);
+W_EXPORT wbool w_tnetstr_parse_boolean (const w_buf_t *buffer, wbool *value);
+W_EXPORT wbool w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value);
+W_EXPORT wbool w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value);
+
 /*\}*/
 
 /*---------------------------------------------------[ config files ]-----*/
