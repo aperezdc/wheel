@@ -336,13 +336,13 @@ START_TEST (test_wtnetstr_parse_dict)
     w_buf_set_str (&b, "0:}");
     fail_if (w_tnetstr_parse_dict (&b, dict),
              "Coult not parse empty dict");
-    ck_assert_int_eq (0, w_dict_count (dict));
+    ck_assert_int_eq (0, w_dict_size (dict));
 
     /* one item */
     w_buf_set_str (&b, "7:1:a,0:~}");
     fail_if (w_tnetstr_parse_dict (&b, dict),
              "Coult not parse 1-item dict");
-    ck_assert_int_eq (1, w_dict_count (dict));
+    ck_assert_int_eq (1, w_dict_size (dict));
     variant = w_dict_get (dict, "a");
     fail_unless (variant != NULL, "Key 'a' is not set in dict");
     fail_unless (w_variant_is_null (variant), "Item 'a' is not null");
@@ -352,7 +352,7 @@ START_TEST (test_wtnetstr_parse_dict)
     w_buf_set_str (&b, "16:1:a,1:1#1:b,1:2#}");
     fail_if (w_tnetstr_parse_dict (&b, dict),
              "Coult not parse 2-item dict");
-    ck_assert_int_eq (2, w_dict_count (dict));
+    ck_assert_int_eq (2, w_dict_size (dict));
 
     variant = w_dict_get (dict, "a");
     fail_unless (variant != NULL, "Key 'a' is not set in dict");

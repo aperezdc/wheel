@@ -18,7 +18,7 @@ w_cfg_getnode (const w_cfg_t *cf, const char *key)
     w_assert (key);
     w_assert (cf);
 
-    if (!w_dict_count (cf)) return NULL;
+    if (w_dict_empty (cf)) return NULL;
 
     if ((sep = strchr (key, '.')) != NULL) {
         /* Dotted key. */
@@ -51,7 +51,7 @@ w_cfg_ensurenode (w_cfg_t *cf, const char *key)
     else
         len = strlen (key);
 
-    if (w_dict_count (cf)) {
+    if (w_dict_size (cf)) {
         if (sep) {
             node = w_dict_getn (cf, key, len);
             if ((node != NULL) && w_variant_is_dict (node))
@@ -221,7 +221,7 @@ w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **
     w_assert (cf);
     w_assert (key);
 
-    if (!w_dict_count (cf))
+    if (w_dict_empty (cf))
         return NULL;
 
     sep = strchr (key, '.');
