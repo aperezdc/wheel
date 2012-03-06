@@ -690,13 +690,13 @@ W_EXPORT void w_dict_clear (w_dict_t *d);
  * Get the number of items in a dictionary.
  */
 #define w_dict_size(_d) \
-    (w_assert (_d), (_d)->size)
+    ((_d)->size)
 
 /*!
  * Check whether a dictionary is empty.
  */
 #define w_dict_empty(_d) \
-    (w_assert (_d), (_d)->size == 0)
+    ((_d)->size == 0)
 
 W_EXPORT void* w_dict_getn (const w_dict_t *d, const char *key, size_t keylen);
 W_EXPORT void  w_dict_setn (w_dict_t *d, const char *key, size_t keylen, void *data);
@@ -733,26 +733,6 @@ W_EXPORT void w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx
 W_EXPORT w_iterator_t w_dict_first (const w_dict_t *d);
 W_EXPORT w_iterator_t w_dict_next (const w_dict_t *d, w_iterator_t i);
 W_EXPORT const char const* w_dict_iterator_get_key (w_iterator_t i);
-
-/*
- * XXX: Never, NEVER change the layout of this structure. This **MUST**
- *      follow w_dict_node_t defined in wdict.c.
- * XXX: They key is totally unmodifiable, as it is insane to change it while
- *      traversing the dictionary.
- */
-struct w_dict_item
-{
-	void *val;
-	const char const* key;
-};
-typedef struct w_dict_item w_dict_item_t;
-
-
-#define w_dict_item_first(_d) \
-	((w_dict_item_t*) w_dict_first (_d))
-
-#define w_dict_item_next(_d, _i) \
-	((w_dict_item_t*) w_dict_next ((_d), (w_iterator_t)(_i)))
 
 #define w_dict_foreach(_d, _i) \
     for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
