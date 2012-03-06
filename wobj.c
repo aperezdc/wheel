@@ -11,12 +11,9 @@
 void*
 w_obj_ref (void *obj)
 {
-    w_assert (obj);
-
-    if (w_likely (((w_obj_t*) obj)->__refs != (size_t) -1)) {
-        ((w_obj_t*) obj)->__refs++;
-    }
-
+    if (w_likely (obj != NULL))
+        if (w_likely (((w_obj_t*) obj)->__refs != (size_t) -1))
+            ((w_obj_t*) obj)->__refs++;
     return obj;
 }
 
@@ -24,16 +21,16 @@ w_obj_ref (void *obj)
 void*
 w_obj_unref (void *obj)
 {
-    w_assert (obj);
+    if (w_likely (obj != NULL)) {
+        if (w_unlikely (((w_obj_t*) obj)->__refs == (size_t) -1)) {
+            w_obj_destroy (obj);
+            return NULL;
+        }
 
-    if (w_unlikely (((w_obj_t*) obj)->__refs == (size_t) -1)) {
-        w_obj_destroy (obj);
-        return NULL;
-    }
-
-    if (--((w_obj_t*) obj)->__refs == 0) {
-        w_obj_destroy (obj);
-        return NULL;
+        if (--((w_obj_t*) obj)->__refs == 0) {
+            w_obj_destroy (obj);
+            return NULL;
+        }
     }
     return obj;
 }
