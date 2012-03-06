@@ -131,7 +131,7 @@ typedef enum w_bool w_bool_t;
  * Wrapper around malloc(). This will abort and print a message when the
  * pointer returned by malloc() is NULL.
  */
-W_EXPORT void* w_malloc(size_t sz);
+W_EXPORT void* w_malloc (size_t sz);
 
 /*!
  * Wrapper around realloc(). This will abort and print a message when the
@@ -141,7 +141,7 @@ W_EXPORT void* w_malloc(size_t sz);
  *  - <tt>w_realloc(NULL, 42)</tt> is equivalent to <tt>malloc(42)</tt>
  *  - <tt>w_relloac(ptr, 0)</tt> is equivalent to <tt>free(ptr)</tt>
  */
-W_EXPORT void* w_realloc(void *ptr, size_t sz);
+W_EXPORT void* w_realloc (void *ptr, size_t sz);
 
 /*!
  * Frees memory and sets the pointer to \c NULL.
@@ -156,7 +156,7 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
  * \sa w_new0(), w_alloc(), w_alloc0(), w_free()
  */
 #define w_new(_t) \
-	((_t *) w_malloc(sizeof(_t)))
+	((_t *) w_malloc (sizeof(_t)))
 
 /*!
  * Allocates a zero-filled chunk of memory suitable for a value of some type.
@@ -173,7 +173,7 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
  * \sa w_new(), w_new0(), w_alloc0(), w_free(), w_resize()
  */
 #define w_alloc(_t, _n) \
-	((_t *) w_malloc(sizeof(_t) * (_n)))
+	((_t *) w_malloc (sizeof (_t) * (_n)))
 
 /*!
  * Allocate a zero-filled array of memory for items of some type.
@@ -192,7 +192,7 @@ W_EXPORT void* w_realloc(void *ptr, size_t sz);
  * \sa w_new(), w_new0(), w_alloc(), w_alloc0(), w_free()
  */
 #define w_resize(_p, _t, _n) \
-	((_t *) w_realloc(_p, sizeof(_t) * (_n)))
+	((_t *) w_realloc (_p, sizeof (_t) * (_n)))
 
 /*\}*/
 
@@ -284,7 +284,10 @@ void* w_obj_unref (void *obj);
  */
 void w_obj_destroy (void *obj);
 
-typedef void (*w_obj_dtor_t)(void*);
+/*!
+ * Type of object destructors.
+ */
+typedef void (*w_obj_dtor_t) (void*);
 
 /*!
  * Registers a destructor to be called when an object is destroyed.
@@ -342,7 +345,7 @@ W_EXPORT void __w_debug (const char *fmt, ...);
  * \{
  */
 
-W_EXPORT char* w_strfmtv(const char *fmt, va_list argl);
+W_EXPORT char* w_strfmtv (const char *fmt, va_list argl);
 W_EXPORT char* w_strfmt (const char *fmt, ...);
 
 /*!
@@ -402,7 +405,7 @@ w_str_dupl (const char *str, size_t len)
     char *r;
     if (str == NULL)
         return NULL;
-    r = (char*) memcpy(w_alloc(char, len + 1), str, len);
+    r = (char*) memcpy (w_alloc(char, len + 1), str, len);
     r[len] = '\0';
     return r;
 }
@@ -423,13 +426,13 @@ w_str_dup (const char *str)
 #else  /* __GLIBC__ */
 #include <ctype.h>
 static inline int
-w_str_casecmp(const char *s1, const char *s2)
+w_str_casecmp (const char *s1, const char *s2)
 {
 	register int c1 = 0;
 	register int c2 = 0;
 	while ((*s1 != '\0') && (*s2 != '\0')) {
-		c1 = tolower(*s1);
-		c2 = tolower(*s2);
+		c1 = tolower (*s1);
+		c2 = tolower (*s2);
 		if (c1 != c2) break;
 		c1++;
 		c2++;
@@ -440,9 +443,9 @@ w_str_casecmp(const char *s1, const char *s2)
 
 
 static inline char*
-w_strncpy(char *dst, const char *src, size_t n)
+w_strncpy (char *dst, const char *src, size_t n)
 {
-	char *result = strncpy(dst, src, n);
+	char *result = strncpy (dst, src, n);
 	dst[n] = '\0';
 	return result;
 }
