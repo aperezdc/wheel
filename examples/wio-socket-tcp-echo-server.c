@@ -14,7 +14,7 @@
 #endif /* !BUFFER_SIZE */
 
 
-static wbool
+static w_bool_t
 serve_request (w_io_socket_t *io)
 {
     char buf[BUFFER_SIZE];

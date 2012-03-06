@@ -9,8 +9,8 @@
 #include <unistd.h>
 
 
-static wbool verbose   = W_NO;
-static int   sleeptime = 5;
+static w_bool_t verbose   = W_NO;
+static int      sleeptime = 5;
 
 
 static const w_opt_t option_spec[] = {

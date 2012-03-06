@@ -8,7 +8,7 @@
 #include "wheel.h"
 #include <unistd.h>
 
-static wbool dofoo = W_NO;
+static w_bool_t dofoo = W_NO;
 
 static const w_opt_t options[] = {
     { 0, 'l', "long-option", W_OPT_BOOL, &dofoo,

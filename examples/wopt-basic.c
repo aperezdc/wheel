@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-static wbool verbose = W_NO;
+static w_bool_t verbose = W_NO;
 
 static const w_opt_t option_spec[] = {
     { 0, 'v', "verbose", W_OPT_BOOL, &verbose,
