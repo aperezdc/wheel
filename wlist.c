@@ -27,7 +27,7 @@ struct w_list_entry
 
 
 w_list_t*
-w_list_new (wbool refs)
+w_list_new (w_bool_t refs)
 {
     w_list_t *list = w_obj_new_with_priv_sized (w_list_t,
                                                 sizeof (struct w_list_head));

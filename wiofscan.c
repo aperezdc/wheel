@@ -12,7 +12,7 @@
 #include <math.h>
 
 
-wbool
+w_bool_t
 w_io_fscan_double (w_io_t *io, double *result)
 {
     /*
@@ -24,8 +24,8 @@ w_io_fscan_double (w_io_t *io, double *result)
      *
      * TODO Have our own strtod/atod routines.
      */
-    wbool got_exp = W_NO;
-    wbool got_dot = W_NO;
+    w_bool_t got_exp = W_NO;
+    w_bool_t got_dot = W_NO;
     w_buf_t buf = W_BUF;
     int c;
 
@@ -115,10 +115,10 @@ failure:
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_long (w_io_t *io, long *result)
 {
-    wbool signchange = W_NO;
+    w_bool_t signchange = W_NO;
     unsigned long uval;
     int chr;
 
@@ -157,7 +157,7 @@ w_io_fscan_long (w_io_t *io, long *result)
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_ulong (w_io_t *io, unsigned long *result)
 {
     int chr;
@@ -211,7 +211,7 @@ _map_hexchar (int ch)
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result)
 {
     int chr;
@@ -246,7 +246,7 @@ end:
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
 {
     int chr;
@@ -276,7 +276,7 @@ w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_int (w_io_t *io, int *result)
 {
     long value;
@@ -303,7 +303,7 @@ w_io_fscan_int (w_io_t *io, int *result)
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_uint (w_io_t *io, unsigned int *result)
 {
     unsigned long value;
@@ -325,7 +325,7 @@ w_io_fscan_uint (w_io_t *io, unsigned int *result)
 }
 
 
-wbool
+w_bool_t
 w_io_fscan_float (w_io_t *io, float *result)
 {
     double value;

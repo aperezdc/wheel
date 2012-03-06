@@ -32,10 +32,10 @@ w_io_init (w_io_t *io)
 }
 
 
-wbool
+w_bool_t
 w_io_close (w_io_t *io)
 {
-    wbool ret;
+    w_bool_t ret;
     w_assert (io);
 
     if (io->close) {
@@ -113,7 +113,7 @@ w_io_getchar (w_io_t *io)
 }
 
 
-wbool
+w_bool_t
 w_io_putchar (w_io_t *io, int ch)
 {
     char bch = ch;
@@ -129,7 +129,7 @@ w_io_putback (w_io_t *io, char ch)
 }
 
 
-wbool
+w_bool_t
 w_io_flush (w_io_t *io)
 {
     w_assert (io);
@@ -267,7 +267,7 @@ w_io_fscan (w_io_t *io, const char *fmt, ...)
 ssize_t
 w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
 {
-    wbool (*rfun) (w_io_t*, void*);
+    w_bool_t (*rfun) (w_io_t*, void*);
     ssize_t retval = 0;
     int ch;
 
@@ -275,7 +275,7 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
     w_assert (fmt);
 
 #define CHAR_TO_FUN(_c, _f) \
-        case _c : rfun = (wbool (*)(w_io_t*, void*)) _f; break
+        case _c : rfun = (w_bool_t (*)(w_io_t*, void*)) _f; break
 
     for (; *fmt ; fmt++) {
         if (*fmt == '$') {

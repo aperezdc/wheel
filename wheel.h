@@ -73,13 +73,13 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 /*!
  * Boolean data type.
  */
-enum wbool
+enum w_bool
 {
     W_NO = 0, /*!< False value. */
     W_YES     /*!< True value. */
 };
 
-typedef enum wbool wbool;
+typedef enum w_bool w_bool_t;
 
 
 /*
@@ -363,37 +363,37 @@ W_EXPORT unsigned w_str_hash (const char *str);
 /*!
  * Converts a string into a boolean.
  */
-W_EXPORT wbool w_str_bool  (const char *str, wbool *val);
+W_EXPORT w_bool_t w_str_bool (const char *str, w_bool_t *val);
 
 /*!
  * Converts a string into an integer.
  */
-W_EXPORT wbool w_str_int   (const char *str, int *val);
+W_EXPORT w_bool_t w_str_int (const char *str, int *val);
 
 /*!
  * Converts a string inyo an unsigned integer.
  */
-W_EXPORT wbool w_str_uint  (const char *str, unsigned *val);
+W_EXPORT w_bool_t w_str_uint (const char *str, unsigned *val);
 
 /*!
  * Converts a string into a long integer.
  */
-W_EXPORT wbool w_str_long  (const char *str, long *val);
+W_EXPORT w_bool_t w_str_long (const char *str, long *val);
 
 /*!
  * Converts a string into a long unsigned integer.
  */
-W_EXPORT wbool w_str_ulong (const char *str, unsigned long *val);
+W_EXPORT w_bool_t w_str_ulong (const char *str, unsigned long *val);
 
 /*!
  * Converts a string into a float number.
  */
-W_EXPORT wbool w_str_float (const char *str, float *val);
+W_EXPORT w_bool_t w_str_float (const char *str, float *val);
 
 /*!
  * Converts a string into a double-precision float number.
  */
-W_EXPORT wbool w_str_double(const char *str, double *val);
+W_EXPORT w_bool_t w_str_double (const char *str, double *val);
 
 
 static inline char*
@@ -482,9 +482,9 @@ w_strncpy(char *dst, const char *src, size_t n)
  */
 W_OBJ (w_list_t)
 {
-    w_obj_t parent;
-    size_t  size;
-    wbool   refs;
+    w_obj_t  parent;
+    size_t   size;
+    w_bool_t refs;
     /* actual data is stored in the private area of the list */
 };
 
@@ -501,7 +501,7 @@ W_OBJ (w_list_t)
  * \param refs Whether to handle references to objects in the list.
  * \return A new, empty list.
  */
-W_EXPORT w_list_t* w_list_new (wbool refs);
+W_EXPORT w_list_t* w_list_new (w_bool_t refs);
 
 /*! Clears all elements from a list. */
 W_EXPORT void w_list_clear (w_list_t *list);
@@ -661,7 +661,7 @@ W_OBJ (w_dict_t)
     w_dict_node_t  *first;
     size_t          size;
     size_t          alloc;
-    wbool           refs;
+    w_bool_t        refs;
 };
 
 /*!
@@ -670,7 +670,7 @@ W_OBJ (w_dict_t)
  *             hash table. Passing \c W_YES assumes that all items in the
  *             dictionary will be objects (derived from \ref w_obj_t).
  */
-W_EXPORT w_dict_t* w_dict_new (wbool refs);
+W_EXPORT w_dict_t* w_dict_new (w_bool_t refs);
 
 /*!
  * Clears the contents of a dictionary.
@@ -883,9 +883,9 @@ W_EXPORT unsigned w_opt_parse(const w_opt_t  *options,
  *         there was some parsing error and the error string will be
  *         non-NULL.
  */
-W_EXPORT wbool w_opt_parse_io (const w_opt_t *opt,
-                               w_io_t        *input,
-                               char         **msg);
+W_EXPORT w_bool_t w_opt_parse_io (const w_opt_t *opt,
+                                  w_io_t        *input,
+                                  char         **msg);
 
 /*!
  * Standard error output stream. By default, this points to a \ref
@@ -957,12 +957,12 @@ typedef void (*w_parse_fun_t) (w_parse_t*, void*);
  *                  an error is generated.
  * \return          Whether parsing was successful.
  */
-W_EXPORT void* w_parse_run     (w_parse_t    *p,
-                                w_io_t       *input,
-                                int           comment,
-                                w_parse_fun_t parse_fun,
-                                void         *context,
-                                char         **msg);
+W_EXPORT void* w_parse_run (w_parse_t    *p,
+                            w_io_t       *input,
+                            int           comment,
+                            w_parse_fun_t parse_fun,
+                            void         *context,
+                            char         **msg);
 
 /*!
  * Formats an error string and raises an error.
@@ -971,7 +971,7 @@ W_EXPORT void* w_parse_run     (w_parse_t    *p,
  * \param fmt Format string (as passed to \ref w_io_format)
  * \param ... Arguments for the format string.
  */
-W_EXPORT void  w_parse_error   (w_parse_t *p, const char *fmt, ...);
+W_EXPORT void  w_parse_error (w_parse_t *p, const char *fmt, ...);
 
 /*!
  * Format an error string. The formatted string will be saved in the
@@ -980,7 +980,7 @@ W_EXPORT void  w_parse_error   (w_parse_t *p, const char *fmt, ...);
  * \param fmt Format string (as passed to \ref w_io_format).
  * \param ... Arguments for the format string.
  */
-W_EXPORT void  w_parse_ferror  (w_parse_t *p, const char *fmt, ...);
+W_EXPORT void  w_parse_ferror (w_parse_t *p, const char *fmt, ...);
 
 /*!
  * Raise a parsing error. Make sure you free intermediate strucutures and
@@ -989,7 +989,7 @@ W_EXPORT void  w_parse_ferror  (w_parse_t *p, const char *fmt, ...);
  *
  * \sa w_parse_ferror(), w_parse_error()
  */
-W_EXPORT void  w_parse_rerror  (w_parse_t *p);
+W_EXPORT void  w_parse_rerror (w_parse_t *p);
 
 /*!
  * Gets the next character in the input, skipping over comments. If comments
@@ -1012,7 +1012,7 @@ W_EXPORT void  w_parse_skip_ws (w_parse_t *p);
  * error in the input. The caller is responsible for calling \ref w_free()
  * on the returned string.
  */
-W_EXPORT char* w_parse_string  (w_parse_t *p);
+W_EXPORT char* w_parse_string (w_parse_t *p);
 
 /*!
  * Gets a C-like identifier. Identifiers are the same as in C: a sequence of
@@ -1021,7 +1021,7 @@ W_EXPORT char* w_parse_string  (w_parse_t *p);
  * errors, but returns \c NULL when there is some error in the input. The
  * caller is responsible for calling \ref w_free() on the returned string.
  */
-W_EXPORT char* w_parse_ident   (w_parse_t *p);
+W_EXPORT char* w_parse_ident (w_parse_t *p);
 
 /*!
  * Gets a single word from the input. A \e word here is any sequence of
@@ -1029,7 +1029,7 @@ W_EXPORT char* w_parse_ident   (w_parse_t *p);
  * returns \c NULL when the word cannot be read. The caller is responsible
  * for calling \ref w_free() on the returned string.
  */
-W_EXPORT char* w_parse_word    (w_parse_t *p);
+W_EXPORT char* w_parse_word (w_parse_t *p);
 
 /*!
  * Parses a floating point value as \c double.
@@ -1037,7 +1037,7 @@ W_EXPORT char* w_parse_word    (w_parse_t *p);
  * \param value Pointer to where to store the result.
  * \return Whether the value was successfully parsed.
  */
-W_EXPORT wbool w_parse_double  (w_parse_t *p, double *value);
+W_EXPORT w_bool_t w_parse_double (w_parse_t *p, double *value);
 
 /*!
  * Parses a aigned integer as an <tt>unsigned long</tt> value. Note that
@@ -1047,7 +1047,7 @@ W_EXPORT wbool w_parse_double  (w_parse_t *p, double *value);
  * \param value Pointer to where to store the result.
  * \return Whether the value was successfully parsed.
  */
-W_EXPORT wbool w_parse_ulong   (w_parse_t *p, unsigned long *value);
+W_EXPORT w_bool_t w_parse_ulong (w_parse_t *p, unsigned long *value);
 
 /*!
  * Parses a aigned integer as a \c long value. Note that prefix \c 0x will
@@ -1056,7 +1056,7 @@ W_EXPORT wbool w_parse_ulong   (w_parse_t *p, unsigned long *value);
  * \param value Pointer to where to store the result.
  * \return Whether the value was successfully parsed.
  */
-W_EXPORT wbool w_parse_long    (w_parse_t *p, long *value);
+W_EXPORT w_bool_t w_parse_long (w_parse_t *p, long *value);
 
 /*!
  * Checks the next character in the input, cleaning up if needed. If the
@@ -1270,12 +1270,12 @@ enum w_io_flag
  */
 W_OBJ_DEF (w_io_t)
 {
-    w_obj_t  parent;
-    int      backch;
-    wbool   (*close) (w_io_t *io);
-    ssize_t (*write) (w_io_t *io, const void *buf, size_t size);
-    ssize_t (*read ) (w_io_t *io, void       *buf, size_t size);
-    wbool   (*flush) (w_io_t *io);
+    w_obj_t   parent;
+    int       backch;
+    w_bool_t (*close) (w_io_t *io);
+    ssize_t  (*write) (w_io_t *io, const void *buf, size_t size);
+    ssize_t  (*read ) (w_io_t *io, void       *buf, size_t size);
+    w_bool_t (*flush) (w_io_t *io);
 };
 
 
@@ -1290,7 +1290,7 @@ W_EXPORT void w_io_init (w_io_t *io);
  *
  * \param io An input/output descriptor.
  */
-W_EXPORT wbool w_io_close (w_io_t *io);
+W_EXPORT w_bool_t w_io_close (w_io_t *io);
 
 /*!
  * Writes data to an input/output descriptor. If the descriptor has no
@@ -1409,14 +1409,14 @@ W_EXPORT ssize_t w_io_fscanv (w_io_t     *io,
                               va_list     args);
 
 
-W_EXPORT wbool w_io_fscan_float     (w_io_t *io, float         *result);
-W_EXPORT wbool w_io_fscan_double    (w_io_t *io, double        *result);
-W_EXPORT wbool w_io_fscan_int       (w_io_t *io, int           *result);
-W_EXPORT wbool w_io_fscan_uint      (w_io_t *io, unsigned int  *result);
-W_EXPORT wbool w_io_fscan_long      (w_io_t *io, long          *result);
-W_EXPORT wbool w_io_fscan_ulong     (w_io_t *io, unsigned long *result);
-W_EXPORT wbool w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result);
-W_EXPORT wbool w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result);
+W_EXPORT w_bool_t w_io_fscan_float     (w_io_t *io, float         *result);
+W_EXPORT w_bool_t w_io_fscan_double    (w_io_t *io, double        *result);
+W_EXPORT w_bool_t w_io_fscan_int       (w_io_t *io, int           *result);
+W_EXPORT w_bool_t w_io_fscan_uint      (w_io_t *io, unsigned int  *result);
+W_EXPORT w_bool_t w_io_fscan_long      (w_io_t *io, long          *result);
+W_EXPORT w_bool_t w_io_fscan_ulong     (w_io_t *io, unsigned long *result);
+W_EXPORT w_bool_t w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result);
+W_EXPORT w_bool_t w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result);
 
 
 /*!
@@ -1433,20 +1433,18 @@ W_EXPORT int w_io_getchar (w_io_t *io);
  * \param ch Character.
  * \return   Whether there was some error.
  */
-W_EXPORT wbool w_io_putchar (w_io_t *io,
-                             int     ch);
+W_EXPORT w_bool_t w_io_putchar (w_io_t *io, int ch);
 
 /*!
  */
-W_EXPORT void w_io_putback (w_io_t *io,
-                            char    ch);
+W_EXPORT void w_io_putback (w_io_t *io, char ch);
 
 /*!
  * Flushes pending buffered data.
  * \param io An input/output descriptor.
  * \return   Whether there was some error.
  */
-W_EXPORT wbool w_io_flush (w_io_t *io);
+W_EXPORT w_bool_t w_io_flush (w_io_t *io);
 
 /*!
  * Input/output object on Unix file descriptors.
@@ -1491,10 +1489,10 @@ W_EXPORT w_io_t* w_io_unix_open_fd (int fd);
  * This function is not intended to be used directly, but it is provided as
  * a convenience for code extending \ref w_io_unix_t
  */
-W_EXPORT wbool w_io_unix_init (w_io_unix_t *io,
-                               const char  *path,
-                               int          mode,
-                               unsigned     perm);
+W_EXPORT w_bool_t w_io_unix_init (w_io_unix_t *io,
+                                  const char  *path,
+                                  int          mode,
+                                  unsigned     perm);
 
 /*!
  * Initialize an I/O object to be used with an Unix file descriptor.
@@ -1539,7 +1537,7 @@ W_OBJ (w_io_socket_t)
     w_io_unix_t        parent;
     w_io_socket_kind_t kind;
     size_t             slen;
-    wbool              bound;
+    w_bool_t           bound;
     char               sa[W_IO_SOCKET_SA_LEN];
 };
 
@@ -1585,8 +1583,8 @@ W_EXPORT w_io_t* w_io_socket_open (w_io_socket_kind_t kind, ...);
  * \return Whether initialization was successful.
  * \sa w_io_socket_open
  */
-W_EXPORT wbool w_io_socket_init (w_io_socket_t *io,
-                                 w_io_socket_kind_t kind, ...);
+W_EXPORT w_bool_t w_io_socket_init (w_io_socket_t *io,
+                                    w_io_socket_kind_t kind, ...);
 
 /*!
  * Serves requests using a socket. This function will start a loop accepting
@@ -1606,9 +1604,9 @@ W_EXPORT wbool w_io_socket_init (w_io_socket_t *io,
  * \param mode    How to serve each request.
  * \param handler Callback invoked to serve requests.
  */
-W_EXPORT wbool w_io_socket_serve (w_io_socket_t *io,
-                                  w_io_socket_serve_mode_t mode,
-                                  wbool (*handler) (w_io_socket_t*));
+W_EXPORT w_bool_t w_io_socket_serve (w_io_socket_t *io,
+                                     w_io_socket_serve_mode_t mode,
+                                     w_bool_t (*handler) (w_io_socket_t*));
 
 /*!
  * Connect a socket to a server. This makes a connection to the host
@@ -1617,7 +1615,7 @@ W_EXPORT wbool w_io_socket_serve (w_io_socket_t *io,
  * read and write operations can be performed in the socket.
  * \return Whether the connection was setup successfully.
  */
-W_EXPORT wbool w_io_socket_connect (w_io_socket_t *io);
+W_EXPORT w_bool_t w_io_socket_connect (w_io_socket_t *io);
 
 /*!
  * Perform a half-close on the write direction. This closes the socket,
@@ -1629,7 +1627,7 @@ W_EXPORT wbool w_io_socket_connect (w_io_socket_t *io);
  * should be used instead.
  * \return Whether performing the half-close was successful.
  */
-W_EXPORT wbool w_io_socket_send_eof (w_io_socket_t *io);
+W_EXPORT w_bool_t w_io_socket_send_eof (w_io_socket_t *io);
 
 /*!
  * Obtain the path in the filesystem for an Unix socket.
@@ -1694,7 +1692,7 @@ W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf);
  * \param buf Buffer with optional initial data.
  * \param append Whether \i buf will be used for appending data.
  */
-W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, wbool append);
+W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, w_bool_t append);
 
 /*!
  * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.
@@ -1723,7 +1721,7 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, wbool append);
  *  - Strings (internally stored as a \ref w_buf_t).
  *  - Integral numbers (internally stored as \c long).
  *  - Floating point numbers (internally stored as \c double).
- *  - Booleans (internally stored as a \c wbool).
+ *  - Booleans (internally stored as a \c w_bool_t).
  *  - Dictionaries (\ref w_dict_t).
  *  - Lists (\ref w_list_t).
  *  - Null value.
@@ -1765,7 +1763,7 @@ union w_variant_value
     w_buf_t   stringbuf;
     long      number;
     double    fpnumber;
-    wbool     boolean;
+    w_bool_t  boolean;
     w_list_t *list;
     w_dict_t *dict;
 };
@@ -1947,23 +1945,23 @@ W_EXPORT w_variant_t* w_variant_clear (w_variant_t *variant);
  * http://tnetstrings.org/
  */
 
-W_EXPORT wbool w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value);
-W_EXPORT wbool w_tnetstr_dump_null (w_buf_t *buffer);
-W_EXPORT wbool w_tnetstr_dump_float (w_buf_t *buffer, double value);
-W_EXPORT wbool w_tnetstr_dump_number (w_buf_t *buffer, long value);
-W_EXPORT wbool w_tnetstr_dump_string (w_buf_t *buffer, const char *value);
-W_EXPORT wbool w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value);
-W_EXPORT wbool w_tnetstr_dump_boolean (w_buf_t *buffer, wbool value);
-W_EXPORT wbool w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
-W_EXPORT wbool w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
+W_EXPORT w_bool_t w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value);
+W_EXPORT w_bool_t w_tnetstr_dump_null (w_buf_t *buffer);
+W_EXPORT w_bool_t w_tnetstr_dump_float (w_buf_t *buffer, double value);
+W_EXPORT w_bool_t w_tnetstr_dump_number (w_buf_t *buffer, long value);
+W_EXPORT w_bool_t w_tnetstr_dump_string (w_buf_t *buffer, const char *value);
+W_EXPORT w_bool_t w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value);
+W_EXPORT w_bool_t w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value);
+W_EXPORT w_bool_t w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
+W_EXPORT w_bool_t w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
 
-W_EXPORT wbool w_tnetstr_write (w_io_t *io, const w_variant_t *value);
-W_EXPORT wbool w_tnetstr_write_null (w_io_t *io);
-W_EXPORT wbool w_tnetstr_write_string (w_io_t *io, const char *value);
-W_EXPORT wbool w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value);
-W_EXPORT wbool w_tnetstr_write_boolean (w_io_t *io, wbool value);
+W_EXPORT w_bool_t w_tnetstr_write (w_io_t *io, const w_variant_t *value);
+W_EXPORT w_bool_t w_tnetstr_write_null (w_io_t *io);
+W_EXPORT w_bool_t w_tnetstr_write_string (w_io_t *io, const char *value);
+W_EXPORT w_bool_t w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value);
+W_EXPORT w_bool_t w_tnetstr_write_boolean (w_io_t *io, w_bool_t value);
 
-static inline wbool
+static inline w_bool_t
 w_tnetstr_write_float (w_io_t *io, double value)
 {
     w_buf_t buf = W_BUF;
@@ -1972,7 +1970,7 @@ w_tnetstr_write_float (w_io_t *io, double value)
         || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
-static inline wbool
+static inline w_bool_t
 w_tnetstr_write_number (w_io_t *io, long value)
 {
     w_buf_t buf = W_BUF;
@@ -1981,7 +1979,7 @@ w_tnetstr_write_number (w_io_t *io, long value)
         || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
-static inline wbool
+static inline w_bool_t
 w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
 {
     w_buf_t buf = W_BUF;
@@ -1991,7 +1989,7 @@ w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
         || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
-static inline wbool
+static inline w_bool_t
 w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
 {
     w_buf_t buf = W_BUF;
@@ -2002,15 +2000,15 @@ w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
 }
 
 W_EXPORT w_variant_t* w_tnetstr_parse (const w_buf_t *buffer);
-W_EXPORT wbool w_tnetstr_parse_null (const w_buf_t *buffer);
-W_EXPORT wbool w_tnetstr_parse_float (const w_buf_t *buffer, double *value);
-W_EXPORT wbool w_tnetstr_parse_number (const w_buf_t *buffer, long *value);
-W_EXPORT wbool w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value);
-W_EXPORT wbool w_tnetstr_parse_boolean (const w_buf_t *buffer, wbool *value);
-W_EXPORT wbool w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value);
-W_EXPORT wbool w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value);
+W_EXPORT w_bool_t w_tnetstr_parse_null (const w_buf_t *buffer);
+W_EXPORT w_bool_t w_tnetstr_parse_float (const w_buf_t *buffer, double *value);
+W_EXPORT w_bool_t w_tnetstr_parse_number (const w_buf_t *buffer, long *value);
+W_EXPORT w_bool_t w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value);
+W_EXPORT w_bool_t w_tnetstr_parse_boolean (const w_buf_t *buffer, w_bool_t *value);
+W_EXPORT w_bool_t w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value);
+W_EXPORT w_bool_t w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value);
 
-W_EXPORT wbool w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer);
+W_EXPORT w_bool_t w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer);
 
 static inline w_variant_t*
 w_tnetstr_read (w_io_t *io)
@@ -2025,7 +2023,7 @@ E:  w_buf_clear (&buf);
 }
 
 #define _W_TNS_READF(_name, _type)                           \
-    static inline wbool                                      \
+    static inline w_bool_t                                   \
     w_tnetstr_read_ ## _name (w_io_t *io, _type *value) {    \
         w_buf_t buf = W_BUF;                                 \
         w_assert (io);                                       \
@@ -2039,7 +2037,7 @@ E:  w_buf_clear (&buf);
 _W_TNS_READF (float,   double  )
 _W_TNS_READF (number,  long int)
 _W_TNS_READF (string,  w_buf_t )
-_W_TNS_READF (boolean, wbool   )
+_W_TNS_READF (boolean, w_bool_t)
 _W_TNS_READF (list,    w_list_t)
 _W_TNS_READF (dict,    w_dict_t)
 
@@ -2080,12 +2078,12 @@ typedef enum w_cfg_type_t w_cfg_type_t;
 /*!
  * Checks whether a key exists in a configuration object.
  */
-W_EXPORT wbool w_cfg_has (const w_cfg_t *cf, const char *key);
+W_EXPORT w_bool_t w_cfg_has (const w_cfg_t *cf, const char *key);
 
 /*!
  * Deletes a key from a configuration object.
  */
-W_EXPORT wbool w_cfg_del (w_cfg_t *cf, const char *key);
+W_EXPORT w_bool_t w_cfg_del (w_cfg_t *cf, const char *key);
 
 /*!
  * Sets a number of items in a configuration object. Prefix each item with
@@ -2099,7 +2097,7 @@ W_EXPORT wbool w_cfg_del (w_cfg_t *cf, const char *key);
  *                W_CFG_END);
  * \endcode
  */
-W_EXPORT wbool w_cfg_set (w_cfg_t *cf, ...);
+W_EXPORT w_bool_t w_cfg_set (w_cfg_t *cf, ...);
 
 /*!
  * Gets a number of items from a configuration object. The variable argument
@@ -2114,7 +2112,7 @@ W_EXPORT wbool w_cfg_set (w_cfg_t *cf, ...);
  *                W_CFG_END);
  * \endcode
  */
-W_EXPORT wbool w_cfg_get (const w_cfg_t *cf, ...);
+W_EXPORT w_bool_t w_cfg_get (const w_cfg_t *cf, ...);
 
 /*!
  * Obtain the type of a configuration object node.
@@ -2127,7 +2125,7 @@ W_EXPORT w_cfg_type_t w_cfg_type (const w_cfg_t *cf, const char *key);
  * \param output Output stream where to write.
  * \return       Whether writing was successful.
  */
-W_EXPORT wbool w_cfg_dump (const w_cfg_t *cf, w_io_t *output);
+W_EXPORT w_bool_t w_cfg_dump (const w_cfg_t *cf, w_io_t *output);
 
 /*!
  * Load configuration from a stream.
@@ -2143,7 +2141,7 @@ W_EXPORT w_cfg_t* w_cfg_load (w_io_t *input, char **msg);
  * \param path Path to a file.
  * \return     Whether writing was successful.
  */
-W_EXPORT wbool w_cfg_dump_file (const w_cfg_t *cf, const char *path);
+W_EXPORT w_bool_t w_cfg_dump_file (const w_cfg_t *cf, const char *path);
 
 /*!
  * Load configuration from a file.
@@ -2205,7 +2203,7 @@ _W_G( node,   W_CFG_NODE,   w_cfg_t*    )
  *
  * \return Wether the terminal size was guessed properly.
  */
-W_EXPORT wbool w_tty_size (unsigned *cols, unsigned *rows);
+W_EXPORT w_bool_t w_tty_size (unsigned *cols, unsigned *rows);
 
 /*!
  * Obtains the width of a row of the controlling terminal.
@@ -2238,7 +2236,8 @@ typedef void (*w_tty_notify_fun_t) (unsigned, unsigned, void*);
  *
  * \note This functionality requires the \c SIGWINCH signal to be defined.
  */
-W_EXPORT wbool w_tty_size_notify (w_tty_notify_fun_t function, void *context);
+W_EXPORT w_bool_t w_tty_size_notify (w_tty_notify_fun_t function,
+                                     void              *context);
 
 /*\}*/
 

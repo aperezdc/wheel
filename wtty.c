@@ -53,7 +53,7 @@ w_tty_rows(void)
 }
 
 
-wbool
+w_bool_t
 w_tty_size(unsigned *cols, unsigned *rows)
 {
 #ifdef TIOCGWINSZ
@@ -102,7 +102,7 @@ update_tty_size (int signum)
 
 
 /* TODO Finish implementation of this function. */
-wbool
+w_bool_t
 w_tty_size_notify(w_tty_notify_fun_t function, void *context)
 {
 	w_unused(function);

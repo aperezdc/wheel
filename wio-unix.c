@@ -11,7 +11,7 @@
 #include <errno.h>
 
 
-static wbool
+static w_bool_t
 w_io_unix_close (w_io_t *iobase)
 {
     w_io_unix_t *io = (w_io_unix_t*) iobase;
@@ -61,7 +61,7 @@ w_io_unix_read (w_io_t *io, void *buf, size_t len)
 }
 
 
-static wbool
+static w_bool_t
 w_io_unix_flush (w_io_t *io)
 {
     return fsync (((w_io_unix_t*) io)->fd) != 0;
@@ -88,7 +88,7 @@ w_io_unix_open_fd (int fd)
 }
 
 
-wbool
+w_bool_t
 w_io_unix_init (w_io_unix_t *io,
                 const char  *path,
                 int          mode,

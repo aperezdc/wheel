@@ -73,12 +73,12 @@ W_OPT_BOOL (const w_opt_context_t *context)
     w_assert (context->option->extra != NULL);
 
     if (context->option->narg == 0) {
-        *((wbool*) context->option->extra) = W_YES;
+        *((w_bool_t*) context->option->extra) = W_YES;
         return W_OPT_OK;
 	}
 
     for (i = 0; i < context->option->narg; i++)
-        if (!w_str_bool (context->argument[i], &((wbool*) context->option->extra)[i]))
+        if (!w_str_bool (context->argument[i], &((w_bool_t*) context->option->extra)[i]))
             return W_OPT_BAD_ARG;
 
     return W_OPT_OK;
@@ -286,7 +286,7 @@ w_opt_parse (const w_opt_t *options,
 {
     w_opt_status_t status = W_OPT_OK;
     w_opt_context_t context = { argc, argv, NULL, userdata, NULL };
-    wbool files_only = W_NO;
+    w_bool_t files_only = W_NO;
     size_t i = 1;
 
     w_assert (options != NULL);
@@ -463,13 +463,13 @@ _w_opt_parse_file (w_parse_t *p, void *ctx)
 }
 
 
-wbool
+w_bool_t
 w_opt_parse_io (const w_opt_t *opt,
                 w_io_t        *input,
                 char         **msg)
 {
     char *errmsg;
-    wbool ret;
+    w_bool_t ret;
 
     w_parse_t parser;
 

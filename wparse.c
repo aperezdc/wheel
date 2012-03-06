@@ -117,7 +117,7 @@ w_parse_ident (w_parse_t *p)
 }
 
 
-wbool
+w_bool_t
 w_parse_ulong (w_parse_t      *p,
                unsigned long  *value)
 {
@@ -152,7 +152,7 @@ w_parse_ulong (w_parse_t      *p,
 }
 
 
-wbool
+w_bool_t
 w_parse_long (w_parse_t *p, long *value)
 {
     unsigned long uval;
@@ -190,7 +190,7 @@ w_parse_long (w_parse_t *p, long *value)
 }
 
 
-wbool
+w_bool_t
 w_parse_double (w_parse_t *p, double *value)
 {
     w_assert (p != NULL);

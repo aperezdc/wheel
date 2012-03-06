@@ -79,10 +79,10 @@ w_cfg_ensurenode (w_cfg_t *cf, const char *key)
 }
 
 
-static wbool
+static w_bool_t
 w_cfg_setv (w_cfg_t *cf, va_list args)
 {
-    wbool ret = W_YES;
+    w_bool_t ret = W_YES;
     w_cfg_type_t kind;
     w_variant_t *node;
     w_assert (cf);
@@ -114,10 +114,10 @@ w_cfg_setv (w_cfg_t *cf, va_list args)
 }
 
 
-static wbool
+static w_bool_t
 w_cfg_getv (const w_cfg_t *cf, va_list args)
 {
-    wbool ret = W_YES;
+    w_bool_t ret = W_YES;
     w_cfg_type_t kind;
     w_variant_t *node;
     double *pnumber;
@@ -161,10 +161,10 @@ w_cfg_getv (const w_cfg_t *cf, va_list args)
 }
 
 
-wbool
+w_bool_t
 w_cfg_set (w_cfg_t *cf, ...)
 {
-    wbool ret;
+    w_bool_t ret;
     va_list args;
     w_assert (cf);
     va_start (args, cf);
@@ -174,10 +174,10 @@ w_cfg_set (w_cfg_t *cf, ...)
 }
 
 
-wbool
+w_bool_t
 w_cfg_get (const w_cfg_t *cf, ...)
 {
-    wbool ret;
+    w_bool_t ret;
     va_list args;
     w_assert (cf);
     va_start (args, cf);
@@ -187,7 +187,7 @@ w_cfg_get (const w_cfg_t *cf, ...)
 }
 
 
-wbool
+w_bool_t
 w_cfg_has (const w_cfg_t *cf, const char *key)
 {
     w_assert (cf);
@@ -247,7 +247,7 @@ w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **
 }
 
 
-wbool
+w_bool_t
 w_cfg_del (w_cfg_t *cf, const char *key)
 {
     w_variant_t *node;
@@ -278,7 +278,7 @@ w_cfg_del (w_cfg_t *cf, const char *key)
     } while (0)
 
 
-static wbool
+static w_bool_t
 w_cfg_dump_string (w_io_t *out, const char *str)
 {
     w_assert (out);
@@ -308,7 +308,7 @@ w_cfg_dump_string (w_io_t *out, const char *str)
 }
 
 
-static wbool
+static w_bool_t
 w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
 {
     w_iterator_t i;
@@ -351,7 +351,7 @@ w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
 /*
  * TODO Better error checking of IO functions.
  */
-wbool
+w_bool_t
 w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
 {
     w_assert (cf);
@@ -360,11 +360,11 @@ w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
 }
 
 
-wbool
+w_bool_t
 w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 {
     w_io_t *io;
-    wbool ret;
+    w_bool_t ret;
 
     w_assert (cf);
     w_assert (path);

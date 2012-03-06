@@ -139,7 +139,7 @@ END_TEST
 
 START_TEST (test_wtnetstr_parse_bool)
 {
-    wbool value = W_NO;
+    w_bool_t value = W_NO;
     w_buf_t b = W_BUF;
 
     w_buf_set_str (&b, "4:true!");

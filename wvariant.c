@@ -66,7 +66,7 @@ w_variant_new (w_variant_type_t type, ...)
             break;
 
         case W_VARIANT_BOOL:
-            variant->value.boolean = va_arg (args, wbool);
+            variant->value.boolean = va_arg (args, w_bool_t);
             break;
 
         case W_VARIANT_STRING:

@@ -11,7 +11,7 @@
 
 START_TEST (test_wopt_set_bool)
 {
-    wbool value = W_NO;
+    w_bool_t value = W_NO;
     const w_opt_t options[] = {
         { 0, 'b', "bool", W_OPT_BOOL, &value, "Bool value" },
         W_OPT_END

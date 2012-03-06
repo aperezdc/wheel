@@ -80,8 +80,8 @@ w_str_hashl (const char *str, size_t len)
 }
 
 
-wbool
-w_str_bool(const char *str, wbool *opt)
+w_bool_t
+w_str_bool(const char *str, w_bool_t *opt)
 {
 	w_assert(str != NULL);
 	w_assert(opt != NULL);
@@ -127,7 +127,7 @@ w_str_bool(const char *str, wbool *opt)
 
 
 
-wbool
+w_bool_t
 w_str_int(const char *str, int *val)
 {
 	long v;
@@ -146,7 +146,7 @@ w_str_int(const char *str, int *val)
 }
 
 
-wbool
+w_bool_t
 w_str_uint(const char *str, unsigned *val)
 {
 	unsigned long v;
@@ -163,7 +163,7 @@ w_str_uint(const char *str, unsigned *val)
 }
 
 
-wbool
+w_bool_t
 w_str_long(const char *str, long *val)
 {
 	long v;
@@ -180,7 +180,7 @@ w_str_long(const char *str, long *val)
 }
 
 
-wbool
+w_bool_t
 w_str_ulong(const char *str, unsigned long *val)
 {
 	unsigned long v;
@@ -198,7 +198,7 @@ w_str_ulong(const char *str, unsigned long *val)
 
 
 #ifdef HUGE_VALF
-wbool
+w_bool_t
 w_str_float(const char *str, float *val)
 {
 	float v;
@@ -216,7 +216,7 @@ w_str_float(const char *str, float *val)
 
 
 #ifdef HUGE_VAL
-wbool
+w_bool_t
 w_str_double(const char *str, double *val)
 {
 	double v;

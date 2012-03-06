@@ -17,7 +17,7 @@
 #include <stdio.h>
 
 
-static wbool
+static w_bool_t
 w_io_stdio_close (w_io_t *io)
 {
     return (fclose (((w_io_stdio_t*) io)->fp) == 0);
@@ -64,7 +64,7 @@ w_io_stdio_read (w_io_t *io, void *buf, size_t len)
 }
 
 
-static wbool
+static w_bool_t
 w_io_stdio_flush (w_io_t *io)
 {
     return fflush (((w_io_stdio_t*) io)->fp) != 0;

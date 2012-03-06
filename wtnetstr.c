@@ -27,7 +27,7 @@ static const char _w_tns_true [] = "4:true!";
 static const char _w_tns_null [] = "0:~";
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_null (w_buf_t *buffer)
 {
     w_assert (buffer);
@@ -36,7 +36,7 @@ w_tnetstr_dump_null (w_buf_t *buffer)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_write_null (w_io_t *io)
 {
     static const unsigned len = w_lengthof (_w_tns_null) - 1;
@@ -45,8 +45,8 @@ w_tnetstr_write_null (w_io_t *io)
 }
 
 
-wbool
-w_tnetstr_dump_boolean (w_buf_t *buffer, wbool value)
+w_bool_t
+w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value)
 {
     w_assert (buffer);
     if (value)
@@ -57,8 +57,8 @@ w_tnetstr_dump_boolean (w_buf_t *buffer, wbool value)
 }
 
 
-wbool
-w_tnetstr_write_boolean (w_io_t *io, wbool value)
+w_bool_t
+w_tnetstr_write_boolean (w_io_t *io, w_bool_t value)
 {
     w_assert (io);
     if (value) {
@@ -72,7 +72,7 @@ w_tnetstr_write_boolean (w_io_t *io, wbool value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_string (w_buf_t *buffer, const char *value)
 {
     size_t len;
@@ -89,7 +89,7 @@ w_tnetstr_dump_string (w_buf_t *buffer, const char *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_write_string (w_io_t *io, const char *value)
 {
     size_t len;
@@ -105,7 +105,7 @@ w_tnetstr_write_string (w_io_t *io, const char *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value)
 {
     w_assert (buffer);
@@ -119,7 +119,7 @@ w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value)
 {
     w_assert (io);
@@ -132,7 +132,7 @@ w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_number (w_buf_t *buffer, long value)
 {
     w_buf_t buf = W_BUF;
@@ -156,7 +156,7 @@ return_error:
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_float (w_buf_t *buffer, double value)
 {
     w_buf_t buf = W_BUF;
@@ -180,7 +180,7 @@ return_error:
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value)
 {
     w_buf_t buf = W_BUF;
@@ -206,7 +206,7 @@ return_error:
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value)
 {
     w_buf_t buf = W_BUF;
@@ -233,7 +233,7 @@ return_error:
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
 {
     w_assert (buffer);
@@ -273,7 +273,7 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_write (w_io_t *io, const w_variant_t *value)
 {
     w_assert (io);
@@ -333,7 +333,7 @@ peek_item_size (const w_buf_t *buffer)
 }
 
 
-static inline wbool
+static inline w_bool_t
 slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
 {
     unsigned plen = 0;
@@ -369,7 +369,7 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
 {
     unsigned blen = _W_TNS_SIZE_DIGITS + 1; /* number + colon */
@@ -404,7 +404,7 @@ return_error:
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_parse_null (const w_buf_t *buffer)
 {
     w_assert (buffer);
@@ -415,7 +415,7 @@ w_tnetstr_parse_null (const w_buf_t *buffer)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_parse_float (const w_buf_t *buffer, double *value)
 {
     w_buf_t payload;
@@ -434,7 +434,7 @@ w_tnetstr_parse_float (const w_buf_t *buffer, double *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
 {
     w_buf_t payload;
@@ -453,8 +453,8 @@ w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
 }
 
 
-wbool
-w_tnetstr_parse_boolean (const w_buf_t *buffer, wbool *value)
+w_bool_t
+w_tnetstr_parse_boolean (const w_buf_t *buffer, w_bool_t *value)
 {
     w_assert (buffer);
     w_assert (value);
@@ -489,7 +489,7 @@ w_tnetstr_parse_boolean (const w_buf_t *buffer, wbool *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value)
 {
     w_buf_t payload;
@@ -505,7 +505,7 @@ w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
 {
     w_buf_t payload;
@@ -537,7 +537,7 @@ w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
 }
 
 
-wbool
+w_bool_t
 w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
 {
     w_buf_t payload;
@@ -588,7 +588,7 @@ w_tnetstr_parse (const w_buf_t *buffer)
     size_t item_len;
     union {
         w_buf_t   vbuf;
-        wbool     vbool;
+        w_bool_t  vbool;
         double    vdouble;
         long      vlong;
         w_list_t *vlist;

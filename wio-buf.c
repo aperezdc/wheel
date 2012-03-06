@@ -9,7 +9,7 @@
 #include <string.h>
 
 
-static wbool
+static w_bool_t
 w_io_buf_close (w_io_t *iobase)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
@@ -51,7 +51,7 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
 
 
 void
-w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, wbool append)
+w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, w_bool_t append)
 {
     w_assert (io);
 

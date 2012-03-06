@@ -117,7 +117,7 @@ _w_dict_dtor (void *obj)
 
 
 w_dict_t*
-w_dict_new (wbool refs)
+w_dict_new (w_bool_t refs)
 {
 	w_dict_t *d = w_obj_new (w_dict_t);
 	d->alloc = W_DICT_DEFAULT_ALLOC;
