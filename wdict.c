@@ -43,7 +43,7 @@
  * XXX  you want to add new fields, ADD FIELDS AT THE END.  XXX
  */
 
-struct w_dict_node_t
+struct w_dict_node
 {
 	void *val;
 	char *key;

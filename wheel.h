@@ -661,7 +661,7 @@ W_EXPORT void w_list_del_at (w_list_t *list, long index);
  * \{
  */
 
-typedef struct w_dict_node_t w_dict_node_t;
+typedef struct w_dict_node w_dict_node_t;
 
 W_OBJ (w_dict_t)
 {
@@ -747,7 +747,7 @@ W_EXPORT const char const* w_dict_iterator_get_key (w_iterator_t i);
  * \{
  */
 
-enum w_opt_status_t
+enum w_opt_status
 {
 	W_OPT_OK,          /*!< All was correct. */
 	W_OPT_EXIT_OK,     /*!< Exit the program with zero status. */
@@ -757,9 +757,9 @@ enum w_opt_status_t
 	W_OPT_FILES,       /*!< Remaining arguments are file names. */
 };
 
-typedef enum w_opt_status_t w_opt_status_t;
+typedef enum w_opt_status w_opt_status_t;
 
-typedef struct w_opt_context_t w_opt_context_t;
+typedef struct w_opt_context w_opt_context_t;
 
 /*!
  * Type of option parsing action callbacks.
@@ -770,7 +770,7 @@ typedef w_opt_status_t (*w_opt_action_t)(const w_opt_context_t*);
 /*!
  * Command line option information.
  */
-struct w_opt_t
+struct w_opt
 {
 	unsigned       narg;   /*!< Number of arguments consumed.           */
 	unsigned char  letter; /*!< Letter for short option style parsing.  */
@@ -780,7 +780,7 @@ struct w_opt_t
 	const char    *info;   /*!< Text describing the option.             */
 };
 
-typedef struct w_opt_t w_opt_t;
+typedef struct w_opt w_opt_t;
 
 #define W_OPT_CLI_ONLY  0x80
 
@@ -794,7 +794,7 @@ typedef struct w_opt_t w_opt_t;
 	{ 0, '\0', NULL, NULL, NULL, NULL }
 
 
-struct w_opt_context_t
+struct w_opt_context
 {
 	const int      argc;
 	char         **argv;
@@ -917,7 +917,7 @@ W_EXPORT w_io_t *w_stdin;
  * w_parse_run (&parser, input, '#', parse_func, NULL, &error);
  * \endcode
  */
-struct w_parse_t
+struct w_parse
 {
     unsigned line;    /*!< Current line number.                      */
     unsigned lpos;    /*!< Current position in line (column number). */
@@ -928,7 +928,7 @@ struct w_parse_t
     void    *result;  /*!< Parsing result.                           */
     jmp_buf  jbuf;    /*!< Jump buffer (used when raising errors).   */
 };
-typedef struct w_parse_t w_parse_t;
+typedef struct w_parse w_parse_t;
 
 typedef void (*w_parse_fun_t) (w_parse_t*, void*);
 
@@ -1113,7 +1113,7 @@ W_EXPORT w_bool_t w_parse_long (w_parse_t *p, long *value);
  * freed.
  */
 
-typedef struct w_buf_t w_buf_t;
+typedef struct w_buf w_buf_t;
 
 /*!
  * \brief A variable-length buffer for arbitrary data.
@@ -1123,7 +1123,7 @@ typedef struct w_buf_t w_buf_t;
  *   w_buf_t mybuffer = W_BUF;
  * \endcode
  */
-struct w_buf_t
+struct w_buf
 {
     char  *data;  /*!< Actual data */
     size_t size;  /*!< Data length */
@@ -1496,24 +1496,24 @@ W_EXPORT void w_io_unix_init_fd (w_io_unix_t *io, int fd);
  * Socket kinds.
  * \see w_io_socket_open
  */
-enum w_io_socket_kind_t
+enum w_io_socket_kind
 {
     W_IO_SOCKET_UNIX, /*!< Unix named socket.    */
     W_IO_SOCKET_TCP4, /*!< IPv4 TCP socket.      */
 };
-typedef enum w_io_socket_kind_t w_io_socket_kind_t;
+typedef enum w_io_socket_kind w_io_socket_kind_t;
 
 /*!
  * Modes available for server-side sockets.
  * \see w_io_socket_serve
  */
-enum w_io_socket_serve_mode_t
+enum w_io_socket_serve_mode
 {
     W_IO_SOCKET_SINGLE, /*!< Serve one client at a time.                   */
     W_IO_SOCKET_THREAD, /*!< Each client is serviced using a new thread.   */
     W_IO_SOCKET_FORK,   /*!< Each client is serviced by forking a process. */
 };
-typedef enum w_io_socket_serve_mode_t w_io_socket_serve_mode_t;
+typedef enum w_io_socket_serve_mode w_io_socket_serve_mode_t;
 
 
 #define W_IO_SOCKET_SA_LEN 1024
@@ -2047,7 +2047,7 @@ typedef w_dict_t w_cfg_t;
 /*!
  * Flags and constant values for node types.
  */
-enum w_cfg_type_t
+enum w_cfg_type
 {
 	W_CFG_END    = W_VARIANT_NULL,    /*!< Marks end of parameter lists. */
 	W_CFG_NONE   = W_VARIANT_INVALID, /*!< Invalid node.                 */
@@ -2056,7 +2056,7 @@ enum w_cfg_type_t
 	W_CFG_NODE   = W_VARIANT_DICT,    /*!< Node containing a subnode.    */
 };
 
-typedef enum w_cfg_type_t w_cfg_type_t;
+typedef enum w_cfg_type w_cfg_type_t;
 
 /*!
  * Create a new configuration object.
