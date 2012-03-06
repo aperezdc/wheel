@@ -132,6 +132,24 @@ w_list_at (const w_list_t *list, long index)
 }
 
 
+void*
+w_list_head (const w_list_t *list)
+{
+    _W_LIST_HE;
+    e = TAILQ_FIRST (h);
+    return e->value;
+}
+
+
+void*
+w_list_tail (const w_list_t *list)
+{
+    _W_LIST_HE;
+    e = TAILQ_LAST (h, w_list_head);
+    return e->value;
+}
+
+
 w_iterator_t
 w_list_first (const w_list_t *list)
 {

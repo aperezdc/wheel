@@ -543,6 +543,12 @@ W_EXPORT void* w_list_pop_head (w_list_t *list);
  */
 W_EXPORT void* w_list_pop_tail (w_list_t *list);
 
+/*! Obtains the element at the first position in the list. */
+W_EXPORT void* w_list_head (const w_list_t *list);
+
+/*! Obtains the element at the last position in the list. */
+W_EXPORT void* w_list_tail (const w_list_t *list);
+
 /*! Obtains a pointer to the first element in the list. */
 W_EXPORT w_iterator_t w_list_first (const w_list_t *list);
 
