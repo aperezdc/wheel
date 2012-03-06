@@ -1136,9 +1136,9 @@ typedef struct w_buf_t w_buf_t;
  */
 struct w_buf_t
 {
-    char  *buf; /*!< Actual data */
-    size_t len; /*!< Data length */
-    size_t bsz; /*!< Buffer size */
+    char  *data;  /*!< Actual data */
+    size_t size;  /*!< Data length */
+    size_t alloc; /*!< Allocated buffer size */
 };
 
 
@@ -1151,12 +1151,25 @@ struct w_buf_t
 /*!
  * Get the length of a buffer.
  */
-#define w_buf_size(_b) ((_b)->len)
+#define w_buf_size(_b) ((_b)->size)
+
+/*!
+ * Obtains the size of the allocated space for stored data.
+ * This will be always equal or larger that the size of the
+ * actual stored data.
+ */
+#define w_buf_alloc_size(_b) ((_b)->alloc)
+
+/*!
+ * Get a pointer to the internal data stored by the buffer.
+ * Note that this may be \c NULL.
+ */
+#define w_buf_data(_b) ((_b)->data)
 
 /*!
  * Checks whether a buffer is empty.
  */
-#define w_buf_empty(_b) ((_b)->len == 0)
+#define w_buf_empty(_b) ((_b)->size == 0)
 
 /*!
  * Adjust the size of a buffer keeping contents.
@@ -1956,7 +1969,7 @@ w_tnetstr_write_float (w_io_t *io, double value)
     w_buf_t buf = W_BUF;
     w_assert (io);
     return w_tnetstr_dump_float (&buf, value)
-        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
 static inline wbool
@@ -1965,7 +1978,7 @@ w_tnetstr_write_number (w_io_t *io, long value)
     w_buf_t buf = W_BUF;
     w_assert (io);
     return w_tnetstr_dump_number (&buf, value)
-        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
 static inline wbool
@@ -1975,7 +1988,7 @@ w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
     w_assert (io);
     w_assert (value);
     return w_tnetstr_dump_list (&buf, value)
-        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
 static inline wbool
@@ -1985,7 +1998,7 @@ w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
     w_assert (io);
     w_assert (value);
     return w_tnetstr_dump_dict (&buf, value)
-        || w_io_write (io, buf.buf, buf.len) != (ssize_t) buf.len;
+        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
 }
 
 W_EXPORT w_variant_t* w_tnetstr_parse (const w_buf_t *buffer);

@@ -12,9 +12,9 @@
 START_TEST (test_wbuf_init)
 {
     w_buf_t b = W_BUF;
-    fail_if (b.buf, "buffer is not null upon creation");
-    fail_if (b.bsz, "buffer size is not 0 upon creation");
-    fail_if (b.len, "buffer length is not 0 upon creation");
+    fail_if (w_buf_data (&b), "buffer is not null upon creation");
+    fail_if (w_buf_size (&b), "buffer length is not 0 upon creation");
+    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 upon creation");
 }
 END_TEST
 
@@ -23,24 +23,24 @@ START_TEST (test_wbuf_free)
 {
     w_buf_t b = W_BUF;
 
-    fail_if (b.buf, "buffer is not null upon creation");
-    fail_if (b.bsz, "buffer size is not 0 upon creation");
-    fail_if (b.len, "buffer length is not 0 upon creation");
+    fail_if (w_buf_data (&b), "buffer is not null upon creation");
+    fail_if (w_buf_size (&b), "buffer length is not 0 upon creation");
+    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 upon creation");
 
     /* freeing should get to a sane state, always */
     w_buf_clear (&b);
 
-    fail_if (b.buf, "buffer is not null after reset");
-    fail_if (b.bsz, "buffer size is not 0 after reset");
-    fail_if (b.len, "buffer length is not 0 after reset");
+    fail_if (w_buf_data (&b), "buffer is not null after reset");
+    fail_if (w_buf_size (&b), "buffer length is not 0 after reset");
+    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 after reset");
 
     /* append something and then free again */
     w_buf_set_str (&b, "This is some content");
     w_buf_clear (&b);
 
-    fail_if (b.buf, "buffer is not null after reset");
-    fail_if (b.bsz, "buffer size is not 0 after reset");
-    fail_if (b.len, "buffer length is not 0 after reset");
+    fail_if (w_buf_data (&b), "buffer is not null after reset");
+    fail_if (w_buf_size (&b), "buffer length is not 0 after reset");
+    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 after reset");
 }
 END_TEST
 
@@ -70,12 +70,12 @@ START_TEST (test_wbuf_append_mem)
     w_buf_set_str (&b, "XX");
     w_buf_append_mem (&b, "YYZZ", 3);
 
-    fail_if (memcmp (b.buf, "XXYYZZ", 5),
+    fail_if (memcmp (w_buf_data (&b), "XXYYZZ", 5),
              "Expected 'XXYYZ', got '%s'", w_buf_str (&b));
 
     w_buf_append_mem (&b, "Too much work and no joy...", 10);
 
-    fail_if (memcmp (b.buf, "XXYYZToo much w", 15),
+    fail_if (memcmp (w_buf_data (&b), "XXYYZToo much w", 15),
              "Expected 'XXYYZToo much w', got '%s'", w_buf_str (&b));
 
     w_buf_clear (&b);

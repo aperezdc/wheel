@@ -328,35 +328,43 @@ w_io_read_until (w_io_t  *io,
         ssize_t c;
         char *pos;
 
-        pos = memchr (overflow->buf, stopchar, w_buf_size (overflow));
+        pos = memchr (w_buf_data (overflow),
+                      stopchar,
+                      w_buf_size (overflow));
+
         if (pos != NULL) {
             /*
              * Stop character is in overflow buffer: remove it from the
              * overflow buffer, copy data to result buffer.
              */
-            unsigned len = pos - overflow->buf + 1;
-            w_buf_append_mem (buffer, overflow->buf, len);
-            overflow->len -= len;
-            memmove (overflow->buf, overflow->buf + len, overflow->len);
+            unsigned len = pos - w_buf_data (overflow) + 1;
+            w_buf_append_mem (buffer, w_buf_data (overflow), len);
+            w_buf_size (overflow) -= len;
+            memmove (w_buf_data (overflow),
+                     w_buf_data (overflow) + len,
+                     w_buf_size (overflow));
             w_buf_resize (buffer, w_buf_size (buffer) - 1);
             return w_buf_size (buffer);
         }
 
-        if (overflow->bsz < (overflow->len + readbytes)) {
+        if (w_buf_alloc_size (overflow) < (w_buf_size (overflow) + readbytes))
+        {
             /*
              * XXX Calling w_buf_resize() will *both* resize the buffer
              * data area and set overflow->bsz *and* overflow->len. But we
              * do not want the later to be changed we save and restore it.
              */
             size_t oldlen = w_buf_size (overflow);
-            w_buf_resize (overflow, overflow->len + readbytes);
+            w_buf_resize (overflow, w_buf_size (overflow) + readbytes);
             w_buf_size (overflow) = oldlen;
         }
 
-        c = w_io_read (io, overflow->buf + w_buf_size (overflow), readbytes);
+        c = w_io_read (io,
+                       w_buf_data (overflow) + w_buf_size (overflow),
+                       readbytes);
 
         if (c > 0)
-            overflow->len += c;
+            w_buf_size (overflow) += c;
         else
             return c;
     }

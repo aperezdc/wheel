@@ -119,9 +119,9 @@ START_TEST (test_wio_buf_write)
                  "buffer length %lu, expected 30",
                  (unsigned long) w_buf_size (b));
 
-    fail_if (memcmp (b->buf +  0, msg, 10), "buffers do not match");
-    fail_if (memcmp (b->buf + 10, msg, 10), "buffers do not match");
-    fail_if (memcmp (b->buf + 20, msg, 10), "buffers do not match");
+    fail_if (memcmp (w_buf_data (b) +  0, msg, 10), "buffers do not match");
+    fail_if (memcmp (w_buf_data (b) + 10, msg, 10), "buffers do not match");
+    fail_if (memcmp (w_buf_data (b) + 20, msg, 10), "buffers do not match");
 
     w_obj_unref (io);
 }

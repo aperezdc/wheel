@@ -39,12 +39,12 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
     w_io_buf_t *io = (w_io_buf_t*) iobase;
     size_t to_read;
 
-    if (io->pos >= io->bufp->len) {
+    if (io->pos >= w_buf_size (io->bufp)) {
         return W_IO_EOF;
     }
 
-    to_read = w_min (len, io->bufp->len - io->pos);
-    memcpy (buf, io->bufp->buf + io->pos, to_read);
+    to_read = w_min (len, w_buf_size (io->bufp) - io->pos);
+    memcpy (buf, w_buf_data (io->bufp) + io->pos, to_read);
     io->pos += to_read;
     return to_read;
 }

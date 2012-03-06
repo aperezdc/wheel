@@ -13,40 +13,40 @@
 
 
 static inline void
-_buf_setlen (w_buf_t *buf, size_t len)
+_buf_resize (w_buf_t *buf, size_t size)
 {
-    if (len) {
-        size_t nsz = W_BUF_CHUNK_SIZE * ((len / W_BUF_CHUNK_SIZE) + 1);
-        if (nsz < len) {
-            nsz = len;
+    if (size) {
+        size_t nsz = W_BUF_CHUNK_SIZE * ((size / W_BUF_CHUNK_SIZE) + 1);
+        if (nsz < size) {
+            nsz = size;
         }
-        if (nsz != buf->bsz) {
-            buf->buf = w_resize (buf->buf, char, nsz + 1);
-            buf->bsz = nsz;
+        if (nsz != buf->alloc) {
+            buf->data  = w_resize (buf->data, char, nsz + 1);
+            buf->alloc = nsz;
         }
     }
     else {
-        if (buf->buf) {
-            w_free (buf->buf);
+        if (buf->data) {
+            w_free (buf->data);
         }
-        buf->bsz = 0;
+        buf->alloc = 0;
     }
 }
 
 
 static inline void
-_buf_xsetlen(w_buf_t *buf, size_t len)
+_buf_xresize (w_buf_t *buf, size_t size)
 {
-    _buf_setlen (buf, len);
-    buf->len = len;
+    _buf_resize (buf, size);
+    buf->size = size;
 }
 
 
 void
-w_buf_resize (w_buf_t *buf, size_t len)
+w_buf_resize (w_buf_t *buf, size_t size)
 {
     w_assert (buf);
-    _buf_xsetlen (buf, len);
+    _buf_xresize (buf, size);
 }
 
 
@@ -59,38 +59,38 @@ w_buf_set_str (w_buf_t *buf, const char *str)
     w_assert (str);
 
     slen = strlen (str);
-    _buf_xsetlen (buf, slen);
-    memcpy (buf->buf, str, slen);
+    _buf_xresize (buf, slen);
+    memcpy (buf->data, str, slen);
 }
 
 
 void
 w_buf_append_mem (w_buf_t *buf, const void *ptr, size_t len)
 {
-    size_t blen;
+    size_t bsize;
 
     w_assert (buf);
     w_assert (ptr);
 
-    blen = buf->len;
-    _buf_xsetlen (buf, blen + len);
-    memcpy (buf->buf + blen, ptr, len);
+    bsize = buf->size;
+    _buf_xresize (buf, bsize + len);
+    memcpy (buf->data + bsize, ptr, len);
 }
 
 
 void
 w_buf_append_str (w_buf_t *buf, const char *str)
 {
-    size_t blen;
+    size_t bsize;
     size_t slen;
 
     w_assert (buf);
     w_assert (str);
 
-    blen = buf->len;
+    bsize = buf->size;
     slen = strlen (str);
-    _buf_xsetlen (buf, blen + slen);
-    memcpy (buf->buf + blen, str, slen);
+    _buf_xresize (buf, bsize + slen);
+    memcpy (buf->data + bsize, str, slen);
 }
 
 
@@ -98,8 +98,8 @@ void
 w_buf_append_char (w_buf_t *buf, int chr)
 {
     w_assert (buf);
-    _buf_xsetlen (buf, buf->len + 1);
-    buf->buf[buf->len-1] = chr;
+    _buf_xresize (buf, buf->size + 1);
+    buf->data[buf->size - 1] = chr;
 }
 
 
@@ -109,9 +109,9 @@ w_buf_append_buf (w_buf_t *buf, const w_buf_t *src)
     w_assert (buf);
     w_assert (src);
 
-    size_t blen = buf->len;
-    _buf_xsetlen (buf, blen + src->len);
-    memcpy (buf->buf + blen, src->buf, src->len);
+    size_t bsize = buf->size;
+    _buf_xresize (buf, bsize + src->size);
+    memcpy (buf->data + bsize, src->data, src->size);
 }
 
 
@@ -120,12 +120,12 @@ w_buf_str (w_buf_t *buf)
 {
     w_assert (buf);
 
-    if (!buf->len) {
-        _buf_xsetlen (buf, 1);
-        buf->len = 0;
+    if (!buf->size) {
+        _buf_xresize (buf, 1);
+        buf->size = 0;
     }
-    buf->buf[buf->len] = '\0';
-    return buf->buf;
+    buf->data[buf->size] = '\0';
+    return buf->data;
 }
 
 
@@ -133,7 +133,7 @@ void
 w_buf_clear (w_buf_t *buf)
 {
     w_assert (buf);
-    _buf_xsetlen (buf, 0);
+    _buf_xresize (buf, 0);
 }
 
 
