@@ -1192,11 +1192,11 @@ W_EXPORT void w_buf_set_str (w_buf_t    *buf,
  * Appends the contents of a memory block to a buffer.
  * \param buf A \ref w_buf_t buffer
  * \param ptr Pointer to the block of memory
- * \param len Length of the memory block
+ * \param size Length of the memory block
  */
 W_EXPORT void w_buf_append_mem (w_buf_t    *buf,
                                 const void *ptr,
-                                size_t     len);
+                                size_t      size);
 
 /*!
  * Appends a character to a buffer
@@ -1273,8 +1273,8 @@ W_OBJ_DEF (w_io_t)
     w_obj_t  parent;
     int      backch;
     wbool   (*close) (w_io_t *io);
-    ssize_t (*write) (w_io_t *io, const void *buf, size_t len);
-    ssize_t (*read ) (w_io_t *io, void       *buf, size_t len);
+    ssize_t (*write) (w_io_t *io, const void *buf, size_t size);
+    ssize_t (*read ) (w_io_t *io, void       *buf, size_t size);
     wbool   (*flush) (w_io_t *io);
 };
 
@@ -1299,11 +1299,11 @@ W_EXPORT wbool w_io_close (w_io_t *io);
  *
  * \param io  An input/output descriptor.
  * \param buf Pointer to the data to be written.
- * \param len Number of bytes to be written.
+ * \param size Number of bytes to be written.
  */
 W_EXPORT ssize_t w_io_write (w_io_t     *io,
                              const void *buf,
-                             size_t      len);
+                             size_t      size);
 
 /*!
  * Reads data from an input/output descriptor. If the descriptor has no
@@ -1312,7 +1312,7 @@ W_EXPORT ssize_t w_io_write (w_io_t     *io,
  */
 W_EXPORT ssize_t w_io_read (w_io_t *io,
                             void   *buf,
-                            size_t len);
+                            size_t  size);
 
 /*!
  * Reads data, until a given character or end of file is reached.
