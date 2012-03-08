@@ -96,7 +96,7 @@ w_io_fscan_double (w_io_t *io, double *result)
         goto failure;
 
     if (got_dot && w_buf_size (&buf) == 1) {
-        w_assert (buf.buf[0] == '.');
+        w_assert (w_buf_data (&buf)[0] == '.');
         c = '.';
         goto failure;
     }
