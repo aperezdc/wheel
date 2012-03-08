@@ -68,7 +68,8 @@ run-all-tests: all-tests
 		"$${test}" || break ; \
 	done
 
-run-tests: tests/test-all
+run-tests: tests/test-all examples/wcfg-to-tnetstring
+	@./tests/test-tnetstr
 	@./tests/test-all
 
 .PHONY: tests clean-tests run-tests all-tests
