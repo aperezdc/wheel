@@ -668,8 +668,8 @@ W_OBJ (w_dict_t)
     w_obj_t         parent;
     w_dict_node_t **nodes;
     w_dict_node_t  *first;
+    size_t          count;
     size_t          size;
-    size_t          alloc;
     w_bool_t        refs;
 };
 
@@ -690,7 +690,7 @@ W_EXPORT void w_dict_clear (w_dict_t *d);
  * Get the number of items in a dictionary.
  */
 #define w_dict_size(_d) \
-    ((_d)->size)
+    ((_d)->count)
 
 /*!
  * Check whether a dictionary is empty.

@@ -1,6 +1,6 @@
 /*
  * wdict.c
- * Copyright (C) 2010-2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
@@ -9,17 +9,17 @@
 #include "wheel.h"
 #include <string.h>
 
-#ifndef W_DICT_DEFAULT_ALLOC
-#define W_DICT_DEFAULT_ALLOC 128
-#endif /* !W_DICT_DEFAULT_ALLOC */
+#ifndef W_DICT_DEFAULT_SIZE
+#define W_DICT_DEFAULT_SIZE 128
+#endif /* !W_DICT_DEFAULT_SIZE */
 
-#ifndef W_DICT_REALLOC_FACTOR
-#define W_DICT_REALLOC_FACTOR 10
-#endif /* !W_DICT_REALLOC_FACTOR */
+#ifndef W_DICT_RESIZE_FACTOR
+#define W_DICT_RESIZE_FACTOR 10
+#endif /* !W_DICT_RESIZE_FACTOR */
 
-#ifndef W_DICT_SIZE_TO_ALLOC_RATIO
-#define W_DICT_SIZE_TO_ALLOC_RATIO 1.2
-#endif /* !W_DICT_SIZE_TO_ALLOC_RATIO */
+#ifndef W_DICT_COUNT_TO_SIZE_RATIO
+#define W_DICT_COUNT_TO_SIZE_RATIO 1.2
+#endif /* !W_DICT_COUNT_TO_SIZE_RATIO */
 
 #ifndef W_DICT_HASH
 #define W_DICT_HASH(_k, _s) (w_str_hash (_k) % ((_s) - 1))
@@ -120,10 +120,10 @@ w_dict_t*
 w_dict_new (w_bool_t refs)
 {
 	w_dict_t *d = w_obj_new (w_dict_t);
-	d->alloc = W_DICT_DEFAULT_ALLOC;
-	d->nodes = w_alloc (w_dict_node_t*, d->alloc);
+	d->size  = W_DICT_DEFAULT_SIZE;
+	d->nodes = w_alloc (w_dict_node_t*, d->size);
 	d->refs  = refs;
-	d->size  = 0;
+	d->count = 0;
 	return w_obj_dtor (d, _w_dict_dtor);
 }
 
@@ -136,7 +136,7 @@ w_dict_clear (w_dict_t *d)
 	memset (d->nodes, 0x00, d->size * sizeof (w_dict_node_t*));
 
 	d->first = NULL;
-	d->size  = 0;
+	d->count = 0;
 }
 
 
@@ -156,7 +156,7 @@ w_dict_getn (const w_dict_t *d, const char *key, size_t len)
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASHN (key, d->alloc, len);
+	hval = W_DICT_HASHN (key, d->size, len);
 	node = d->nodes[hval];
 
 	if (node) {
@@ -192,12 +192,12 @@ w_dict_rehash (w_dict_t *d)
 		node = node->nextNode;
 	}
 
-	d->alloc *= W_DICT_REALLOC_FACTOR;
-	d->nodes = w_resize (d->nodes, w_dict_node_t*, ++d->alloc);
-	memset (d->nodes, 0x00, d->alloc * sizeof (w_dict_node_t*));
+	d->size *= W_DICT_RESIZE_FACTOR;
+	d->nodes = w_resize (d->nodes, w_dict_node_t*, ++d->size);
+	memset (d->nodes, 0x00, d->size * sizeof (w_dict_node_t*));
 
 	for (node = d->first; node; node = node->nextNode) {
-		unsigned hval  = W_DICT_HASH (node->key, d->alloc);
+		unsigned hval  = W_DICT_HASH (node->key, d->size);
 		w_dict_node_t *n = d->nodes[hval];
 		if (!n) d->nodes[hval] = node;
 		else {
@@ -227,7 +227,7 @@ w_dict_setn (w_dict_t *d, const char *key, size_t len, void *val)
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASHN (key, d->alloc, len);
+	hval = W_DICT_HASHN (key, d->size, len);
 	node = d->nodes[hval];
 
 	while (node) {
@@ -253,8 +253,8 @@ w_dict_setn (w_dict_t *d, const char *key, size_t len, void *val)
 	if (d->first) d->first->prevNode = node;
 	d->first = node;
 
-	d->size++;
-	if (d->size > (d->alloc * W_DICT_SIZE_TO_ALLOC_RATIO))
+	d->count++;
+	if (d->count > (d->size * W_DICT_COUNT_TO_SIZE_RATIO))
 		w_dict_rehash (d);
 }
 
@@ -275,7 +275,7 @@ w_dict_deln (w_dict_t *d, const char *key, size_t keylen)
 	w_assert (d != NULL);
 	w_assert (key != NULL);
 
-	hval = W_DICT_HASHN (key, d->alloc, keylen);
+	hval = W_DICT_HASHN (key, d->size, keylen);
 
 	for (node = d->nodes[hval]; node; node = node->next) {
 		if (W_DICT_KEY_EQN (node->key, key, keylen)) {
@@ -293,7 +293,7 @@ w_dict_deln (w_dict_t *d, const char *key, size_t keylen)
 				w_obj_unref (node->val);
 
 			w_dict_node_free (node);
-			d->size--;
+			d->count--;
 			return;
 		}
 	}
