@@ -4,7 +4,12 @@ set -e
 mydir=$(dirname "$0")
 python=$(type -P python2)
 if [[ -z ${python} ]] ; then
-	python=python
+	python=$(type -P python)
+fi
+
+if [[ -z ${python} ]] ; then
+	echo "Python not installed, skipping test" 1>&2
+	exit 0
 fi
 
 for file in "${mydir}"/../examples/wcfg-test-??.conf
