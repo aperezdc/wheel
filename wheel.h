@@ -2225,10 +2225,10 @@ W_OBJ_DEF (w_event_t)
 
     /* Value in use depends on the value of "type" */
     union {
-        int            fd;      /* W_EVENT_FD     */
-        w_io_t        *io;      /* W_EVENT_IO     */
-        int            signum;  /* W_EVENT_SIGNAL */
-        double         timeout; /* W_EVENT_TIMER  */
+        int            fd;     /* W_EVENT_FD     */
+        w_io_t        *io;     /* W_EVENT_IO     */
+        int            signum; /* W_EVENT_SIGNAL */
+        w_timestamp_t  time;   /* W_EVENT_TIMER  */
     };
 };
 

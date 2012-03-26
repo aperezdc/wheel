@@ -19,7 +19,7 @@ examples: $(EXAMPLES)
 examples: $(libwheel)
 
 examples/%: examples/%.o $(libwheel)
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^ -lm
 
 
 clean: clean-examples

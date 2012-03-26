@@ -35,15 +35,18 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <math.h>
 #include <time.h>
 
 
-static size_t   w_event_loop_backend_size (void);
-static w_bool_t w_event_loop_backend_init (w_event_loop_t*);
-static void     w_event_loop_backend_free (w_event_loop_t*);
-static w_bool_t w_event_loop_backend_add  (w_event_loop_t*, w_event_t*);
-static w_bool_t w_event_loop_backend_del  (w_event_loop_t*, w_event_t*);
-static w_bool_t w_event_loop_backend_poll (w_event_loop_t*, w_timestamp_t);
+static size_t   w_event_loop_backend_size  (void);
+static w_bool_t w_event_loop_backend_init  (w_event_loop_t*);
+static void     w_event_loop_backend_free  (w_event_loop_t*);
+static w_bool_t w_event_loop_backend_start (w_event_loop_t*);
+static w_bool_t w_event_loop_backend_stop  (w_event_loop_t*);
+static w_bool_t w_event_loop_backend_add   (w_event_loop_t*, w_event_t*);
+static w_bool_t w_event_loop_backend_del   (w_event_loop_t*, w_event_t*);
+static w_bool_t w_event_loop_backend_poll  (w_event_loop_t*, w_timestamp_t);
 
 
 static inline w_bool_t
@@ -123,11 +126,11 @@ w_event_new (w_event_type_t type, w_event_callback_t callback, ...)
             event->io    = w_obj_ref (va_arg (args, w_io_unix_t*));
             event->flags = va_arg (args, int);
             break;
+        case W_EVENT_TIMER:
+            event->time  = va_arg (args, w_timestamp_t);
+            break;
         case W_EVENT_SIGNAL:
             event->signum = va_arg (args, int);
-            break;
-        case W_EVENT_TIMER:
-            event->timeout = va_arg (args, w_timestamp_t);
             break;
     }
     va_end (args);
@@ -167,15 +170,18 @@ w_event_loop_run (w_event_loop_t *loop)
 {
     w_assert (loop);
 
+    if (w_event_loop_backend_start (loop))
+        return W_YES;
+
     loop->running = W_YES;
 
     /* TODO Allow control of timeouts for polling! */
+    /* XXX Does that _actually_ make sense?? */
     while (loop->running)
         if (w_event_loop_backend_poll (loop, -1.0))
             loop->running = W_NO;
 
-    /* TODO Always W_NO? -> Error handling */
-    return W_NO;
+    return w_event_loop_backend_stop (loop);
 }
 
 
@@ -229,6 +235,7 @@ found:
 
 #ifdef W_EVENT_BACKEND_EPOLL
 #include <sys/signalfd.h>
+#include <sys/timerfd.h>
 #include <sys/epoll.h>
 
 #define W_EPOLL_SIGNAL_MARK ((void*) 0xbabebabe)
@@ -304,6 +311,8 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
 
     /* TODO Check for errors on (nevents < 0) */
 
+    loop->now = w_timestamp_now ();
+
     for (i = 0; i < nevents && !stop_loop; i++) {
         w_event_t *event = events[i].data.ptr;
         if (event == W_EPOLL_SIGNAL_MARK) {
@@ -313,6 +322,7 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
             w_assert (ep->signal_fd >= 0);
             if (read (ep->signal_fd, &si, sizeof (struct signalfd_siginfo))
                                        != sizeof (struct signalfd_siginfo))
+                /* XXX This may be too drastic... */
                 abort ();
 
             w_list_foreach (ep->signal_events, i) {
@@ -323,6 +333,21 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
             }
         }
         else {
+            if (w_event_type (event) == W_EVENT_TIMER) {
+                uint64_t expires = 0;
+                /* The "flags" field is used to store a file descriptor, ugh */
+                w_assert (event->flags >= 0);
+                if (read (event->flags, &expires, sizeof (uint64_t)) != sizeof (uint64_t) &&
+                    errno != EAGAIN)
+                    /* XXX This may be too drastic... */
+                    abort ();
+
+                /*
+                 * TODO use the "expirations" counter to do something
+                 * sensible with it instead of just ignoring it.
+                 */
+            }
+
             if ((*event->callback) (loop, event))
                 stop_loop = W_YES;
         }
@@ -394,8 +419,14 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
             break;
 
         case W_EVENT_TIMER:
-            /* TODO Those are not supported (yet) */
-            return W_YES;
+            if ((fd = event->flags = timerfd_create (CLOCK_MONOTONIC, TFD_CLOEXEC)) == -1)
+                return W_YES;
+            if (fd_set_nonblocking (fd)) {
+                close (fd);
+                return W_YES;
+            }
+            ep_ev.events = EPOLLIN;
+            break;
     }
     w_assert (fd >= 0);
 
@@ -458,8 +489,11 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
             break;
 
         case W_EVENT_TIMER:
-            /* TODO Those are not supported (yet) */
-            return W_YES;
+            /* The "flags" attribute is being used to store the fd. */
+            /* TODO/FIXME close the timer fd */
+            w_assert (event->flags >= 0);
+            fd = (int) event->flags;
+            break;
     }
     w_assert (fd >= 0);
 
@@ -470,6 +504,56 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
      */
     return epoll_ctl (ep->fd, EPOLL_CTL_DEL, fd, &ep_ev) != 0
         && errno != ENOENT;
+}
+
+
+static w_bool_t
+w_event_loop_backend_start (w_event_loop_t *loop)
+{
+    w_iterator_t i;
+    w_assert (loop);
+
+    /* Arm timers */
+    w_list_foreach (loop->events, i) {
+        w_event_t *event = *i;
+        if (w_event_type (event) == W_EVENT_TIMER) {
+            struct itimerspec its;
+
+            its.it_value.tv_sec = 0;
+            its.it_value.tv_nsec = 1;
+            its.it_interval.tv_sec = (time_t) floor (event->time);
+            its.it_interval.tv_nsec = (long) ((event->time - its.it_interval.tv_sec) * 1e9);
+
+            if (event->flags < 0 || timerfd_settime (event->flags, 0, &its, NULL) == -1)
+                return W_YES;
+        }
+    }
+
+    return W_NO;
+}
+
+
+static w_bool_t
+w_event_loop_backend_stop (w_event_loop_t *loop)
+{
+    struct itimerspec its;
+    w_iterator_t i;
+
+    w_assert (loop);
+
+    /* Setting the structure to all zeros disarms a timer */
+    memset (&its, 0x00, sizeof (struct itimerspec));
+
+    /* Disarm timers */
+    w_list_foreach (loop->events, i) {
+        w_event_t *event = *i;
+        if (w_event_type (event) == W_EVENT_TIMER) {
+            if (event->flags < 0 || timerfd_settime (event->flags, 0, &its, NULL) == -1)
+                return W_YES;
+        }
+    }
+
+    return W_NO;
 }
 
 #endif /* W_EVENT_BACKEND_EPOLL */
