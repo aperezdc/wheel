@@ -815,6 +815,8 @@ _W_M_(W_OPT_ULONG);
 _W_M_(W_OPT_FLOAT);
 _W_M_(W_OPT_DOUBLE);
 _W_M_(W_OPT_STRING);
+_W_M_(W_OPT_TIME_PERIOD);
+_W_M_(W_OPT_DATA_SIZE);
 #undef _W_M_
 
 
