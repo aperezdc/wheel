@@ -367,36 +367,57 @@ W_EXPORT unsigned w_str_hash (const char *str);
 
 /*!
  * Converts a string into a boolean.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_bool (const char *str, w_bool_t *val);
 
 /*!
  * Converts a string into an integer.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_int (const char *str, int *val);
 
 /*!
- * Converts a string inyo an unsigned integer.
+ * Converts a string into an unsigned integer.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_uint (const char *str, unsigned *val);
 
 /*!
  * Converts a string into a long integer.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_long (const char *str, long *val);
 
 /*!
  * Converts a string into a long unsigned integer.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_ulong (const char *str, unsigned long *val);
 
 /*!
  * Converts a string into a float number.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_float (const char *str, float *val);
 
 /*!
  * Converts a string into a double-precision float number.
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
  */
 W_EXPORT w_bool_t w_str_double (const char *str, double *val);
 
