@@ -275,3 +275,64 @@ START_TEST (test_wstr_conv_int_max_plusone)
 }
 END_TEST
 
+START_TEST (test_wstr_conv_bytes_zero)
+{
+    unsigned long long val = 42;
+
+    fail_unless (w_str_size_bytes ("0", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+
+    fail_unless (w_str_size_bytes ("0k", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+
+    fail_unless (w_str_size_bytes ("0m", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+
+    fail_unless (w_str_size_bytes ("0g", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+
+    fail_unless (w_str_size_bytes ("0K", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+
+    fail_unless (w_str_size_bytes ("0M", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+
+    fail_unless (w_str_size_bytes ("0G", &val), "Could not convert");
+    ck_assert_int_eq (0, val);
+}
+END_TEST
+
+START_TEST (test_wstr_conv_ok)
+{
+    unsigned long long val = 0;
+
+    fail_unless (w_str_size_bytes ("16", &val), "Could not convert");
+    ck_assert_int_eq (16, val);
+
+    fail_unless (w_str_size_bytes ("42k", &val), "Could not convert");
+    ck_assert_int_eq (42 * 1024, val);
+
+    fail_unless (w_str_size_bytes ("43K", &val), "Could not convert");
+    ck_assert_int_eq (43 * 1024, val);
+
+    fail_unless (w_str_size_bytes ("32m", &val), "Could not convert");
+    ck_assert_int_eq (32 * 1024 * 1024, val);
+
+    fail_unless (w_str_size_bytes ("33M", &val), "Could not convert");
+    ck_assert_int_eq (33 * 1024 * 1024, val);
+
+    fail_unless (w_str_size_bytes ("64g", &val), "Could not convert");
+    ck_assert_int_eq (64UL * 1024 * 1024 * 1024, val);
+
+    fail_unless (w_str_size_bytes ("65G", &val), "Could not convert");
+    ck_assert_int_eq (65UL * 1024 * 1024 * 1024, val);
+}
+END_TEST
+
+START_TEST (test_wstr_inval_suff)
+{
+    unsigned long long val = 0;
+
+    fail_if (w_str_size_bytes ("16j", &val), "Could convert");
+}
+END_TEST

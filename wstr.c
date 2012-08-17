@@ -233,3 +233,29 @@ w_str_double(const char *str, double *val)
 #endif /* HUGE_VAL */
 
 
+w_bool_t
+w_str_size_bytes (const char *str, unsigned long long *val)
+{
+    unsigned long long v = 0;
+    char *endpos;
+
+    w_assert (str);
+    w_assert (val);
+
+    v = strtoull (str, &endpos, 0);
+
+    if (v == ULLONG_MAX && errno == ERANGE)
+        return W_NO;
+
+    if (endpos) {
+        switch (*endpos) {
+            case  'g': case 'G': v *= 1024 * 1024 * 1024; break; /* gigabytes */
+            case  'm': case 'M': v *= 1024 * 1024;        break; /* megabytes */
+            case  'k': case 'K': v *= 1024;               break; /* kilobytes */
+            case '\0': break;
+            default  : return W_NO;
+        }
+    }
+
+    return (*val = v, W_YES);
+}

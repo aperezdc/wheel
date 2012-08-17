@@ -421,6 +421,21 @@ W_EXPORT w_bool_t w_str_float (const char *str, float *val);
  */
 W_EXPORT w_bool_t w_str_double (const char *str, double *val);
 
+/*!
+ * Convers a string into a data size value in bytes.
+ * The input string is expected to contain a number, optionally terminated
+ * by one of the following suffixes:
+ *
+ * - \b k or \b K : value is in kilobytes.
+ * - \b m or \b M : value is in megabytes.
+ * - \b g or \b G : value is in gigabytes.
+ *
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value.
+ * \return Whether the conversion was done successfully.
+ */
+W_EXPORT w_bool_t w_str_size_bytes (const char *str, unsigned long long *val);
+
 
 static inline char*
 w_str_dupl (const char *str, size_t len)

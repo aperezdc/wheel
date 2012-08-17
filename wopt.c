@@ -108,37 +108,6 @@ W_OPT_STRING (const w_opt_context_t *context)
 }
 
 
-static w_bool_t
-storage_size_to_bytes (const char *str, unsigned long long *result)
-{
-    unsigned long long val = 0;
-    char *endpos;
-
-    w_assert (str);
-    w_assert (result);
-
-    val = strtoull (str, &endpos, 0);
-
-    if (val == ULLONG_MAX && errno == ERANGE)
-        return W_YES;
-
-    if (!endpos || *endpos == '\0')
-        goto save_and_exit;
-
-    switch (*endpos) {
-        case  'g': case 'G': val *= 1024 * 1024 * 1024; break; /* gigabytes */
-        case  'm': case 'M': val *= 1024 * 1024;        break; /* megabytes */
-        case  'k': case 'K': val *= 1024;               break; /* kilobytes */
-        case '\0': break;
-        default  : return W_YES;
-    }
-
-save_and_exit:
-    *result = val;
-    return W_NO;
-}
-
-
 w_opt_status_t
 W_OPT_DATA_SIZE (const w_opt_context_t *ctx)
 {
@@ -147,7 +116,7 @@ W_OPT_DATA_SIZE (const w_opt_context_t *ctx)
     w_assert (ctx->option->extra);
     w_assert (ctx->option->narg == 1);
 
-    return (storage_size_to_bytes (ctx->argument[0], ctx->option->extra))
+    return (!w_str_size_bytes (ctx->argument[0], ctx->option->extra))
             ? W_OPT_BAD_ARG
             : W_OPT_OK;
 }
