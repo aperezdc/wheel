@@ -336,3 +336,72 @@ START_TEST (test_wstr_inval_suff)
     fail_if (w_str_size_bytes ("16j", &val), "Could convert");
 }
 END_TEST
+
+START_TEST (test_wstr_conv_time_period_zero)
+{
+    unsigned long long val = 42;
+
+    fail_unless (w_str_time_period ("0", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+
+    fail_unless (w_str_time_period ("0s", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+
+    fail_unless (w_str_time_period ("0m", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+
+    fail_unless (w_str_time_period ("0d", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+
+    fail_unless (w_str_time_period ("0w", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+
+    fail_unless (w_str_time_period ("0M", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+
+    fail_unless (w_str_time_period ("0y", &val), "Could not convert");
+    ck_assert_int_eq (0, val); val = 42;
+}
+END_TEST
+
+START_TEST (test_wstr_conv_time_period_ok)
+{
+    unsigned long long val = 0;
+
+    fail_unless (w_str_time_period ("42", &val), "Could not convert");
+    ck_assert_int_eq (42, val);
+
+    fail_unless (w_str_time_period ("43s", &val), "Could not convert");
+    ck_assert_int_eq (43, val);
+
+    fail_unless (w_str_time_period ("23m", &val), "Could not convert");
+    ck_assert_int_eq (23 * 60, val);
+
+    fail_unless (w_str_time_period ("78m", &val), "Could not convert");
+    ck_assert_int_eq (78 * 60, val);
+
+    fail_unless (w_str_time_period ("11h", &val), "Could not convert");
+    ck_assert_int_eq (11 * 60 * 60, val);
+
+    fail_unless (w_str_time_period ("30h", &val), "Could not convert");
+    ck_assert_int_eq (30 * 60 * 60, val);
+
+    fail_unless (w_str_time_period ("12d", &val), "Could not convert");
+    ck_assert_int_eq (12 * 24 * 60 * 60, val);
+
+    fail_unless (w_str_time_period ("8M", &val), "Could not convert");
+    ck_assert_int_eq (8 * 30 * 24 * 60 * 60, val);
+
+    fail_unless (w_str_time_period ("2y", &val), "Could not convert");
+    ck_assert_int_eq (2 * 365 * 24 * 60 * 60, val);
+}
+END_TEST
+
+START_TEST (test_wstr_conv_time_period_inval_suff)
+{
+    unsigned long long val = 0;
+
+    fail_if (w_str_time_period ("12f", &val), "Could convert");
+    ck_assert_int_eq (0, val);
+}
+END_TEST

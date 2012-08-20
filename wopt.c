@@ -122,39 +122,6 @@ W_OPT_DATA_SIZE (const w_opt_context_t *ctx)
 }
 
 
-static w_bool_t
-time_period_to_seconds (const char *str, unsigned long long *result)
-{
-    unsigned long long val = 0;
-    char *endpos;
-
-    w_assert (str);
-    w_assert (result);
-
-    val = strtoull (str, &endpos, 0);
-
-    if (val == ULLONG_MAX && errno == ERANGE)
-        return W_YES;
-
-    if (!endpos || *endpos == '\0')
-        goto save_and_exit;
-
-    switch (*endpos) {
-        case 'y': val *= 60 * 60 * 24 * 365; break; /* years   */
-        case 'M': val *= 60 * 60 * 24 * 30;  break; /* months  */
-        case 'w': val *= 60 * 60 * 24 * 7;   break; /* weeks   */
-        case 'd': val *= 60 * 60 * 24;       break; /* days    */
-        case 'h': val *= 60 * 60;            break; /* hours   */
-        case 'm': val *= 60;                 break; /* minutes */
-        default : return W_YES;
-    }
-
-save_and_exit:
-    *result = val;
-    return W_NO;
-}
-
-
 w_opt_status_t
 W_OPT_TIME_PERIOD (const w_opt_context_t *ctx)
 {
@@ -163,7 +130,7 @@ W_OPT_TIME_PERIOD (const w_opt_context_t *ctx)
     w_assert (ctx->option->extra);
     w_assert (ctx->option->narg == 1);
 
-    return (time_period_to_seconds (ctx->argument[0], ctx->option->extra))
+    return (!w_str_time_period (ctx->argument[0], ctx->option->extra))
             ? W_OPT_BAD_ARG
             : W_OPT_OK;
 }

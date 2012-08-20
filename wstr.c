@@ -259,3 +259,34 @@ w_str_size_bytes (const char *str, unsigned long long *val)
 
     return (*val = v, W_YES);
 }
+
+
+w_bool_t
+w_str_time_period (const char *str, unsigned long long *val)
+{
+    unsigned long long v = 0;
+    char *endpos;
+
+    w_assert (str);
+    w_assert (val);
+
+    v = strtoull (str, &endpos, 0);
+
+    if (v == ULLONG_MAX && errno == ERANGE)
+        return W_NO;
+
+    if (endpos) {
+        switch (*endpos) {
+            case 'y': v *= 60 * 60 * 24 * 365; break; /* years   */
+            case 'M': v *= 60 * 60 * 24 * 30;  break; /* months  */
+            case 'w': v *= 60 * 60 * 24 * 7;   break; /* weeks   */
+            case 'd': v *= 60 * 60 * 24;       break; /* days    */
+            case 'h': v *= 60 * 60;            break; /* hours   */
+            case 'm': v *= 60;                 break; /* minutes */
+            case 's': case '\0':               break; /* seconds */
+            default : return W_NO;
+        }
+    }
+
+    return (*val = v, W_YES);
+}

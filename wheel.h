@@ -436,6 +436,25 @@ W_EXPORT w_bool_t w_str_double (const char *str, double *val);
  */
 W_EXPORT w_bool_t w_str_size_bytes (const char *str, unsigned long long *val);
 
+/*!
+ * Converts a string into a time value in seconds.
+ * The input string is expected to contain a number, optionally terminated
+ * by one of the following suffixes:
+ *
+ * - \b y : value is in years.
+ * - \b M : value is in months.
+ * - \b w : value is in weeks.
+ * - \b d : value is in days.
+ * - \b h : value is in hours.
+ * - \b s : value is in seconds (default if no suffix given).
+ *
+ * \param str Input (null-terminated) string.
+ * \param val Pointer to where to store the parsed value, which is
+ *            always returned in seconds.
+ * \return Whether the conversion was done successfully.
+ */
+W_EXPORT w_bool_t w_str_time_period (const char *str, unsigned long long *val);
+
 
 static inline char*
 w_str_dupl (const char *str, size_t len)
