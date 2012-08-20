@@ -249,11 +249,11 @@ w_str_size_bytes (const char *str, unsigned long long *val)
 
     if (endpos) {
         switch (*endpos) {
-            case  'g': case 'G': v *= 1024 * 1024 * 1024; break; /* gigabytes */
-            case  'm': case 'M': v *= 1024 * 1024;        break; /* megabytes */
-            case  'k': case 'K': v *= 1024;               break; /* kilobytes */
-            case '\0': break;
-            default  : return W_NO;
+            case 'g': case 'G': v *= 1024 * 1024 * 1024; break; /* gigabytes */
+            case 'm': case 'M': v *= 1024 * 1024;        break; /* megabytes */
+            case 'k': case 'K': v *= 1024;               break; /* kilobytes */
+            case 'b': case 'B': case '\0':               break; /* bytes     */
+            default : return W_NO;
         }
     }
 
