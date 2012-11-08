@@ -645,7 +645,7 @@ W_EXPORT void w_list_traverse_rev (const w_list_t *list, w_traverse_fun_t f, voi
  * w_iterator_t i;
  *
  * w_list_foreach (list, i)
- *    w_io_format ("$s\n", (const char*) *i);
+ *    w_io_format (w_stdout, "$s\n", (const char*) *i);
  * \endcode
  *
  * \see w_list_foreach_rev, w_list_traverse.
