@@ -354,3 +354,28 @@ success:
 
     return W_NO;
 }
+
+
+w_bool_t
+w_io_fscan_word (w_io_t *io, char **result)
+{
+    w_buf_t value = W_BUF;
+    w_bool_t ret = W_NO;
+    int chr;
+
+    while (!isspace ((chr = w_io_getchar (io))) &&
+           chr != W_IO_EOF && chr != W_IO_ERR)
+        w_buf_append_char (&value, chr);
+
+    if (chr != W_IO_EOF && chr != W_IO_ERR)
+        w_io_putback (io, chr);
+
+    if (w_buf_size (&value)) {
+        if (result)
+            *result = w_buf_str (&value);
+    }
+    else
+        ret = W_YES;
+    w_buf_clear (&value);
+    return ret;
+}

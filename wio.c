@@ -290,6 +290,7 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
                 CHAR_TO_FUN ('O', w_io_fscan_ulong_oct);
                 CHAR_TO_FUN ('f', w_io_fscan_float);
                 CHAR_TO_FUN ('F', w_io_fscan_double);
+                CHAR_TO_FUN ('w', w_io_fscan_word);
                 default: rfun = NULL;
             }
 

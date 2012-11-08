@@ -1467,7 +1467,7 @@ W_EXPORT w_bool_t w_io_fscan_long      (w_io_t *io, long          *result);
 W_EXPORT w_bool_t w_io_fscan_ulong     (w_io_t *io, unsigned long *result);
 W_EXPORT w_bool_t w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result);
 W_EXPORT w_bool_t w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result);
-
+W_EXPORT w_bool_t w_io_fscan_word      (w_io_t *io, char         **result);
 
 /*!
  * Reads a single character from an I/O object.
