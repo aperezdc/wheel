@@ -370,12 +370,11 @@ w_io_fscan_word (w_io_t *io, char **result)
     if (chr != W_IO_EOF && chr != W_IO_ERR)
         w_io_putback (io, chr);
 
-    if (w_buf_size (&value)) {
-        if (result)
-            *result = w_buf_str (&value);
-    }
+    ret = !w_buf_size (&value);
+    if (!ret && result)
+        *result = w_buf_str (&value);
     else
-        ret = W_YES;
-    w_buf_clear (&value);
+        w_buf_clear (&value);
+
     return ret;
 }
