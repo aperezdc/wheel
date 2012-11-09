@@ -62,3 +62,11 @@ w_obj_dtor (void *obj, void (*dtor) (void*))
     ((w_obj_t*) obj)->__dtor = dtor;
     return obj;
 }
+
+
+void
+w_obj_mark_static (void *obj)
+{
+    w_assert (obj);
+    ((w_obj_t*) obj)->__refs = (size_t) -1;
+}

@@ -313,6 +313,36 @@ typedef void (*w_obj_dtor_t) (void*);
  */
 void* w_obj_dtor (void *obj, w_obj_dtor_t fini);
 
+/*!
+ * Mark an object as static.
+ *
+ * When the last reference to an object marked as static is lost, its destructor
+ * will be called, but the area of memory occupied by the object will not be
+ * freed. This is the same behaviour as for objects initialized with \ref
+ * W_OBJ_STATIC. The typical use-case for this function to mark objects that
+ * are allocated as part of others, and the function is called during their
+ * initialization, like this:
+ *
+ * \code
+ * W_OBJ (my_type) {
+ *   w_obj_t     parent;
+ *   w_io_unix_t unix_io;
+ * };
+ *
+ * void my_type_free (void *objptr) {
+ *   w_obj_destroy (&self->unix_io);
+ * }
+ *
+ * my_type* my_type_new (void) {
+ *   my_type *self = w_obj_new (my_type);
+ *   w_io_unix_init_fd (&self->unix_io, 0);
+ *   w_obj_mark_static (&self->unix_io);
+ *   return w_obj_dtor (self, _my_type_free);
+ * }
+ * \endcode
+ */
+void w_obj_mark_static (void *obj);
+
 /*\}*/
 
 
