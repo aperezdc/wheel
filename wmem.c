@@ -55,3 +55,29 @@ w_realloc(void *ptr, size_t sz)
 }
 
 
+void
+_w_mem_cleanup (void *ptr)
+{
+    void **location = ptr;
+    if (location) {
+        /* w_free already sets the address to NULL */
+        if (*location) {
+            w_free (*location);
+        }
+    }
+}
+
+
+void
+_w_lobj_cleanup (void *ptr)
+{
+    void **location = ptr;
+    if (location) {
+        w_obj_t *obj = *location;
+        if (obj) {
+            w_obj_unref (obj);
+            *location = NULL;
+        }
+    }
+}
+
