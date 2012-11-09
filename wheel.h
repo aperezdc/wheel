@@ -21,6 +21,13 @@
  */
 #define w_lengthof(_v)  (sizeof(_v) / sizeof(0[_v]))
 
+#ifdef __GNUC__
+# define w_offsetof __builtin_offsetof
+#else
+# define w_offsetof(st, m) \
+    ((size_t) ((char*) &((st*) 0)->m - (char*) 0))
+#endif /* __GNUC__ */
+
 /*!
  * Mark a variable as unused, to avoid compiler warnings.
  */
