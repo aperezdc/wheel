@@ -250,6 +250,7 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
             w_io_flush (w_stderr);
             abort ();
 
+        case W_VARIANT_OBJECT:  /* Can't serialize object values. */
         case W_VARIANT_INVALID: /* Can't serialize invalid values. */
             return W_YES;
         case W_VARIANT_NULL:
@@ -290,6 +291,7 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
             w_io_flush (w_stderr);
             abort();
 
+        case W_VARIANT_OBJECT:  /* Can't serialize object values. */
         case W_VARIANT_INVALID: /* Can't serialize invalid values. */
             return W_YES;
         case W_VARIANT_NULL:

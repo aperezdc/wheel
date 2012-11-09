@@ -1844,6 +1844,7 @@ enum w_variant_type
     W_VARIANT_BOOL,    /*!< Boolean               */
     W_VARIANT_DICT,    /*!< Dictionary            */
     W_VARIANT_LIST,    /*!< List                  */
+    W_VARIANT_OBJECT,  /*!< Object                */
 
     /*
      * Note that this is used as a convenience that allows to easily
@@ -1863,6 +1864,7 @@ union w_variant_value
     w_bool_t  boolean;
     w_list_t *list;
     w_dict_t *dict;
+    w_obj_t  *obj;
 };
 
 typedef union w_variant_value w_variant_value_t;
@@ -1931,6 +1933,10 @@ W_OBJ (w_variant_t)
 #define w_variant_is_list(_v) \
     ((_v)->type == W_VARIANT_LIST)
 
+/*! Checks wether a variant contains an object. */
+#define w_variant_is_object(_v) \
+    ((_v)->type == W_VARIANT_OBJECT)
+
 /*! Checks whether a variant is invalid. */
 #define w_variant_is_invalid(_v) \
     ((_v)->type == W_VARIANT_INVALID)
@@ -1954,6 +1960,10 @@ W_OBJ (w_variant_t)
 /*! Obtains the list stored in a variant. */
 #define w_variant_list(_v) \
     ((_v)->value.list)
+
+/*! Obtains the object stored in a variant. */
+#define w_variant_object(_v) \
+    ((_v)->value.obj)
 
 /*! Obtains the string value stored in a variant. */
 #define w_variant_string(_v) \
@@ -1997,6 +2007,11 @@ W_OBJ (w_variant_t)
 #define w_variant_set_dict(_v, _d)               \
     (w_variant_clear(_v)->type = W_VARIANT_DICT, \
      (_v)->value.dict = w_obj_ref (_d))
+
+/*! Assigns an object to a variant, mutating it if needed. */
+#define w_variant_set_object(_v, _o)               \
+    (w_variant_clear(_v)->type = W_VARIANT_OBJECT, \
+     (_v)->value.obj = w_obj_ref (_o))
 
 /*! Assigns \e null to a variant, mutating it if needed. */
 #define w_variant_set_null(_v) \

@@ -32,6 +32,10 @@ _w_variant_clear (w_variant_t *v)
         case W_VARIANT_DICT:
             w_obj_unref (v->value.dict);
             break;
+
+        case W_VARIANT_OBJECT:
+            w_obj_unref (v->value.obj);
+            break;
     }
 }
 
@@ -84,6 +88,10 @@ w_variant_new (w_variant_type_t type, ...)
 
         case W_VARIANT_LIST:
             variant->value.list = w_obj_ref (va_arg (args, w_list_t*));
+            break;
+
+        case W_VARIANT_OBJECT:
+            variant->value.obj = w_obj_ref (va_arg (args, w_obj_t*));
             break;
     }
     va_end (args);
