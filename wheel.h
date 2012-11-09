@@ -1901,6 +1901,45 @@ W_OBJ (w_variant_t)
 #define W_VARIANT \
     { W_OBJ_STATIC (w_variant_clear), W_VARIANT_INVALID, { W_BUF } }
 
+/*! Statically initilizes a variant with a null value. */
+#define W_VARIANT_INIT_NULL \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_NULL, { W_BUF } }
+
+/*! Statically initilizes a variant with a string value. */
+#define W_VARIANT_INIT_STRING(str) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_STRING, \
+      { { w_str_dup (str), strlen (str) } } }
+
+/*! Statically initilizes a variant with a numeric value. */
+#define W_VARIANT_NUMBER_INIT(num) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_NUMBER, \
+      { .number = (num) } }
+
+/*! Statically initilizes a variant with a float value. */
+#define W_VARIANT_FLOAT_INIT(num) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_FLOAT, \
+      { .fpnumber (num) } }
+
+/*! Statically initilizes a variant with a boolean value. */
+#define W_VARIANT_BOOL_INIT(val) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_BOOL, \
+      { .boolean = (val) } }
+
+/*! Statically initilizes a variant with a dictionary value. */
+#define W_VARIANT_DICT_INIT(val) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_DICT, \
+      { .dict = w_obj_ref (val) } }
+
+/*! Statically initilizes a variant with a list value. */
+#define W_VARIANT_LIST_INIT(val) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_LIST, \
+      { .list = w_obj_ref (val) } }
+
+/*! Statically initilizes a variant with an object value. */
+#define W_VARIANT_OBJECT_INIT(val) \
+    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_OBJECT, \
+      { .obj = w_obj_ref (val) } }
+
 /*! Obtains the type of the value stored in a variant. */
 #define w_variant_type(_v) \
     ((_v)->type)
