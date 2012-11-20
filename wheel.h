@@ -2196,6 +2196,79 @@ _W_TNS_READF (dict,    w_dict_t)
 
 /*\}*/
 
+/*------------------------------------------------------[ metatypes ]-----*/
+
+
+/*!
+ * \defgroup wtype Meta types
+ * \addtogroup wtype
+ * \{
+ */
+
+enum w_meta_type {
+    W_META_TYPE_NONE = 0,
+    W_META_TYPE_I8,
+    W_META_TYPE_U8,
+    W_META_TYPE_I16,
+    W_META_TYPE_U16,
+    W_META_TYPE_I32,
+    W_META_TYPE_U32,
+    W_META_TYPE_I64,
+    W_META_TYPE_U64,
+    W_META_TYPE_BOOL,
+    W_META_TYPE_STR,
+    W_META_TYPE_REG,
+};
+
+typedef enum w_meta_type w_meta_type_t;
+
+typedef struct w_meta_item w_meta_item_t;
+
+struct w_meta_item
+{
+    const char          *name; /*!< Name. */
+    w_meta_type_t        type; /*!< Type. */
+    unsigned long        alen; /*!< Array length. Zero if single-item. */
+    ptrdiff_t            voff; /*!< Value offset. */
+    const w_meta_item_t *mref; /*!< Reference to other meta info. */
+};
+
+typedef const w_meta_item_t w_meta_t[];
+
+
+#define W_META(name)          { name, W_META_TYPE_NONE, 0, 0, NULL }
+#define W_META_END            { NULL, W_META_TYPE_NONE, 0, 0, NULL }
+
+#define W_META_I8(s, m)       { #m, W_META_TYPE_I8,    0, w_offsetof (s, m), NULL }
+#define W_META_I8_V(s, m, l)  { #m, W_META_TYPE_I8,  (l), w_offsetof (s, m), NULL }
+#define W_META_I16(s, m)      { #m, W_META_TYPE_I16,   0, w_offsetof (s, m), NULL }
+#define W_META_I16_V(s, m, l) { #m, W_META_TYPE_I16, (l), w_offsetof (s, m), NULL }
+#define W_META_I32(s, m)      { #m, W_META_TYPE_I32,   0, w_offsetof (s, m), NULL }
+#define W_META_I32_V(s, m, l) { #m, W_META_TYPE_I32, (l), w_offsetof (s, m), NULL }
+#define W_META_I64(s, m)      { #m, W_META_TYPE_I64,   0, w_offsetof (s, m), NULL }
+#define W_META_I64_V(s, m, l) { #m, W_META_TYPE_I64, (l), w_offsetof (s, m), NULL }
+#define W_META_U8(s, m)       { #m, W_META_TYPE_U8,    0, w_offsetof (s, m), NULL }
+#define W_META_U8_V(s, m, l)  { #m, W_META_TYPE_U8,  (l), w_offsetof (s, m), NULL }
+#define W_META_U16(s, m)      { #m, W_META_TYPE_U16,   0, w_offsetof (s, m), NULL }
+#define W_META_U16_V(s, m, l) { #m, W_META_TYPE_U16, (l), w_offsetof (s, m), NULL }
+#define W_META_U32(s, m)      { #m, W_META_TYPE_U32,   0, w_offsetof (s, m), NULL }
+#define W_META_U32_V(s, m, l) { #m, W_META_TYPE_U32, (l), w_offsetof (s, m), NULL }
+#define W_META_U64(s, m)      { #m, W_META_TYPE_U64,   0, w_offsetof (s, m), NULL }
+#define W_META_U64_V(s, m, l) { #m, W_META_TYPE_U64, (l), w_offsetof (s, m), NULL }
+#define W_META_BOOL(s, m)     { #m, W_META_TYPE_BOOL,  0, w_offsetof (s, m), NULL }
+#define W_META_BOOL_V(s, m, l){ #m, W_META_TYPE_BOOL,(l), w_offsetof (s, m), NULL }
+#define W_META_STR(s, m)      { #m, W_META_TYPE_STR,   0, w_offsetof (s, m), NULL }
+#define W_META_STR_V(s, m, l) { #m, W_META_TYPE_STR, (l), w_offsetof (s, m), NULL }
+#define W_META_REG(s, m, p)   { #m, W_META_TYPE_REG,   0, w_offsetof (s, m), (p)  }
+#define W_META_REG_V(s,m,p,l) { #m, W_META_TYPE_REG, (l), w_offsetof (s, m), (p)  }
+
+#define w_meta_desc_name(m)     ((m)[0].name)
+#define w_meta_desc_items(m)    ((m) + 1)
+#define w_meta_item_next(i)     ((i) + 1)
+#define w_meta_item_is_valid(i) ((i)->name != NULL)
+
+/*\}*/
+
 /*---------------------------------------------------[ config files ]-----*/
 
 /*!
