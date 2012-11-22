@@ -2215,6 +2215,8 @@ enum w_meta_type {
     W_META_TYPE_U32,
     W_META_TYPE_I64,
     W_META_TYPE_U64,
+    W_META_TYPE_FLT,
+    W_META_TYPE_DBL,
     W_META_TYPE_BOOL,
     W_META_TYPE_STR,
     W_META_TYPE_REG,
@@ -2255,6 +2257,10 @@ typedef const w_meta_item_t w_meta_t[];
 #define W_META_U32_V(s, m, l) { #m, W_META_TYPE_U32, (l), w_offsetof (s, m), NULL }
 #define W_META_U64(s, m)      { #m, W_META_TYPE_U64,   0, w_offsetof (s, m), NULL }
 #define W_META_U64_V(s, m, l) { #m, W_META_TYPE_U64, (l), w_offsetof (s, m), NULL }
+#define W_META_FLT(s, m)      { #m, W_META_TYPE_FLT,   0, w_offsetof (s, m), NULL }
+#define W_META_FLT_V(s, m, l) { #m, W_META_TYPE_FLT, (l), w_offsetof (s, m), NULL }
+#define W_META_DBL(s, m)      { #m, W_META_TYPE_DBL,   0, w_offsetof (s, m), NULL }
+#define W_META_DBL_V(s, m, l) { #m, W_META_TYPE_DBL, (l), w_offsetof (s, m), NULL }
 #define W_META_BOOL(s, m)     { #m, W_META_TYPE_BOOL,  0, w_offsetof (s, m), NULL }
 #define W_META_BOOL_V(s, m, l){ #m, W_META_TYPE_BOOL,(l), w_offsetof (s, m), NULL }
 #define W_META_STR(s, m)      { #m, W_META_TYPE_STR,   0, w_offsetof (s, m), NULL }
