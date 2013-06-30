@@ -838,7 +838,7 @@ W_EXPORT void w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx
 
 W_EXPORT w_iterator_t w_dict_first (const w_dict_t *d);
 W_EXPORT w_iterator_t w_dict_next (const w_dict_t *d, w_iterator_t i);
-W_EXPORT const char const* w_dict_iterator_get_key (w_iterator_t i);
+W_EXPORT const char* w_dict_iterator_get_key (w_iterator_t i);
 
 #define w_dict_foreach(_d, _i) \
     for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
