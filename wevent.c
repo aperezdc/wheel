@@ -21,13 +21,15 @@
  *   - epoll() on Linux.
  *   - kqueue() on BSDs.
  */
-#if defined(linux)
-# define W_EVENT_BACKEND_EPOLL 1
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
-# define W_EVENT_BACKEND_KQUEUE 1
-#else
-# error There is not an event loop backend for your platform.
-#endif
+#if !(defined(W_EVENT_BACKEND_EPOLL) || defined(W_EVENT_BACKEND_KQUEUE))
+# if defined(linux)
+#  define W_EVENT_BACKEND_EPOLL 1
+# elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#  define W_EVENT_BACKEND_KQUEUE 1
+# else
+#  error There is not an event loop backend for your platform.
+# endif
+#endif /* !(W_EVENT_BACKEND_EPOLL || W_EVENT_BACKEND_KQUEUE) */
 
 #include <sys/types.h>
 #include <sys/time.h>
