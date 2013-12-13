@@ -802,7 +802,7 @@ W_EXPORT void w_dict_clear (w_dict_t *d);
  * Check whether a dictionary is empty.
  */
 #define w_dict_empty(_d) \
-    ((_d)->size == 0)
+    (!(_d)->count)
 
 W_EXPORT void* w_dict_getn (const w_dict_t *d, const char *key, size_t keylen);
 W_EXPORT void  w_dict_setn (w_dict_t *d, const char *key, size_t keylen, void *data);
