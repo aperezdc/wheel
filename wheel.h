@@ -1266,7 +1266,7 @@ struct w_buf
 /*!
  * Checks whether a buffer is empty.
  */
-#define w_buf_empty(_b) ((_b)->size == 0)
+#define w_buf_empty(_b) (!(_b)->size)
 
 /*!
  * Adjust the size of a buffer keeping contents.
