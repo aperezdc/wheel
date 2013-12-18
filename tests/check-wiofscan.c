@@ -1,11 +1,11 @@
 /*
  * check-wiofscan.c
- * Copyright (C) 2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2011-2013 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 #include <check.h>
 #include <math.h>
 

@@ -1,11 +1,11 @@
 /*
  * check-wvariant.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2013 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 #include <check.h>
 
 

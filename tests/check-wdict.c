@@ -1,13 +1,13 @@
 /*
  * check-wdict.c
- * Copyright (C) 2010 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2013 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
 #include <check.h>
 #include <string.h>
-#include "wheel.h"
+#include "../wheel.h"
 
 
 START_TEST (test_wdict_get_set)

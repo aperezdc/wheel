@@ -43,9 +43,6 @@ ifneq ($(libwheel_STDIO),0)
 CPPFLAGS      += -DW_CONF_STDIO
 endif
 
-ifneq ($(strip $(libwheel_PATH)),.)
-CPPFLAGS      += -I$(libwheel_PATH)
-endif
 libwheel      := $(libwheel_PATH)/libwheel.a
 libwheel_SRCS := $(addprefix $(libwheel_PATH)/,$(libwheel_SRCS))
 libwheel_OBJS := $(patsubst %.c,%.o,$(libwheel_SRCS))
