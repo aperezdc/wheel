@@ -56,7 +56,7 @@ w_realloc(void *ptr, size_t sz)
 
 
 void
-_w_mem_cleanup (void *ptr)
+_w_lmem_cleanup (void *ptr)
 {
     void **location = ptr;
     if (location) {
