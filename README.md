@@ -1,6 +1,6 @@
----------------------------------------------------
-libwheel - A library to avoid reinventing the wheel
----------------------------------------------------
+# libwheel - A library to avoid reinventing the wheel
+
+[![Build Status](https://drone.io/github.com/aperezdc/wheel/status.png)](https://drone.io/github.com/aperezdc/wheel/latest)
 
 The “wheel” library aims to provide basic (and some not-that-basic)
 facilities that one would expect to have in C. For the moment it contains:
