@@ -1,0 +1,5 @@
+image: c
+script:
+  - sudo apt-get install -y check
+  - make
+  - make run-all-tests
