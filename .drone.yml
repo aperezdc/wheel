@@ -1,4 +1,4 @@
-image: c
+image: gcc:4.8
 script:
   - sudo apt-get install -y check
   - make
