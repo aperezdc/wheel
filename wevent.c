@@ -352,7 +352,6 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
             if (w_event_type (event) == W_EVENT_TIMER) {
                 uint64_t expires = 0;
                 /* The "flags" field is used to store a file descriptor, ugh */
-                w_assert (event->flags >= 0);
                 if (read (event->flags, &expires, sizeof (uint64_t)) != sizeof (uint64_t) &&
                     errno != EAGAIN)
                     /* XXX This may be too drastic... */
@@ -514,7 +513,6 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
         case W_EVENT_TIMER:
             /* The "flags" attribute is being used to store the fd. */
             /* TODO/FIXME close the timer fd */
-            w_assert (event->flags >= 0);
             fd = (int) event->flags;
             break;
 
@@ -550,7 +548,7 @@ w_event_loop_backend_start (w_event_loop_t *loop)
             its.it_interval.tv_sec = (time_t) floor (event->time);
             its.it_interval.tv_nsec = (long) ((event->time - its.it_interval.tv_sec) * 1e9);
 
-            if (event->flags < 0 || timerfd_settime (event->flags, 0, &its, NULL) == -1)
+            if (timerfd_settime ((int) event->flags, 0, &its, NULL) == -1)
                 return W_YES;
         }
     }
@@ -574,7 +572,7 @@ w_event_loop_backend_stop (w_event_loop_t *loop)
     w_list_foreach (loop->events, i) {
         w_event_t *event = *i;
         if (w_event_type (event) == W_EVENT_TIMER) {
-            if (event->flags < 0 || timerfd_settime (event->flags, 0, &its, NULL) == -1)
+            if (timerfd_settime ((int) event->flags, 0, &its, NULL) == -1)
                 return W_YES;
         }
     }
