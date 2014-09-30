@@ -2434,13 +2434,18 @@ enum w_event_type
     W_EVENT_SIGNAL,
     W_EVENT_IO,
     W_EVENT_FD,
+    W_EVENT_IDLE,
 };
 typedef enum w_event_type w_event_type_t;
 
-enum {
-    W_EVENT_IN  = 0x01,
-    W_EVENT_OUT = 0x02,
+
+enum w_event_flags {
+    W_EVENT_IN      = 1 << 0,
+    W_EVENT_OUT     = 1 << 1,
+    W_EVENT_ONESHOT = 1 << 2,
+    W_EVENT_REPEAT  = 1 << 3,
 };
+typedef enum w_event_flags w_event_flags_t;
 
 typedef double w_timestamp_t;
 
@@ -2460,7 +2465,7 @@ W_OBJ_DEF (w_event_t)
     w_obj_t            parent;
     w_event_type_t     type;
     w_event_callback_t callback;
-    long               flags;
+    w_event_flags_t    flags;
 
     /* Value in use depends on the value of "type" */
     union {

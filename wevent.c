@@ -100,6 +100,7 @@ _w_event_destroy (void *obj)
         case W_EVENT_FD:
         case W_EVENT_TIMER:
         case W_EVENT_SIGNAL:
+        case W_EVENT_IDLE:
             /* Nothing to be done. */
             break;
     }
@@ -133,6 +134,10 @@ w_event_new (w_event_type_t type, w_event_callback_t callback, ...)
             break;
         case W_EVENT_SIGNAL:
             event->signum = va_arg (args, int);
+            break;
+        case W_EVENT_IDLE:
+            event->flags = va_arg (args, w_event_flags_t);
+            event->flags &= (W_EVENT_ONESHOT | W_EVENT_REPEAT);
             break;
     }
     va_end (args);
@@ -179,9 +184,14 @@ w_event_loop_run (w_event_loop_t *loop)
 
     /* TODO Allow control of timeouts for polling! */
     /* XXX Does that _actually_ make sense?? */
-    while (loop->running)
-        if (w_event_loop_backend_poll (loop, -1.0))
+    while (loop->running) {
+        if (w_event_loop_backend_poll (loop, -1.0)) {
             loop->running = W_NO;
+        }
+        else {
+            /* TODO: Run W_EVENT_IDLE callbacks here */
+        }
+    }
 
     return w_event_loop_backend_stop (loop);
 }
@@ -198,13 +208,15 @@ w_event_loop_stop (w_event_loop_t *loop)
 w_bool_t
 w_event_loop_add (w_event_loop_t *loop, w_event_t *event)
 {
-    w_bool_t ret;
+    w_bool_t ret = W_NO;
 
     w_assert (loop);
     w_assert (event);
 
     /* Adding the element to the list will w_obj_ref() it, too */
-    if (!(ret = w_event_loop_backend_add (loop, event)))
+    if (event->type == W_EVENT_IDLE)
+        w_list_push_tail (loop->events, event);
+    else if (!(ret = w_event_loop_backend_add (loop, event)))
         w_list_push_head (loop->events, event);
 
     return ret;
@@ -215,7 +227,7 @@ w_bool_t
 w_event_loop_del (w_event_loop_t *loop, w_event_t *event)
 {
     w_iterator_t i;
-    w_bool_t ret;
+    w_bool_t ret = W_NO;
 
     w_assert (loop);
     w_assert (event);
@@ -228,7 +240,9 @@ w_event_loop_del (w_event_loop_t *loop, w_event_t *event)
 
 found:
     /* Removing from the list will also w_obj_unref() the event */
-    if (!(ret = w_event_loop_backend_del (loop, event)))
+    if (event->type == W_EVENT_IDLE)
+        w_list_del (loop->events, i);
+    else if (!(ret = w_event_loop_backend_del (loop, event)))
         w_list_del (loop->events, i);
 
     return ret;
@@ -361,6 +375,8 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
 static w_bool_t
 w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 {
+    w_assert (w_event_type (event) != W_EVENT_IDLE);
+
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event ep_ev;
     sigset_t old_sigmask;
@@ -429,6 +445,9 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
             }
             ep_ev.events = EPOLLIN;
             break;
+
+        case W_EVENT_IDLE:
+            w_die ("Fatal: $s called with event opf type W_EVENT_IDLE\n", __func__);
     }
     w_assert (fd >= 0);
 
@@ -444,6 +463,8 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 static w_bool_t
 w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
 {
+    w_assert (w_event_type (event) != W_EVENT_IDLE);
+
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event ep_ev;
     w_iterator_t delpos = 0, i;
@@ -496,6 +517,9 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
             w_assert (event->flags >= 0);
             fd = (int) event->flags;
             break;
+
+        case W_EVENT_IDLE:
+            w_die ("Fatal: $s called with event opf type W_EVENT_IDLE\n", __func__);
     }
     w_assert (fd >= 0);
 
