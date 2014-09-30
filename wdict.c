@@ -54,19 +54,6 @@ struct w_dict_node
 
 
 static inline w_dict_node_t*
-w_dict_node_new (const char *key, void *val)
-{
-	w_dict_node_t *node;
-	w_assert (key != NULL);
-
-	node = w_new (w_dict_node_t);
-	node->key = w_str_dup (key);
-	node->val = val;
-	return node;
-}
-
-
-static inline w_dict_node_t*
 w_dict_node_newn (const char *key, size_t len, void *val)
 {
 	w_dict_node_t *node;
