@@ -2490,6 +2490,7 @@ W_OBJ_DEF (w_event_loop_t)
     w_obj_t       parent;
     w_bool_t      running;
     w_list_t     *events;
+    w_list_t     *idle_events;
     w_timestamp_t now;
 };
 

@@ -215,7 +215,7 @@ w_event_loop_add (w_event_loop_t *loop, w_event_t *event)
 
     /* Adding the element to the list will w_obj_ref() it, too */
     if (event->type == W_EVENT_IDLE)
-        w_list_push_tail (loop->events, event);
+        w_list_push_tail (loop->idle_events, event);
     else if (!(ret = w_event_loop_backend_add (loop, event)))
         w_list_push_head (loop->events, event);
 
@@ -227,12 +227,16 @@ w_bool_t
 w_event_loop_del (w_event_loop_t *loop, w_event_t *event)
 {
     w_iterator_t i;
-    w_bool_t ret = W_NO;
 
     w_assert (loop);
     w_assert (event);
 
-    for (i = w_list_first (loop->events); i; i = w_list_next (loop->events, i))
+    w_list_t* list = event->type == W_EVENT_IDLE
+        ? loop->idle_events
+        : loop->events;
+
+    w_bool_t ret = W_NO;
+    for (i = w_list_first (list); i; i = w_list_next (list, i))
         if (*i == event)
             goto found;
 
@@ -241,9 +245,9 @@ w_event_loop_del (w_event_loop_t *loop, w_event_t *event)
 found:
     /* Removing from the list will also w_obj_unref() the event */
     if (event->type == W_EVENT_IDLE)
-        w_list_del (loop->events, i);
+        w_list_del (list, i);
     else if (!(ret = w_event_loop_backend_del (loop, event)))
-        w_list_del (loop->events, i);
+        w_list_del (list, i);
 
     return ret;
 }
