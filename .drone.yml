@@ -1,5 +1,15 @@
 image: gcc4.8
 script:
-  - sudo apt-get install -y check
-  - make
-  - make run-all-tests
+    - sudo apt-get install -y check
+    - make
+    - make run-all-tests
+
+notification:
+    slack:
+        on_started: true
+        on_success: true
+        on_failure: true
+        team: connectical
+        channel: '#git'
+        username: builder
+        token: {{ slackToken }}
