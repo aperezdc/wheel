@@ -12,4 +12,4 @@ notification:
         team: connectical
         channel: '#git'
         username: builder
-        token: {{ slackToken }}
+        token: {{slackToken}}
