@@ -10,6 +10,6 @@ notification:
         on_success: true
         on_failure: true
         team: connectical
-        channel: '#git'
+        channel: '#devel'
         username: builder
         token: {{slackToken}}
