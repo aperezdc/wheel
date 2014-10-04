@@ -93,7 +93,7 @@ _w_event_destroy (void *obj)
     w_event_t *event = (w_event_t*) obj;
     w_assert (event);
 
-    switch (w_event_type (event)) {
+    switch (event->type) {
         case W_EVENT_IO:
             w_obj_unref (event->io);
             break;
@@ -127,7 +127,8 @@ w_event_new (w_event_type_t type, w_event_callback_t callback, ...)
             break;
         case W_EVENT_IO:
             event->io    = w_obj_ref (va_arg (args, w_io_unix_t*));
-            event->flags = va_arg (args, int);
+            event->flags = va_arg (args, w_event_flags_t);
+            event->flags &= (W_EVENT_IN | W_EVENT_OUT);
             break;
         case W_EVENT_TIMER:
             event->time  = va_arg (args, w_timestamp_t);
@@ -363,7 +364,7 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
             }
         }
         else {
-            if (w_event_type (event) == W_EVENT_TIMER) {
+            if (event->type == W_EVENT_TIMER) {
                 uint64_t expires = 0;
                 /* The "flags" field is used to store a file descriptor, ugh */
                 if (read (event->flags, &expires, sizeof (uint64_t)) != sizeof (uint64_t) &&
@@ -388,7 +389,7 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
 static w_bool_t
 w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 {
-    w_assert (w_event_type (event) != W_EVENT_IDLE);
+    w_assert (event->type != W_EVENT_IDLE);
 
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event ep_ev;
@@ -406,10 +407,10 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
     ep_ev.data.ptr = event;
     ep_ev.events   = EPOLLET; /* Always use edge-triggered events */
 
-    switch (w_event_type (event)) {
+    switch (event->type) {
         case W_EVENT_IO:
         case W_EVENT_FD:
-            fd = (w_event_type (event) == W_EVENT_IO)
+            fd = (event->type == W_EVENT_IO)
                ? W_IO_UNIX_FD (event->io)
                : event->fd;
 
@@ -466,7 +467,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 
     ret = epoll_ctl (ep->fd, EPOLL_CTL_ADD, fd, &ep_ev) != 0 && errno != EEXIST;
 
-    if (!ret && w_event_type (event) == W_EVENT_SIGNAL)
+    if (!ret && event->type == W_EVENT_SIGNAL)
         w_list_push_tail (ep->signal_events, event);
 
     return ret;
@@ -476,7 +477,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 static w_bool_t
 w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
 {
-    w_assert (w_event_type (event) != W_EVENT_IDLE);
+    w_assert (event->type != W_EVENT_IDLE);
 
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event ep_ev;
@@ -489,7 +490,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
     w_assert (ep);
     w_assert (ep->fd >= 0);
 
-    switch (w_event_type (event)) {
+    switch (event->type) {
         case W_EVENT_SIGNAL:
             /* It is only needed to modify the signal mask. */
             if (ep->signal_fd < 0)
@@ -554,7 +555,7 @@ w_event_loop_backend_start (w_event_loop_t *loop)
     /* Arm timers */
     w_list_foreach (loop->events, i) {
         w_event_t *event = *i;
-        if (w_event_type (event) == W_EVENT_TIMER) {
+        if (event->type == W_EVENT_TIMER) {
             struct itimerspec its;
 
             its.it_value.tv_sec = 0;
@@ -585,7 +586,7 @@ w_event_loop_backend_stop (w_event_loop_t *loop)
     /* Disarm timers */
     w_list_foreach (loop->events, i) {
         w_event_t *event = *i;
-        if (w_event_type (event) == W_EVENT_TIMER) {
+        if (event->type == W_EVENT_TIMER) {
             if (timerfd_settime ((int) event->flags, 0, &its, NULL) == -1)
                 return W_YES;
         }
