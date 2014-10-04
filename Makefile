@@ -74,6 +74,14 @@ run-tests: tests/test-all examples/wcfg-to-tnetstring
 
 .PHONY: tests clean-tests run-tests all-tests
 
+
+# Support for YouCompleteMe/ccode/etc
+show-cflags:
+	@echo '$(CFLAGS) $(CPPFLAGS)'
+
+.PHONY: show-cflags
+
+
 .SECONDARY:
 
 # vim:ft=make
