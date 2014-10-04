@@ -189,7 +189,17 @@ w_event_loop_run (w_event_loop_t *loop)
             loop->running = W_NO;
         }
         else {
-            /* TODO: Run W_EVENT_IDLE callbacks here */
+            w_iterator_t i;
+            w_list_foreach (loop->idle_events, i) {
+                w_event_t *event = *i;
+                w_assert (event->type == W_EVENT_IDLE);
+
+                (*event->callback) (loop, event);
+
+                if (event->flags & W_EVENT_ONESHOT) {
+                    w_list_del (loop->idle_events, i);
+                }
+            }
         }
     }
 
