@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 #include <stdio.h>
 #define BUFFER_SIZE 512
 

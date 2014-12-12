@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 #include <unistd.h>
 
 static w_bool_t dofoo = W_NO;

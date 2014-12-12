@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 
 
 int main (int argc, char **argv)

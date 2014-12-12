@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 
 W_OBJ (my_obj_t)
 {

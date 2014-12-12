@@ -5,7 +5,7 @@
  * Distributed under terms of the MIT license.
  */
 
-#include "wheel.h"
+#include "../wheel.h"
 #include <unistd.h>
 #include <signal.h>
 #include <errno.h>
