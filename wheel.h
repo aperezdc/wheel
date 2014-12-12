@@ -528,7 +528,8 @@ w_str_dup (const char *str)
 
 
 #ifdef __GLIBC__
-# define w_str_casecmp strcasecmp
+# define w_str_casecmp  strcasecmp
+# define w_str_ncasecmp strncasecmp
 #else  /* __GLIBC__ */
 #include <ctype.h>
 static inline int
@@ -544,6 +545,24 @@ w_str_casecmp (const char *s1, const char *s2)
 		c2++;
 	}
 	return ((*s1 == '\0') && (*s2 == '\0')) ? 0 : ((c1 < c2) ? -1 : 1);
+}
+static inline int
+w_str_ncasecmp (const char *s1, const char *s2, size_t n)
+{
+    register int c1 = 0;
+    register int c2 = 0;
+    while ((*s1 != '\0') && (*s2 != '\0') && n-- > 0) {
+        c1 = tolower (*s1);
+        c2 = tolower (*s2);
+        if (c1 != c2) break;
+        c1++;
+        c2++;
+    }
+    if (n == 0 && c1 == c2)
+        return 0;
+    if (*s1 == '\0' && *s2 == '\0' && n == 0)
+        return 0;
+    return (c1 < c2) ? -1 : 1;
 }
 #endif /* __GLIBC__ */
 
