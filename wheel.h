@@ -603,17 +603,17 @@ typedef void (*w_task_func_t) (void*);
     (w_task_set_system (w_task_current ()))
 
 /*!
- * Creates a new task. The task will be ready to be scheduled as soon as the
- * task scheduler is started using \ref w_task_scheduler_loop() is called.
+ * Prepares a task for running. The task will be ready to be scheduled when
+ * the task scheduler is started using \ref w_task_run_scheduler().
  *
- * \param func Function called to start the task. Receives the value pass
- *      \data as its only argument.
+ * \param func Function called to start the task. Receives the value passed
+ *      as \data as its only argument.
  * \param data Pointer passed to the task function. May be \c NULL.
  * \param stack_size Size of the stack allocated for the task. The value
  *      is always rounded up to the size of a memory page, which means
  *      it is possible to pass \c 0 to get the smallest possible stack.
  */
-W_EXPORT w_task_t* w_task_spawn (w_task_func_t func, void *data, size_t stack_size);
+W_EXPORT w_task_t* w_task_prepare (w_task_func_t func, void *data, size_t stack_size);
 
 /*!
  * Obtains the task currently running.
@@ -667,7 +667,7 @@ W_EXPORT void w_task_exit (void);
  * int main (int argc, char **argv)
  * {
  *     while (argc--)
- *         w_task_spawn (process_argument, *argv++, 0);
+ *         w_task_prepare (process_argument, *argv++, 0);
  *     w_task_run_scheduler ();
  *     return 0;
  * }

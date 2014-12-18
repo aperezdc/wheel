@@ -27,7 +27,7 @@ main (int argc, char *argv[])
     int i;
 
     for (i = 1; i < argc; i++) {
-        w_task_spawn (print_message, argv[i], 0);
+        w_task_prepare (print_message, argv[i], 0);
     }
 
     w_task_run_scheduler ();

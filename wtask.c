@@ -174,7 +174,7 @@ switch_context (ucontext_t *from, ucontext_t *to)
 
 
 w_task_t*
-w_task_spawn (w_task_func_t func, void *data, size_t stack_size)
+w_task_prepare (w_task_func_t func, void *data, size_t stack_size)
 {
     w_assert (func);
 
@@ -240,7 +240,7 @@ void
 w_task_run_scheduler (void)
 {
     if (s_num_tasks == 0)
-        w_die ("$s: No tasks. Missing w_task_spawn() calls?\n", __func__);
+        w_die ("$s: No tasks. Missing w_task_prepare() calls?\n", __func__);
 
     while (s_num_tasks > 0) {
         w_assert (!TAILQ_EMPTY (&s_runqueue));
