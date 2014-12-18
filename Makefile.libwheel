@@ -28,6 +28,7 @@ libwheel_SRCS := wcfg.c       \
                  wio-socket.c \
                  wio-stdio.c  \
                  wio-buf.c    \
+                 wtask.c      \
                  wtty.c
 
 ifneq ($(libwheel_PTHREAD),0)
