@@ -15,7 +15,7 @@
  *   on other parts of libwheel.
  *
  * - libtask includes assembler routines for popular platforms, whereas this
- *   implementation uses {get,se}context(), which should be available in any
+ *   implementation uses {get,set}context(), which should be available in any
  *   reasonable Unix-like system in which libwheel can be used.
  */
 
