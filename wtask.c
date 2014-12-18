@@ -37,11 +37,6 @@
 # endif /* MAP_ANON */
 #endif /* !MAP_ANONYMOUS */
 
-#ifndef MAP_GROWSDOWN
-# define 0
-# warning MAP_GROWSDOWN is undefined, YMMV
-#endif /* !MAP_GROWSDOWN */
-
 #ifndef MAP_STACK
 # define 0
 # warning MAP_STACK is undefined, but this should not be a problem
