@@ -1654,9 +1654,9 @@ W_EXPORT int w_io_getchar (w_io_t *io);
  * Writes a single character to an I/O object.
  * \param io An input/output descriptor.
  * \param ch Character.
- * \return   Whether there was some error.
+ * \return   Number of bytes written, or a negative value on error.
  */
-W_EXPORT w_bool_t w_io_putchar (w_io_t *io, int ch);
+W_EXPORT ssize_t w_io_putchar (w_io_t *io, int ch);
 
 /*!
  */

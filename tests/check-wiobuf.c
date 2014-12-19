@@ -1,6 +1,6 @@
 /*
  * check-wiobuf.c
- * Copyright (C) 2010-2013 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -104,15 +104,12 @@ END_TEST
 
 START_TEST (test_wio_buf_write)
 {
-    w_io_t *io;
-    w_buf_t *b;
+    w_io_t *io = w_io_buf_open (NULL);
+    ck_assert_int_eq (10, w_io_write (io, msg, 10));
+    ck_assert_int_eq (10, w_io_write (io, msg, 10));
+    ck_assert_int_eq (10, w_io_write (io, msg, 10));
 
-    io = w_io_buf_open (NULL);
-    w_io_write (io, msg, 10);
-    w_io_write (io, msg, 10);
-    w_io_write (io, msg, 10);
-
-    b = W_IO_BUF_BUF ((w_io_buf_t*) io);
+    w_buf_t *b = W_IO_BUF_BUF ((w_io_buf_t*) io);
     fail_if (b == NULL, "null autocreated buffer");
 
     fail_unless (w_buf_size (b) == 30,
@@ -122,6 +119,18 @@ START_TEST (test_wio_buf_write)
     fail_if (memcmp (w_buf_data (b) +  0, msg, 10), "buffers do not match");
     fail_if (memcmp (w_buf_data (b) + 10, msg, 10), "buffers do not match");
     fail_if (memcmp (w_buf_data (b) + 20, msg, 10), "buffers do not match");
+
+    w_obj_unref (io);
+}
+END_TEST
+
+
+START_TEST (test_wio_buf_format)
+{
+    w_io_t *io = w_io_buf_open (NULL);
+    ck_assert_int_eq (2, w_io_format (io, "$i", 42));
+
+    ck_assert_str_eq ("42", w_buf_str (W_IO_BUF_BUF ((w_io_buf_t*) io)));
 
     w_obj_unref (io);
 }

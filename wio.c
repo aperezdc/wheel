@@ -1,6 +1,6 @@
 /*
  * wio.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -79,15 +79,15 @@ ssize_t
 w_io_write (w_io_t *io, const void *buf, size_t len)
 {
     w_assert (io);
+    w_assert (buf);
 
     if (w_unlikely (len == 0))
         return 0;
+    if (w_likely (io->write != NULL))
+        return (*io->write) (io, buf, len);
 
-    w_assert (buf);
-
-    return (io->write)
-        ? (*io->write) (io, buf, len)
-        : (errno = EBADF, -1);
+    errno = EBADF;
+    return -EBADF;
 }
 
 
@@ -113,11 +113,13 @@ w_io_getchar (w_io_t *io)
 }
 
 
-w_bool_t
+ssize_t
 w_io_putchar (w_io_t *io, int ch)
 {
+    w_assert (io);
+
     char bch = ch;
-    return (w_io_write (io, &bch, 1) != 1);
+    return w_io_write (io, &bch, 1);
 }
 
 
@@ -155,10 +157,23 @@ w_io_format (w_io_t *io, const char *fmt, ...)
 }
 
 
+#define DO_INC_IO(incvar, iocall)            \
+    do {                                     \
+        ssize_t __r_ ## __LINE__ = (iocall); \
+        if (__r_ ## __LINE__ < 0)            \
+            return __r_ ## __LINE__;         \
+        incvar += __r_ ## __LINE__;          \
+    } while (0)
+
+
 ssize_t
 w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 {
+    w_assert (io);
+    w_assert (fmt);
+
     int last_errno = errno;
+    ssize_t result = 0;
     size_t len_aux;
     union {
         int           vint;
@@ -171,79 +186,76 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
         double        vfpnum;
     } v;
 
-    w_assert (io);
-    w_assert (fmt);
-
     for (; *fmt; fmt++) {
         if (*fmt != '$') {
-            w_io_putchar (io, *fmt);
+            DO_INC_IO (result, w_io_putchar (io, *fmt));
             continue;
         }
 
         switch (*(++fmt)) {
             case 'l':
                 v.vlong = va_arg (args, long);
-                w_io_format_long (io, v.vlong);
+                DO_INC_IO (result, w_io_format_long (io, v.vlong));
                 break;
             case 'i':
                 v.vint = va_arg (args, int);
-                w_io_format_long (io, v.vint);
+                DO_INC_IO (result, w_io_format_long (io, v.vint));
                 break;
             case 'c':
                 v.vint = va_arg (args, int);
-                w_io_putchar (io, v.vint);
+                DO_INC_IO (result, w_io_putchar (io, v.vint));
                 break;
             case 'I':
                 v.vuint = va_arg (args, unsigned int);
-                w_io_format_ulong (io, v.vuint);
+                DO_INC_IO (result, w_io_format_ulong (io, v.vuint));
                 break;
             case 'L':
                 v.vulong = va_arg (args, unsigned long);
-                w_io_format_ulong (io, v.vulong);
+                DO_INC_IO (result, w_io_format_ulong (io, v.vulong));
                 break;
             case 'X':
                 v.vulong = va_arg (args, unsigned long);
-                w_io_format_ulong_hex (io, v.vulong);
+                DO_INC_IO (result, w_io_format_ulong_hex (io, v.vulong));
                 break;
             case 'O':
                 v.vulong = va_arg (args, unsigned long);
-                w_io_format_ulong_oct (io, v.vulong);
+                DO_INC_IO (result, w_io_format_ulong_oct (io, v.vulong));
                 break;
             case 'f':
             case 'F':
                 v.vfpnum = va_arg (args, double);
-                w_io_format_double (io, v.vfpnum);
+                DO_INC_IO (result, w_io_format_double (io, v.vfpnum));
                 break;
             case 'p':
                 v.vpointer = (intptr_t) va_arg (args, void*);
-                w_io_format_ulong_hex (io, v.vpointer);
+                DO_INC_IO (result, w_io_format_ulong_hex (io, v.vpointer));
                 break;
             case 's':
                 v.vcharp = va_arg (args, const char*);
-                w_io_write (io, v.vcharp, strlen (v.vcharp));
+                DO_INC_IO (result, w_io_write (io, v.vcharp, strlen (v.vcharp)));
                 break;
             case 'B':
                 v.vbufp = va_arg (args, w_buf_t*);
-                w_io_write (io, w_buf_str (v.vbufp), w_buf_size (v.vbufp));
+                DO_INC_IO (result, w_io_write (io, w_buf_str (v.vbufp), w_buf_size (v.vbufp)));
                 break;
             case 'S':
                 len_aux  = va_arg (args, size_t);
                 v.vcharp = va_arg (args, const char*);
-                w_io_write (io, v.vcharp, len_aux);
+                DO_INC_IO (result, w_io_write (io, v.vcharp, len_aux));
                 break;
             case 'e':
-                w_io_format_long (io, last_errno);
+                DO_INC_IO (result, w_io_format_long (io, last_errno));
                 break;
             case 'E':
                 v.vcharp = strerror (last_errno);
-                w_io_write (io, v.vcharp, strlen (v.vcharp));
+                DO_INC_IO (result, w_io_write (io, v.vcharp, strlen (v.vcharp)));
                 break;
             default:
-                w_io_putchar (io, *fmt);
+                DO_INC_IO (result, w_io_putchar (io, *fmt));
         }
     }
 
-    return -1;
+    return result;
 }
 
 
