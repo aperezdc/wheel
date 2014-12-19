@@ -79,10 +79,10 @@ ssize_t
 w_io_write (w_io_t *io, const void *buf, size_t len)
 {
     w_assert (io);
-    w_assert (buf);
-
     if (w_unlikely (len == 0))
         return 0;
+
+    w_assert (buf);
     if (w_likely (io->write != NULL))
         return (*io->write) (io, buf, len);
 
