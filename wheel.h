@@ -2929,7 +2929,7 @@ W_EXPORT w_cfg_type_t w_cfg_type (const w_cfg_t *cf, const char *key)
  * \param output Output stream where to write.
  * \return       Whether writing was successful.
  */
-W_EXPORT bool w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
+W_EXPORT w_io_result_t w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
@@ -2949,7 +2949,7 @@ W_EXPORT w_cfg_t* w_cfg_load (w_io_t *input, char **msg)
  * \param path Path to a file.
  * \return     Whether writing was successful.
  */
-W_EXPORT bool w_cfg_dump_file (const w_cfg_t *cf, const char *path)
+W_EXPORT w_io_result_t w_cfg_dump_file (const w_cfg_t *cf, const char *path)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 

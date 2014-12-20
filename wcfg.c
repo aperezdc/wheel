@@ -8,6 +8,8 @@
 
 #include "wheel.h"
 #include <fcntl.h>
+#include <ctype.h>
+#include <errno.h>
 
 
 static w_variant_t*
@@ -269,125 +271,171 @@ w_cfg_del (w_cfg_t *cf, const char *key)
 }
 
 
-
-#define W_CFG_DUMP_INDENT(_l, _o)                       \
-    do {                                                \
-        unsigned __tmp = (_l) * 4;                      \
-        while (__tmp--)                                 \
-            if (w_io_failed (w_io_putchar ((_o), ' '))) \
-                return false;                            \
+#define DUMP_INDENT(_i, _l, _o)                        \
+    do {                                               \
+        unsigned __tmp = (_l) * 4;                     \
+        while (__tmp--)                                \
+            W_IO_CHAIN (_i, w_io_putchar ((_o), ' ')); \
     } while (0)
 
 
-static bool
-w_cfg_dump_string (w_io_t *out, const char *str)
+static w_io_result_t
+dump_buffer (const w_buf_t *buf, w_io_t *out)
 {
     w_assert (out);
-    w_assert (str);
+    w_assert (buf);
 
-    if (w_io_failed (w_io_putchar (out, '"')))
-        return false;
+    w_io_result_t r = W_IO_RESULT (0);
+    W_IO_CHAIN (r, w_io_putchar (out, '"'));
 
-    for (; *str; str++) {
+    if (w_buf_size (buf)) {
+        for (unsigned i = 0; i < w_buf_size (buf); i++) {
+            int c = w_buf_data (buf)[i];
 #define ESCAPE(_c, _e) \
-        case _c : if (w_io_failed (w_io_putchar (out, '\\')) || \
-                      w_io_failed (w_io_putchar (out, (_e))))   \
-                          return false;                          \
-                  break
-        switch (*str) {
-            ESCAPE ('\n', 'n');
-            ESCAPE ('\r', 'r');
-            ESCAPE ('\b', 'b');
-            ESCAPE (0x1b, 'e');
-            ESCAPE ('\a', 'a');
-            ESCAPE ('\t', 't');
-            ESCAPE ('\v', 'v');
-            default:
-                if (w_io_failed (w_io_putchar (out, *str)))
-                    return false;
-        }
+            case _c : W_IO_CHAIN (r, w_io_putchar (out, '\\')); \
+                      W_IO_CHAIN (r, w_io_putchar (out, (_e))); \
+                      break
+            switch (c) {
+                ESCAPE ('\n', 'n');
+                ESCAPE ('\r', 'r');
+                ESCAPE ('\b', 'b');
+                ESCAPE (0x1b, 'e');
+                ESCAPE ('\a', 'a');
+                ESCAPE ('\t', 't');
+                ESCAPE ('\v', 'v');
+                default:
+                    W_IO_CHAIN (r, w_io_putchar (out, c));
+            }
 #undef ESCAPE
-    }
-    if (w_io_failed (w_io_putchar (out, '"')))
-        return false;
-    return true;
-}
-
-
-static bool
-w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
-{
-    w_iterator_t i;
-    w_variant_t *node;
-
-    w_assert (cf);
-    w_assert (out);
-
-    w_dict_foreach (cf, i) {
-        W_CFG_DUMP_INDENT (indent, out);
-
-        node = (w_variant_t*) *i;
-
-        if (w_io_failed (w_io_format (out, "$s ", w_dict_iterator_get_key (i))))
-            return false;
-
-        switch (w_variant_type (node)) {
-            case W_CFG_NODE:
-                if (w_io_failed (w_io_putchar (out, '{')) ||
-                    w_io_failed (w_io_putchar (out, '\n')) ||
-                    !w_cfg_dump_cfg (w_variant_dict (node), out, indent + 1))
-                    return false;
-                W_CFG_DUMP_INDENT (indent, out);
-                if (w_io_failed (w_io_putchar (out, '}')))
-                    return false;
-                break;
-            case W_CFG_STRING:
-                if (!w_cfg_dump_string (out, w_variant_string (node)))
-                    return false;
-                break;
-            case W_CFG_NUMBER:
-                if (w_io_failed (w_io_format_double (out, w_variant_float (node))))
-                    return false;
-                break;
-            default:
-                break;
         }
-        if (w_io_failed (w_io_putchar (out, '\n')))
-            return false;
     }
 
-    return true;
+    W_IO_CHAIN (r, w_io_putchar (out, '"'));
+    return r;
 }
 
 
-/*
- * TODO Better error checking of IO functions.
- */
-bool
-w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
+static w_io_result_t dump_value (const w_variant_t*, w_io_t*, unsigned);
+static w_io_result_t dump_dict (const w_dict_t*, w_io_t*, unsigned);
+
+
+static w_io_result_t
+dump_list (const w_list_t *list, w_io_t* stream, unsigned indent)
 {
-    w_assert (cf);
-    w_assert (output);
-    return w_cfg_dump_cfg (cf, output, 0);
+    w_io_result_t r = W_IO_RESULT (0);
+    w_iterator_t i;
+
+    w_list_foreach (list, i) {
+        DUMP_INDENT (r, indent, stream);
+        W_IO_CHAIN (r, dump_value ((w_variant_t*) *i, stream, indent));
+        W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
+    }
+
+    return r;
 }
 
 
-bool
+static w_io_result_t
+dump_value (const w_variant_t *value, w_io_t *stream, unsigned indent)
+{
+    w_io_result_t r = W_IO_RESULT (0);
+
+    switch (w_variant_type (value)) {
+        case W_VARIANT_STRING:
+            W_IO_CHAIN (r, dump_buffer (w_variant_buffer (value), stream));
+            break;
+        case W_VARIANT_BOOL:
+            W_IO_CHAIN (r, w_io_format (stream, "$s",
+                                        w_variant_bool (value)
+                                            ? "true" : "false"));
+            break;
+        case W_VARIANT_NUMBER:
+            W_IO_CHAIN (r, w_io_format_long (stream,
+                                             w_variant_number (value)));
+            break;
+        case W_VARIANT_FLOAT:
+            W_IO_CHAIN (r, w_io_format_double (stream,
+                                               w_variant_float (value)));
+            break;
+        case W_VARIANT_LIST:
+            W_IO_CHAIN (r, w_io_putchar (stream, '['));
+            W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
+            W_IO_CHAIN (r, dump_list (w_variant_list (value),
+                                      stream, indent + 1));
+            W_IO_CHAIN (r, w_io_putchar (stream, ']'));
+            W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
+            break;
+        case W_VARIANT_DICT:
+            W_IO_CHAIN (r, w_io_putchar (stream, '{'));
+            W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
+            W_IO_CHAIN (r, dump_dict (w_variant_dict (value), stream, indent + 1));
+            W_IO_CHAIN (r, w_io_putchar (stream, '}'));
+            W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
+            break;
+        default:
+            // TODO: Handle errors better than aborting.
+            w_die ("%s: Invalid variant type in w_cfg_t container\n", __func__);
+    }
+
+    return r;
+}
+
+
+static w_io_result_t
+dump_dict (const w_dict_t *dict, w_io_t *stream, unsigned indent)
+{
+    w_io_result_t r = W_IO_RESULT (0);
+    w_iterator_t i;
+
+    w_dict_foreach (dict, i) {
+        DUMP_INDENT (r, indent, stream);
+        W_IO_CHAIN (r, w_io_format (stream, "$s: ",  w_dict_iterator_get_key (i)));
+        W_IO_CHAIN (r, dump_value ((w_variant_t*) *i, stream, indent));
+        W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
+    }
+
+    return r;
+}
+
+
+w_io_result_t
+w_cfg_dump (const w_cfg_t *cfg, w_io_t *stream)
+{
+    w_assert (cfg);
+    w_assert (stream);
+    return dump_dict (cfg, stream, 0);
+}
+
+
+w_io_result_t
 w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 {
-    w_io_t *io;
-    bool ret;
-
     w_assert (cf);
     w_assert (path);
 
-    if (!(io = w_io_unix_open (path, O_WRONLY | O_CREAT | O_TRUNC, 0666)))
-        return false;
+    w_io_t *io = w_io_unix_open (path, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (!io) return W_IO_RESULT_ERROR (errno ? errno : -1);
 
-    ret = w_cfg_dump (cf, io);
+    w_io_result_t r = w_cfg_dump (cf, io);
     w_obj_unref (io);
 
-    return ret;
+    return r;
+}
+
+
+static char*
+parse_identifier (w_parse_t *p)
+{
+    w_assert(p);
+
+    w_buf_t buf = W_BUF;
+    while (!isspace(p->look) && p->look != ':') {
+        w_buf_append_char (&buf, p->look);
+        w_parse_getchar (p);
+    }
+
+    w_parse_skip_ws (p);
+    return w_buf_str (&buf);
 }
 
 
@@ -410,9 +458,16 @@ w_cfg_parse_items (w_parse_t *p, w_cfg_t *r)
      * This is valid syntax, so take it into account.
      */
     while (p->look != W_IO_EOF && p->look != '}') {
-        if (!(key = w_parse_ident (p))) {
+        if (!(key = parse_identifier (p))) {
             w_parse_error (p, "Identifier expected");
         }
+
+        /* Handle optional colon. */
+        if (p->look == ':') {
+            w_parse_getchar (p);
+            w_parse_skip_ws (p);
+        }
+
         switch (p->look) {
             case '"':
                 if (!(svalue = w_parse_string (p))) {

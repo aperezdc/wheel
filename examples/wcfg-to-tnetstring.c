@@ -25,7 +25,9 @@ int main (int argc, char *argv[])
             w_die ("Unknown error loading config\n");
     }
 
-    w_tnetstr_write_dict (w_stdout, cfg);
+    if (w_io_failed (w_tnetstr_write_dict (w_stdout, cfg)))
+        w_die ("I/O error while writing: $E\n");
+
     w_obj_unref (cfg);
     return EXIT_SUCCESS;
 }
