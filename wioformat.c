@@ -21,32 +21,29 @@ _map_digit (unsigned n)
 }
 
 
-static inline ssize_t
+static inline w_io_result_t
 format_ulong (w_io_t *io, unsigned long value, unsigned base)
 {
-    ssize_t result = 1;
+    w_io_result_t r = W_IO_RESULT (0);
 
     if (value >= base) {
-        ssize_t t = format_ulong (io, value / base, base);
-        if (t < 0)
-            return t;
-        result += t;
+        W_IO_CHAIN (r, format_ulong (io, value / base, base));
     }
-
-    return w_io_putchar (io, _map_digit (value % base)) ? result : -1;
+    W_IO_CHAIN (r, w_io_putchar (io, _map_digit (value % base)));
+    return r;
 }
 
 
-ssize_t
+w_io_result_t
 w_io_format_long (w_io_t *io, long value)
 {
     w_assert (io);
 
     if (value < 0) {
-        if (!w_io_putchar (io, '-'))
-            return -1;
-        ssize_t ret = format_ulong (io, -value, 10);
-        return (ret < 0) ? ret : ++ret;
+        w_io_result_t r = W_IO_RESULT (0);
+        W_IO_CHAIN (r, w_io_putchar (io, '-'));
+        W_IO_CHAIN (r, format_ulong (io, -value, 10));
+        return r;
     }
     else {
         return format_ulong (io, value, 10);
@@ -54,7 +51,7 @@ w_io_format_long (w_io_t *io, long value)
 }
 
 
-ssize_t
+w_io_result_t
 w_io_format_ulong (w_io_t *io, unsigned long value)
 {
     w_assert (io);
@@ -62,7 +59,7 @@ w_io_format_ulong (w_io_t *io, unsigned long value)
 }
 
 
-ssize_t
+w_io_result_t
 w_io_format_ulong_hex (w_io_t *io, unsigned long value)
 {
     w_assert (io);
@@ -70,7 +67,7 @@ w_io_format_ulong_hex (w_io_t *io, unsigned long value)
 }
 
 
-ssize_t
+w_io_result_t
 w_io_format_ulong_oct (w_io_t *io, unsigned long value)
 {
     w_assert (io);
@@ -78,7 +75,7 @@ w_io_format_ulong_oct (w_io_t *io, unsigned long value)
 }
 
 
-ssize_t
+w_io_result_t
 w_io_format_double (w_io_t *io, double value)
 {
     w_assert (io);
@@ -87,7 +84,7 @@ w_io_format_double (w_io_t *io, double value)
      * FIXME Avoid head allocation of the temporary string.
      */
     char *str = w_strfmt ("%g", value);
-    ssize_t ret = w_io_write (io, str, strlen (str));
+    w_io_result_t r = w_io_write (io, str, strlen (str));
     w_free (str);
-    return ret;
+    return r;
 }

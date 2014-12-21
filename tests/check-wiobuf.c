@@ -58,19 +58,19 @@ END_TEST
 START_TEST (test_wio_buf_read)
 {
     char buf[64];
-    ssize_t ret;
-    w_io_t *io;
     w_buf_t b = W_BUF;
 
     w_buf_set_str (&b, msg);
-    io = w_io_buf_open (&b);
+    w_io_t *io = w_io_buf_open (&b);
 
-    ret = w_io_read (io, buf, 64);
-    fail_unless (ret == 64, "read %ld bytes, expected 64", (long) ret);
+    w_io_result_t r = w_io_read (io, buf, 64);
+    fail_if (w_io_failed (r), "I/O on buffers should not fail");
+    ck_assert_int_eq (64, w_io_result_bytes (r));
     fail_if (memcmp (msg, buf, 64), "strings are not equal");
 
-    ret = w_io_read (io, buf, 10);
-    fail_unless (ret == 10, "read %ld bytes, expected 10", (long) ret);
+    r = w_io_read (io, buf, 10);
+    fail_if (w_io_failed (r), "I/O on buffers should not fail");
+    ck_assert_int_eq (10, w_io_result_bytes (r));
     fail_if (memcmp (msg + 64, buf, 10), "strings are not equal");
 
     w_obj_unref (io);
@@ -105,9 +105,9 @@ END_TEST
 START_TEST (test_wio_buf_write)
 {
     w_io_t *io = w_io_buf_open (NULL);
-    ck_assert_int_eq (10, w_io_write (io, msg, 10));
-    ck_assert_int_eq (10, w_io_write (io, msg, 10));
-    ck_assert_int_eq (10, w_io_write (io, msg, 10));
+    ck_assert_int_eq (10, w_io_result_bytes (w_io_write (io, msg, 10)));
+    ck_assert_int_eq (10, w_io_result_bytes (w_io_write (io, msg, 10)));
+    ck_assert_int_eq (10, w_io_result_bytes (w_io_write (io, msg, 10)));
 
     w_buf_t *b = W_IO_BUF_BUF ((w_io_buf_t*) io);
     fail_if (b == NULL, "null autocreated buffer");
@@ -128,7 +128,7 @@ END_TEST
 START_TEST (test_wio_buf_format)
 {
     w_io_t *io = w_io_buf_open (NULL);
-    ck_assert_int_eq (2, w_io_format (io, "$i", 42));
+    ck_assert_int_eq (2, w_io_result_bytes (w_io_format (io, "$i", 42)));
 
     ck_assert_str_eq ("42", w_buf_str (W_IO_BUF_BUF ((w_io_buf_t*) io)));
 

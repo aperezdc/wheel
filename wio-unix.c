@@ -1,6 +1,6 @@
 /*
  * wio-unix.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -11,18 +11,19 @@
 #include <errno.h>
 
 
-static w_bool_t
+static w_io_result_t
 w_io_unix_close (w_io_t *iobase)
 {
     w_io_unix_t *io = (w_io_unix_t*) iobase;
     if (io->fd >= 0) {
-        return (close (io->fd) == 0);
+        if (close (io->fd) == -1)
+            return W_IO_RESULT_ERROR (errno);
     }
-    return W_YES;
+    return W_IO_RESULT_SUCCESS;
 }
 
 
-static ssize_t
+static w_io_result_t
 w_io_unix_write (w_io_t *io, const void *bufp, size_t len)
 {
     ssize_t ret, n = len;
@@ -33,19 +34,18 @@ w_io_unix_write (w_io_t *io, const void *bufp, size_t len)
             ret = write (((w_io_unix_t*) io)->fd, buf, len);
         } while (ret < 0 && errno == EINTR);
 
-        if (ret < 0) {
-            return ret;
-        }
+        if (ret == -1)
+            return W_IO_RESULT_ERROR (errno);
 
         buf += ret;
         len -= ret;
     }
 
-    return n;
+    return W_IO_RESULT (n);
 }
 
 
-static ssize_t
+static w_io_result_t
 w_io_unix_read (w_io_t *io, void *buf, size_t len)
 {
     ssize_t ret;
@@ -54,17 +54,22 @@ w_io_unix_read (w_io_t *io, void *buf, size_t len)
         ret = read (((w_io_unix_t*) io)->fd, buf, len);
     } while (ret < 0 && errno == EINTR);
 
+    if (ret == -1)
+        return W_IO_RESULT_ERROR (errno);
     if (ret == 0)
-        ret = W_IO_EOF;
+        return W_IO_RESULT_EOF;
 
-    return ret;
+    return W_IO_RESULT (ret);
 }
 
 
-static w_bool_t
+static w_io_result_t
 w_io_unix_flush (w_io_t *io)
 {
-    return fsync (((w_io_unix_t*) io)->fd) != 0;
+    if (fsync (((w_io_unix_t*) io)->fd) == -1)
+        return W_IO_RESULT_ERROR (errno);
+
+    return W_IO_RESULT_SUCCESS;
 }
 
 

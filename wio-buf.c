@@ -9,7 +9,7 @@
 #include <string.h>
 
 
-static w_bool_t
+static w_io_result_t
 w_io_buf_close (w_io_t *iobase)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
@@ -17,11 +17,11 @@ w_io_buf_close (w_io_t *iobase)
     if (io->bufp == &io->buf)
         w_buf_clear (&io->buf);
 
-    return W_YES;
+    return W_IO_RESULT_SUCCESS;
 }
 
 
-static ssize_t
+static w_io_result_t
 w_io_buf_write (w_io_t *iobase, const void *buf, size_t len)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
@@ -29,24 +29,24 @@ w_io_buf_write (w_io_t *iobase, const void *buf, size_t len)
     w_buf_resize (io->bufp, io->pos);
     w_buf_append_mem (io->bufp, buf, len);
     io->pos += len;
-    return len;
+
+    return W_IO_RESULT (len);
 }
 
 
-static ssize_t
+static w_io_result_t
 w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
 {
     w_io_buf_t *io = (w_io_buf_t*) iobase;
-    size_t to_read;
 
-    if (io->pos >= w_buf_size (io->bufp)) {
-        return W_IO_EOF;
-    }
+    if (io->pos >= w_buf_size (io->bufp))
+        return W_IO_RESULT_EOF;
 
-    to_read = w_min (len, w_buf_size (io->bufp) - io->pos);
+    size_t to_read = w_min (len, w_buf_size (io->bufp) - io->pos);
     memcpy (buf, w_buf_data (io->bufp) + io->pos, to_read);
     io->pos += to_read;
-    return to_read;
+
+    return W_IO_RESULT (to_read);
 }
 
 

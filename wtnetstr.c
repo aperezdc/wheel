@@ -1,11 +1,13 @@
 /*
  * wtnetstr.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
 #include "wheel.h"
+#include <errno.h>
+
 
 enum {
     /* Five digits maximum may be used for specifying value lengths. */
@@ -27,213 +29,207 @@ static const char _w_tns_true [] = "4:true!";
 static const char _w_tns_null [] = "0:~";
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_null (w_buf_t *buffer)
 {
     w_assert (buffer);
-    w_buf_append_mem (buffer, _w_tns_null, w_lengthof (_w_tns_null) - 1);
-    return W_NO;
+
+    w_io_result_t r = { .bytes = w_lengthof (_w_tns_null) - 1 };
+    w_buf_append_mem (buffer, _w_tns_null, r.bytes);
+    return r;
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_write_null (w_io_t *io)
 {
-    static const unsigned len = w_lengthof (_w_tns_null) - 1;
     w_assert (io);
-    return w_io_write (io, _w_tns_null, len) != len;
+    return w_io_write (io, _w_tns_null, w_lengthof (_w_tns_null) - 1);
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value)
 {
     w_assert (buffer);
-    if (value)
-        w_buf_append_mem (buffer, _w_tns_true, w_lengthof (_w_tns_true) - 1);
-    else
-        w_buf_append_mem (buffer, _w_tns_false, w_lengthof (_w_tns_false) - 1);
-    return W_NO;
+
+    if (value) {
+        w_io_result_t r = { .bytes = w_lengthof (_w_tns_true) - 1 };
+        w_buf_append_mem (buffer, _w_tns_true, r.bytes);
+        return r;
+    } else {
+        w_io_result_t r = { .bytes = w_lengthof (_w_tns_false) - 1 };
+        w_buf_append_mem (buffer, _w_tns_false, r.bytes);
+        return r;
+    }
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_write_boolean (w_io_t *io, w_bool_t value)
 {
     w_assert (io);
     if (value) {
-        static const unsigned len = w_lengthof (_w_tns_true) - 1;
-        return w_io_write (io, _w_tns_true, len) != len;
-    }
-    else {
-        static const unsigned len = w_lengthof (_w_tns_false) - 1;
-        return w_io_write (io, _w_tns_false, len) != len;
+        return w_io_write (io, _w_tns_true, w_lengthof (_w_tns_true) - 1);
+    } else {
+        return w_io_write (io, _w_tns_false, w_lengthof (_w_tns_false) - 1);
     }
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_string (w_buf_t *buffer, const char *value)
 {
-    size_t len;
-
     w_assert (buffer);
     w_assert (value);
 
-    len = strlen (value);
+    size_t len = strlen (value);
     if (w_unlikely (len > _W_TNS_MAX_PAYLOAD))
-        return W_YES;
+        return W_IO_RESULT_ERROR (EINVAL);
 
-    w_buf_format (buffer, "$L:$S,", len, len, value);
-    return W_NO;
+    return w_buf_format (buffer, "$L:$S,", len, len, value);
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_write_string (w_io_t *io, const char *value)
 {
-    size_t len;
-
     w_assert (io);
     w_assert (value);
 
-    len = strlen (value);
+    size_t len = strlen (value);
     if (w_unlikely ((len) > _W_TNS_MAX_PAYLOAD))
-        return W_YES;
+        return W_IO_RESULT_ERROR (EINVAL);
 
-    return w_io_format (io, "$L:$S,", len, len, value) == W_IO_ERR;
+    return w_io_format (io, "$L:$S,", len, len, value);
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value)
 {
     w_assert (buffer);
     w_assert (value);
 
     if (w_unlikely (w_buf_size (value) > _W_TNS_MAX_PAYLOAD))
-        return W_YES;
+        return W_IO_RESULT_ERROR (EINVAL);
 
-    w_buf_format (buffer, "$L:$B,", w_buf_size (value), value);
-    return W_NO;
+    return w_buf_format (buffer, "$L:$B,", w_buf_size (value), value);
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value)
 {
     w_assert (io);
     w_assert (value);
 
     if (w_unlikely (w_buf_size (value) > _W_TNS_MAX_PAYLOAD))
-        return W_YES;
+        return W_IO_RESULT_ERROR (EINVAL);
 
-    return w_io_format (io, "$L:$B,", w_buf_size (value), value) == W_IO_ERR;
+    return w_io_format (io, "$L:$B,", w_buf_size (value), value);
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_number (w_buf_t *buffer, long value)
 {
-    w_buf_t buf = W_BUF;
-    w_io_buf_t iobuf;
-
     w_assert (buffer);
 
+    w_buf_t buf = W_BUF;
+    w_io_buf_t iobuf;
     w_io_buf_init (&iobuf, &buf, W_NO);
     w_io_format_long ((w_io_t*) &iobuf, value);
 
-    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
-        goto return_error;
-
-    w_buf_format (buffer, "$L:$B#", w_buf_size (&buf), &buf);
+    w_io_result_t r;
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD)) {
+        r = W_IO_RESULT_ERROR (EINVAL);
+    } else {
+        r = w_buf_format (buffer, "$L:$B#", w_buf_size (&buf), &buf);
+    }
     w_buf_clear (&buf);
-    return W_NO;
-
-return_error:
-    w_buf_clear (&buf);
-    return W_YES;
+    return r;
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_float (w_buf_t *buffer, double value)
 {
-    w_buf_t buf = W_BUF;
-    w_io_buf_t iobuf;
-
     w_assert (buffer);
 
+    w_buf_t buf = W_BUF;
+    w_io_buf_t iobuf;
     w_io_buf_init (&iobuf, &buf, W_NO);
     w_io_format_double ((w_io_t*) &iobuf, value);
 
-    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
-        goto return_error;
-
-    w_buf_format (buffer, "$L:$B^", w_buf_size (&buf), &buf);
+    w_io_result_t r;
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD)) {
+        r = W_IO_RESULT_ERROR (EINVAL);
+    } else {
+        r = w_buf_format (buffer, "$L:$B^", w_buf_size (&buf), &buf);
+    }
     w_buf_clear (&buf);
-    return W_NO;
-
-return_error:
-    w_buf_clear (&buf);
-    return W_YES;
+    return r;
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value)
 {
-    w_buf_t buf = W_BUF;
-    w_iterator_t item;
-
     w_assert (buffer);
     w_assert (value);
 
-    w_list_foreach (value, item)
-        if (w_unlikely (w_tnetstr_dump (&buf, (w_variant_t*) *item)))
-            goto return_error;
+    w_buf_t buf = W_BUF;
+    w_io_result_t r;
+    w_iterator_t item;
 
-    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
-        goto return_error;
+    w_list_foreach (value, item) {
+        r = w_tnetstr_dump (&buf, (w_variant_t*) *item);
+        if (w_unlikely (w_io_failed (r)))
+            break;
+    }
 
-    w_buf_format (buffer, "$L:$B]", w_buf_size (&buf), &buf);
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD)) {
+        r = W_IO_RESULT_ERROR (EINVAL);
+    } else if (!w_io_failed (r)) {
+        r = w_buf_format (buffer, "$L:$B]", w_buf_size (&buf), &buf);
+    }
+
     w_buf_clear (&buf);
-    return W_NO;
-
-return_error:
-    w_buf_clear (&buf);
-    return W_YES;
+    return r;
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value)
 {
-    w_buf_t buf = W_BUF;
-    w_iterator_t item;
-
     w_assert (buffer);
     w_assert (value);
 
-    w_dict_foreach (value, item)
-        if (w_unlikely (w_tnetstr_dump_string (&buf, w_dict_iterator_get_key (item)) ||
-                        w_tnetstr_dump (&buf, (const w_variant_t*) *item)))
-            goto return_error;
+    w_buf_t buf = W_BUF;
+    w_io_result_t r;
+    w_iterator_t item;
 
-    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD))
-        goto return_error;
+    w_dict_foreach (value, item) {
+        r = w_tnetstr_dump_string (&buf, w_dict_iterator_get_key (item));
+        if (w_unlikely (w_io_failed (r)))
+            break;
+        r = w_tnetstr_dump (&buf, (const w_variant_t*) *item);
+        if (w_unlikely (w_io_failed (r)))
+            break;
+    }
 
-    w_buf_format (buffer, "$L:$B}", w_buf_size (&buf), &buf);
+    if (w_unlikely (w_buf_size (&buf) > _W_TNS_MAX_PAYLOAD)) {
+        r = W_IO_RESULT_ERROR (EINVAL);
+    } else if (!w_io_failed (r)) {
+        r = w_buf_format (buffer, "$L:$B}", w_buf_size (&buf), &buf);
+    }
     w_buf_clear (&buf);
-    return W_NO;
-
-return_error:
-    w_buf_clear (&buf);
-    return W_YES;
+    return r;
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
 {
     w_assert (buffer);
@@ -252,29 +248,40 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
 
         case W_VARIANT_OBJECT:  /* Can't serialize object values. */
         case W_VARIANT_INVALID: /* Can't serialize invalid values. */
-            return W_YES;
+            return W_IO_RESULT_ERROR (EINVAL);
+
         case W_VARIANT_NULL:
             return w_tnetstr_dump_null (buffer);
+
         case W_VARIANT_BOOL:
             return w_tnetstr_dump_boolean (buffer, w_variant_bool (value));
+
         case W_VARIANT_STRING:
             return w_tnetstr_dump_buffer (buffer, w_variant_string_buf (value));
+
         case W_VARIANT_NUMBER:
             return w_tnetstr_dump_number (buffer, w_variant_number (value));
+
         case W_VARIANT_FLOAT:
             return w_tnetstr_dump_float (buffer, w_variant_float (value));
+
         case W_VARIANT_LIST:
             return w_tnetstr_dump_list (buffer, w_variant_list (value));
+
         case W_VARIANT_DICT:
             return w_tnetstr_dump_dict (buffer, w_variant_dict (value));
     }
 
-    /* This point should never be reached. */
-    return W_YES;
+    w_io_format (w_stderr,
+                 "w_variant_t with unhandled type.\n"
+                 "This is a bug, execution aborted!\n");
+    w_io_flush (w_stderr);
+    abort ();
+    return W_IO_RESULT_ERROR (EINVAL);  /* Keep compiler happy */
 }
 
 
-w_bool_t
+w_io_result_t
 w_tnetstr_write (w_io_t *io, const w_variant_t *value)
 {
     w_assert (io);
@@ -293,25 +300,36 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
 
         case W_VARIANT_OBJECT:  /* Can't serialize object values. */
         case W_VARIANT_INVALID: /* Can't serialize invalid values. */
-            return W_YES;
+            return W_IO_RESULT_ERROR (EINVAL);
+
         case W_VARIANT_NULL:
             return w_tnetstr_write_null (io);
+
         case W_VARIANT_BOOL:
             return w_tnetstr_write_boolean (io, w_variant_bool (value));
+
         case W_VARIANT_STRING:
             return w_tnetstr_write_buffer (io, w_variant_string_buf (value));
+
         case W_VARIANT_NUMBER:
             return w_tnetstr_write_number (io, w_variant_number (value));
+
         case W_VARIANT_FLOAT:
             return w_tnetstr_write_float (io, w_variant_float (value));
+
         case W_VARIANT_LIST:
             return w_tnetstr_write_list (io, w_variant_list (value));
+
         case W_VARIANT_DICT:
             return w_tnetstr_write_dict (io, w_variant_dict (value));
     }
 
-    /* This point should never be reached. */
-    return W_YES;
+    w_io_format (w_stderr,
+                 "w_variant_t with unhandled type.\n"
+                 "This is a bug, execution aborted!\n");
+    w_io_flush (w_stderr);
+    abort ();
+    return W_IO_RESULT_ERROR (EINVAL);  /* Keep compiler happy */
 }
 
 
@@ -374,12 +392,12 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
 w_bool_t
 w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
 {
+    w_assert (io);
+    w_assert (buffer);
+
     unsigned blen = _W_TNS_SIZE_DIGITS + 1; /* number + colon */
     unsigned plen;
     int ch = '\0';
-
-    w_assert (io);
-    w_assert (buffer);
 
     for (plen = 0; blen-- && (ch = w_io_getchar (io)) != ':'; plen *= 10) {
         w_buf_append_char (buffer, ch);
@@ -397,12 +415,11 @@ w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
      */
     blen = w_buf_size (buffer);
     w_buf_resize (buffer, ++plen + blen);
-
-    return w_io_read (io, w_buf_data (buffer) + blen, plen) != plen;
+    w_io_result_t r = w_io_read (io, w_buf_data (buffer) + blen, plen);
 
 return_error:
     w_buf_clear (buffer);
-    return W_YES;
+    return w_io_failed (r) || w_io_result_bytes (r) != plen;
 }
 
 

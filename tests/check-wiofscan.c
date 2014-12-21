@@ -1,6 +1,6 @@
 /*
  * check-wiofscan.c
- * Copyright (C) 2011-2013 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2011-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -11,9 +11,8 @@
 
 #define IOSTR(_s) \
     w_buf_t __buf = W_BUF; \
-    w_io_t *io; \
     w_buf_set_str (&__buf, (_s)); \
-    io = w_io_buf_open (&__buf)
+    w_io_t *io = w_io_buf_open (&__buf)
 
 
 START_TEST (test_wiofscan_ulong_zero)

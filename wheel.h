@@ -1,7 +1,7 @@
 /*
  * Main include file for libwheel.
  *
- * Copyright (C) 2010-2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
@@ -349,7 +349,7 @@ void w_obj_mark_static (void *obj);
 /*------------------------------------------[ forward declarations ]------*/
 
 W_OBJ_DECL (w_io_t);
-
+typedef struct w_io_result w_io_result_t;
 
 /*---------------------------------------------------[ errors/debug ]-----*/
 
@@ -1451,9 +1451,9 @@ W_EXPORT void w_buf_append_buf (w_buf_t       *buf,
  * \param buf A \ref w_buf_t buffer.
  * \param fmt Format string.
  */
-W_EXPORT void w_buf_format (w_buf_t    *buf,
-                            const char *fmt,
-                            ...);
+W_EXPORT w_io_result_t w_buf_format (w_buf_t    *buf,
+                                     const char *fmt,
+                                     ...);
 
 /*!
  * Frees the contents of a buffer.
@@ -1480,12 +1480,88 @@ W_EXPORT char* w_buf_str (w_buf_t *buf);
  * \{
  */
 
-enum w_io_flag
-{
-    __W_IO_ZERO =  0,
-    W_IO_ERR    = -1, /*!< An I/O error occured. */
-    W_IO_EOF    = -2, /*!< End of file reached.  */
+struct w_io_result {
+    union {
+        ssize_t error;
+        ssize_t bytes;
+    };
 };
+
+
+#define W__LCAT3(__a, __b) __a ## __b
+#define W__LCAT2(_name, _line) W__LCAT3(_name ## _, _line)
+#define W__LCAT(_name) W__LCAT2(_name, __LINE__)
+
+
+#define W_IO_RESULT(_v) \
+    ((w_io_result_t) { .bytes = (_v) })
+
+#define W_IO_RESULT_ERROR(_v) \
+    ((w_io_result_t) { .error = - (_v) })
+
+#define W_IO_RESULT_EOF \
+    ((w_io_result_t) { .error = -W_IO_EOF })
+
+#define W_IO_RESULT_SUCCESS \
+    ((w_io_result_t) { .error = W_IO_SUCCESS })
+
+
+#define W_IO_CHAIN(_r, _iocall)                           \
+    do {                                                  \
+        w_io_result_t W__LCAT (io_chain_r) = (_iocall);   \
+        if (w_io_result_error (W__LCAT (io_chain_r)))     \
+            return W__LCAT (io_chain_r);                  \
+        (_r).bytes += W__LCAT (io_chain_r).bytes;         \
+    } while (0);
+
+#define W_IO_CHECK(_iocall)                               \
+    do {                                                  \
+        w_io_result_t W__LCAT (io_check_r) = (_iocall);   \
+        if (w_io_result_error (W__LCAT (io_check_r)))     \
+            return W__LCAT (io_check_r);                  \
+    } while (0)
+
+#define W_IO_CHECK_BYTES(_iocall1, _action, _iocall2)     \
+    do {                                                  \
+        w_io_result_t W__LCAT (io_check_b1) = (_iocall1); \
+        if (w_io_result_error (W__LCAT (io_check_b1)))    \
+            return W__LCAT( io_check_b1);                 \
+        w_io_result_t W__LCAT (io_check_b2) = (_iocall2); \
+        if (w_io_result_error (W__LCAT (io_check_b2)))    \
+            return W__LCAT (io_check_b2);                 \
+        if (W__LCAT (io_check_b1).bytes !=                \
+            W__LCAT (io_check_b2).bytes)                  \
+            return W_IO_RESULT_ERROR(1);                  \
+        _action W__LCAT (io_check_b2);                    \
+    } while (0)
+
+
+enum w_io_error
+{
+    W_IO_SUCCESS = 0,
+    W_IO_EOF     = 0xFFE0FFF, /*!< End of file reached.  */
+};
+
+
+static inline unsigned
+w_io_result_error (w_io_result_t r) {
+    return (r.error < 0 && r.error != -W_IO_EOF) ? -r.error : W_IO_SUCCESS;
+}
+
+static inline size_t
+w_io_result_bytes (w_io_result_t r) {
+    return (r.error < 0 || r.error == -W_IO_EOF) ? 0 : r.bytes;
+}
+
+static inline w_bool_t
+w_io_failed (w_io_result_t r) {
+    return w_io_result_error (r) != W_IO_SUCCESS;
+}
+
+static inline w_bool_t
+w_io_eof (w_io_result_t r) {
+    return r.error < 0 && r.error == -W_IO_EOF;
+}
 
 
 /*!
@@ -1493,12 +1569,13 @@ enum w_io_flag
  */
 W_OBJ_DEF (w_io_t)
 {
-    w_obj_t   parent;
-    int       backch;
-    w_bool_t (*close) (w_io_t *io);
-    ssize_t  (*write) (w_io_t *io, const void *buf, size_t size);
-    ssize_t  (*read ) (w_io_t *io, void       *buf, size_t size);
-    w_bool_t (*flush) (w_io_t *io);
+    w_obj_t parent;
+    int     backch;
+
+    w_io_result_t (*close) (w_io_t *io);
+    w_io_result_t (*write) (w_io_t *io, const void *buf, size_t size);
+    w_io_result_t (*read ) (w_io_t *io, void       *buf, size_t size);
+    w_io_result_t (*flush) (w_io_t *io);
 };
 
 
@@ -1513,7 +1590,7 @@ W_EXPORT void w_io_init (w_io_t *io);
  *
  * \param io An input/output descriptor.
  */
-W_EXPORT w_bool_t w_io_close (w_io_t *io);
+W_EXPORT w_io_result_t w_io_close (w_io_t *io);
 
 /*!
  * Writes data to an input/output descriptor. If the descriptor has no
@@ -1522,20 +1599,20 @@ W_EXPORT w_bool_t w_io_close (w_io_t *io);
  *
  * \param io  An input/output descriptor.
  * \param buf Pointer to the data to be written.
- * \param size Number of bytes to be written.
+ * \param size Result of the operation.
  */
-W_EXPORT ssize_t w_io_write (w_io_t     *io,
-                             const void *buf,
-                             size_t      size);
+W_EXPORT w_io_result_t w_io_write (w_io_t     *io,
+                                   const void *buf,
+                                   size_t      size);
 
 /*!
  * Reads data from an input/output descriptor. If the descriptor has no
  * \c read callback, then \c -1 is returned and \c errno is set to
  * \c EBADF.
  */
-W_EXPORT ssize_t w_io_read (w_io_t *io,
-                            void   *buf,
-                            size_t  size);
+W_EXPORT w_io_result_t w_io_read (w_io_t *io,
+                                  void   *buf,
+                                  size_t  size);
 
 /*!
  * Reads data, until a given character or end of file is reached.
@@ -1547,11 +1624,11 @@ W_EXPORT ssize_t w_io_read (w_io_t *io,
  *                  is used.
  * \return Number of bytes read. Negative value on error.
  */
-W_EXPORT ssize_t w_io_read_until (w_io_t  *io,
-                                  w_buf_t *data,
-                                  w_buf_t *overflow,
-                                  int      stopchar,
-                                  unsigned maxbytes);
+W_EXPORT w_io_result_t w_io_read_until (w_io_t  *io,
+                                        w_buf_t *data,
+                                        w_buf_t *overflow,
+                                        int      stopchar,
+                                        unsigned maxbytes);
 
 /*!
  * Reads a line from an input stream.
@@ -1588,9 +1665,9 @@ W_EXPORT ssize_t w_io_read_until (w_io_t  *io,
  * \param io  An input/output descriptor.
  * \param fmt Format string.
  */
-W_EXPORT ssize_t w_io_format (w_io_t     *io,
-                              const char *fmt,
-                              ...);
+W_EXPORT w_io_result_t w_io_format (w_io_t     *io,
+                                    const char *fmt,
+                                    ...);
 
 /*!
  * Formats text and writes it to an I/O object. This version accepts
@@ -1600,16 +1677,16 @@ W_EXPORT ssize_t w_io_format (w_io_t     *io,
  * \param fmt  Format string.
  * \param args Argument list.
  */
-W_EXPORT ssize_t w_io_formatv (w_io_t     *io,
-                               const char *fmt,
-                               va_list     args);
+W_EXPORT w_io_result_t w_io_formatv (w_io_t     *io,
+                                     const char *fmt,
+                                     va_list     args);
 
 
-W_EXPORT ssize_t w_io_format_long      (w_io_t *io, long          value);
-W_EXPORT ssize_t w_io_format_ulong     (w_io_t *io, unsigned long value);
-W_EXPORT ssize_t w_io_format_double    (w_io_t *io, double        value);
-W_EXPORT ssize_t w_io_format_ulong_hex (w_io_t *io, unsigned long value);
-W_EXPORT ssize_t w_io_format_ulong_oct (w_io_t *io, unsigned long value);
+W_EXPORT w_io_result_t w_io_format_long      (w_io_t *io, long          value);
+W_EXPORT w_io_result_t w_io_format_ulong     (w_io_t *io, unsigned long value);
+W_EXPORT w_io_result_t w_io_format_double    (w_io_t *io, double        value);
+W_EXPORT w_io_result_t w_io_format_ulong_hex (w_io_t *io, unsigned long value);
+W_EXPORT w_io_result_t w_io_format_ulong_oct (w_io_t *io, unsigned long value);
 
 /*!
  * Reads formatted input from an I/O object.
@@ -1656,7 +1733,7 @@ W_EXPORT int w_io_getchar (w_io_t *io);
  * \param ch Character.
  * \return   Number of bytes written, or a negative value on error.
  */
-W_EXPORT ssize_t w_io_putchar (w_io_t *io, int ch);
+W_EXPORT w_io_result_t w_io_putchar (w_io_t *io, int ch);
 
 /*!
  */
@@ -1667,7 +1744,7 @@ W_EXPORT void w_io_putback (w_io_t *io, char ch);
  * \param io An input/output descriptor.
  * \return   Whether there was some error.
  */
-W_EXPORT w_bool_t w_io_flush (w_io_t *io);
+W_EXPORT w_io_result_t w_io_flush (w_io_t *io);
 
 /*!
  * Input/output object on Unix file descriptors.
@@ -2226,58 +2303,66 @@ W_EXPORT w_variant_t* w_variant_clear (w_variant_t *variant);
  * http://tnetstrings.org/
  */
 
-W_EXPORT w_bool_t w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value);
-W_EXPORT w_bool_t w_tnetstr_dump_null (w_buf_t *buffer);
-W_EXPORT w_bool_t w_tnetstr_dump_float (w_buf_t *buffer, double value);
-W_EXPORT w_bool_t w_tnetstr_dump_number (w_buf_t *buffer, long value);
-W_EXPORT w_bool_t w_tnetstr_dump_string (w_buf_t *buffer, const char *value);
-W_EXPORT w_bool_t w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value);
-W_EXPORT w_bool_t w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value);
-W_EXPORT w_bool_t w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
-W_EXPORT w_bool_t w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
+W_EXPORT w_io_result_t w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value);
+W_EXPORT w_io_result_t w_tnetstr_dump_null (w_buf_t *buffer);
+W_EXPORT w_io_result_t w_tnetstr_dump_float (w_buf_t *buffer, double value);
+W_EXPORT w_io_result_t w_tnetstr_dump_number (w_buf_t *buffer, long value);
+W_EXPORT w_io_result_t w_tnetstr_dump_string (w_buf_t *buffer, const char *value);
+W_EXPORT w_io_result_t w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value);
+W_EXPORT w_io_result_t w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value);
+W_EXPORT w_io_result_t w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value);
+W_EXPORT w_io_result_t w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value);
 
-W_EXPORT w_bool_t w_tnetstr_write (w_io_t *io, const w_variant_t *value);
-W_EXPORT w_bool_t w_tnetstr_write_null (w_io_t *io);
-W_EXPORT w_bool_t w_tnetstr_write_string (w_io_t *io, const char *value);
-W_EXPORT w_bool_t w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value);
-W_EXPORT w_bool_t w_tnetstr_write_boolean (w_io_t *io, w_bool_t value);
+W_EXPORT w_io_result_t w_tnetstr_write (w_io_t *io, const w_variant_t *value);
+W_EXPORT w_io_result_t w_tnetstr_write_null (w_io_t *io);
+W_EXPORT w_io_result_t w_tnetstr_write_string (w_io_t *io, const char *value);
+W_EXPORT w_io_result_t w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value);
+W_EXPORT w_io_result_t w_tnetstr_write_boolean (w_io_t *io, w_bool_t value);
 
-static inline w_bool_t
+static inline w_io_result_t
 w_tnetstr_write_float (w_io_t *io, double value)
 {
-    w_buf_t buf = W_BUF;
     w_assert (io);
-    return w_tnetstr_dump_float (&buf, value)
-        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
+
+    w_buf_t buf = W_BUF;
+    W_IO_CHECK_BYTES (w_tnetstr_dump_float (&buf, value),
+                      return,
+                      w_io_write (io, buf.data, buf.size));
 }
 
-static inline w_bool_t
+static inline w_io_result_t
 w_tnetstr_write_number (w_io_t *io, long value)
 {
-    w_buf_t buf = W_BUF;
     w_assert (io);
-    return w_tnetstr_dump_number (&buf, value)
-        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
+
+    w_buf_t buf = W_BUF;
+    W_IO_CHECK_BYTES (w_tnetstr_dump_number (&buf, value),
+                      return,
+                      w_io_write (io, buf.data, buf.size));
 }
 
-static inline w_bool_t
+static inline w_io_result_t
 w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
 {
-    w_buf_t buf = W_BUF;
     w_assert (io);
     w_assert (value);
-    return w_tnetstr_dump_list (&buf, value)
-        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
+
+    w_buf_t buf = W_BUF;
+    W_IO_CHECK_BYTES (w_tnetstr_dump_list (&buf, value),
+                      return,
+                      w_io_write (io, buf.data, buf.size));
 }
 
-static inline w_bool_t
+static inline w_io_result_t
 w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
 {
-    w_buf_t buf = W_BUF;
     w_assert (io);
     w_assert (value);
-    return w_tnetstr_dump_dict (&buf, value)
-        || w_io_write (io, buf.data, buf.size) != (ssize_t) buf.size;
+
+    w_buf_t buf = W_BUF;
+    W_IO_CHECK_BYTES (w_tnetstr_dump_dict (&buf, value),
+                      return,
+                      w_io_write (io, buf.data, buf.size));
 }
 
 W_EXPORT w_variant_t* w_tnetstr_parse (const w_buf_t *buffer);

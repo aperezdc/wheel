@@ -1,6 +1,6 @@
 /*
  * wbuf.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -53,12 +53,10 @@ w_buf_resize (w_buf_t *buf, size_t size)
 void
 w_buf_set_str (w_buf_t *buf, const char *str)
 {
-    size_t slen;
-
     w_assert (buf);
     w_assert (str);
 
-    slen = strlen (str);
+    size_t slen = strlen (str);
     _buf_xresize (buf, slen);
     memcpy (buf->data, str, slen);
 }
@@ -137,19 +135,21 @@ w_buf_clear (w_buf_t *buf)
 }
 
 
-void
+w_io_result_t
 w_buf_format (w_buf_t *buf, const char *fmt, ...)
 {
-    w_io_buf_t io;
-    va_list al;
-
     w_assert (buf);
     w_assert (fmt);
 
+    w_io_buf_t io;
     w_io_buf_init (&io, buf, W_YES);
 
+    va_list al;
     va_start (al, fmt);
-    w_io_formatv ((w_io_t*) &io, fmt, al);
+
+    w_io_result_t r = w_io_formatv ((w_io_t*) &io, fmt, al);
+
     va_end (al);
+    return r;
 }
 

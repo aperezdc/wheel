@@ -32,30 +32,28 @@ w_io_init (w_io_t *io)
 }
 
 
-w_bool_t
+w_io_result_t
 w_io_close (w_io_t *io)
 {
-    w_bool_t ret;
     w_assert (io);
+    w_io_result_t r = W_IO_RESULT_SUCCESS;
 
     if (io->close) {
-        ret = (*io->close) (io);
+        r = (*io->close) (io);
         io->close = NULL;
     }
-    else {
-        ret = W_YES;
-    }
-    return ret;
+    return r;
 }
 
 
-ssize_t
+w_io_result_t
 w_io_read (w_io_t *io, void *buf, size_t len)
 {
     w_assert (io);
+    w_io_result_t r = W_IO_RESULT (0);
 
     if (w_unlikely (len == 0))
-        return 0;
+        return r;
 
     w_assert (buf);
 
@@ -66,54 +64,56 @@ w_io_read (w_io_t *io, void *buf, size_t len)
         io->backch = W_IO_EOF;
 
         /* Check whether more characters are to be read */
-        if (!--len) return 1;
+        if (!--len)
+            return W_IO_RESULT (1);
     }
 
-    return (io->read)
-        ? (*io->read) (io, buf, len)
-        : (errno = EBADF, -1);
+    if (w_likely (io->read != NULL)) {
+        r = (*io->read) (io, buf, len);
+    } else {
+        r = W_IO_RESULT_ERROR (errno = EBADF);
+    }
+    return r;
 }
 
 
-ssize_t
+w_io_result_t
 w_io_write (w_io_t *io, const void *buf, size_t len)
 {
     w_assert (io);
+    w_io_result_t r = W_IO_RESULT (0);
+
     if (w_unlikely (len == 0))
-        return 0;
+        return r;
 
     w_assert (buf);
-    if (w_likely (io->write != NULL))
-        return (*io->write) (io, buf, len);
-
-    errno = EBADF;
-    return -EBADF;
+    if (w_likely (io->write != NULL)) {
+        r = (*io->write) (io, buf, len);
+    } else {
+        r = W_IO_RESULT_ERROR (errno = EBADF);
+    }
+    return r;
 }
 
 
 int
 w_io_getchar (w_io_t *io)
 {
-    ssize_t ret;
-    char ch;
-
     w_assert (io);
 
-    switch ((ret = w_io_read (io, &ch, 1))) {
-        case 1: /* One byte read, return character */
-            return ch;
+    char ch;
+    w_io_result_t r = w_io_read (io, &ch, 1);
 
-        case W_IO_EOF: /* Concrete return values */
-        case W_IO_ERR:
-            return ret;
+    if (w_io_failed (r))
+        return -w_io_result_error (r);
+    if (w_io_eof (r))
+        return W_IO_EOF;
 
-        default: /* Any other value is an error */
-            return W_IO_ERR;
-    }
+    return ch;
 }
 
 
-ssize_t
+w_io_result_t
 w_io_putchar (w_io_t *io, int ch)
 {
     w_assert (io);
@@ -131,49 +131,40 @@ w_io_putback (w_io_t *io, char ch)
 }
 
 
-w_bool_t
+w_io_result_t
 w_io_flush (w_io_t *io)
 {
     w_assert (io);
-    return (io->flush)
-        ? (*io->flush) (io)
-        : W_NO;
+
+    if (io->flush) {
+        return (*io->flush) (io);
+    } else {
+        return W_IO_RESULT_ERROR (errno = EBADF);
+    }
 }
 
 
-ssize_t
+w_io_result_t
 w_io_format (w_io_t *io, const char *fmt, ...)
 {
-    ssize_t ret;
-    va_list args;
-
     w_assert (io);
     w_assert (fmt);
 
+    va_list args;
     va_start (args, fmt);
-    ret = w_io_formatv (io, fmt, args);
+    w_io_result_t r = w_io_formatv (io, fmt, args);
     va_end (args);
-    return ret;
+    return r;
 }
 
 
-#define DO_INC_IO(incvar, iocall)            \
-    do {                                     \
-        ssize_t __r_ ## __LINE__ = (iocall); \
-        if (__r_ ## __LINE__ < 0)            \
-            return __r_ ## __LINE__;         \
-        incvar += __r_ ## __LINE__;          \
-    } while (0)
-
-
-ssize_t
+w_io_result_t
 w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 {
     w_assert (io);
     w_assert (fmt);
 
     int last_errno = errno;
-    ssize_t result = 0;
     size_t len_aux;
     union {
         int           vint;
@@ -186,76 +177,79 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
         double        vfpnum;
     } v;
 
+    w_io_result_t r = W_IO_RESULT (0);
     for (; *fmt; fmt++) {
         if (*fmt != '$') {
-            DO_INC_IO (result, w_io_putchar (io, *fmt));
+            W_IO_CHAIN (r, w_io_putchar (io, *fmt));
             continue;
         }
 
         switch (*(++fmt)) {
             case 'l':
                 v.vlong = va_arg (args, long);
-                DO_INC_IO (result, w_io_format_long (io, v.vlong));
+                W_IO_CHAIN (r, w_io_format_long (io, v.vlong));
                 break;
             case 'i':
                 v.vint = va_arg (args, int);
-                DO_INC_IO (result, w_io_format_long (io, v.vint));
+                W_IO_CHAIN (r, w_io_format_long (io, v.vint));
                 break;
             case 'c':
                 v.vint = va_arg (args, int);
-                DO_INC_IO (result, w_io_putchar (io, v.vint));
+                W_IO_CHAIN (r, w_io_putchar (io, v.vint));
                 break;
             case 'I':
                 v.vuint = va_arg (args, unsigned int);
-                DO_INC_IO (result, w_io_format_ulong (io, v.vuint));
+                W_IO_CHAIN (r, w_io_format_ulong (io, v.vuint));
                 break;
             case 'L':
                 v.vulong = va_arg (args, unsigned long);
-                DO_INC_IO (result, w_io_format_ulong (io, v.vulong));
+                W_IO_CHAIN (r, w_io_format_ulong (io, v.vulong));
                 break;
             case 'X':
                 v.vulong = va_arg (args, unsigned long);
-                DO_INC_IO (result, w_io_format_ulong_hex (io, v.vulong));
+                W_IO_CHAIN (r, w_io_format_ulong_hex (io, v.vulong));
                 break;
             case 'O':
                 v.vulong = va_arg (args, unsigned long);
-                DO_INC_IO (result, w_io_format_ulong_oct (io, v.vulong));
+                W_IO_CHAIN (r, w_io_format_ulong_oct (io, v.vulong));
                 break;
             case 'f':
             case 'F':
                 v.vfpnum = va_arg (args, double);
-                DO_INC_IO (result, w_io_format_double (io, v.vfpnum));
+                W_IO_CHAIN (r, w_io_format_double (io, v.vfpnum));
                 break;
             case 'p':
                 v.vpointer = (intptr_t) va_arg (args, void*);
-                DO_INC_IO (result, w_io_format_ulong_hex (io, v.vpointer));
+                W_IO_CHAIN (r, w_io_format_ulong_hex (io, v.vpointer));
                 break;
             case 's':
                 v.vcharp = va_arg (args, const char*);
-                DO_INC_IO (result, w_io_write (io, v.vcharp, strlen (v.vcharp)));
+                W_IO_CHAIN (r, w_io_write (io, v.vcharp, strlen (v.vcharp)));
                 break;
             case 'B':
                 v.vbufp = va_arg (args, w_buf_t*);
-                DO_INC_IO (result, w_io_write (io, w_buf_str (v.vbufp), w_buf_size (v.vbufp)));
+                W_IO_CHAIN (r, w_io_write (io,
+                                           w_buf_str (v.vbufp),
+                                           w_buf_size (v.vbufp)));
                 break;
             case 'S':
                 len_aux  = va_arg (args, size_t);
                 v.vcharp = va_arg (args, const char*);
-                DO_INC_IO (result, w_io_write (io, v.vcharp, len_aux));
+                W_IO_CHAIN (r, w_io_write (io, v.vcharp, len_aux));
                 break;
             case 'e':
-                DO_INC_IO (result, w_io_format_long (io, last_errno));
+                W_IO_CHAIN (r, w_io_format_long (io, last_errno));
                 break;
             case 'E':
                 v.vcharp = strerror (last_errno);
-                DO_INC_IO (result, w_io_write (io, v.vcharp, strlen (v.vcharp)));
+                W_IO_CHAIN (r, w_io_write (io, v.vcharp, strlen (v.vcharp)));
                 break;
             default:
-                DO_INC_IO (result, w_io_putchar (io, *fmt));
+                W_IO_CHAIN (r, w_io_putchar (io, *fmt));
         }
     }
 
-    return result;
+    return r;
 }
 
 
@@ -323,7 +317,7 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
 }
 
 
-ssize_t
+w_io_result_t
 w_io_read_until (w_io_t  *io,
                  w_buf_t *buffer,
                  w_buf_t *overflow,
@@ -338,12 +332,9 @@ w_io_read_until (w_io_t  *io,
         readbytes = W_IO_READ_UNTIL_BYTES;
 
     for (;;) {
-        ssize_t c;
-        char *pos;
-
-        pos = memchr (w_buf_data (overflow),
-                      stopchar,
-                      w_buf_size (overflow));
+        char *pos = memchr (w_buf_data (overflow),
+                            stopchar,
+                            w_buf_size (overflow));
 
         if (pos != NULL) {
             /*
@@ -357,7 +348,7 @@ w_io_read_until (w_io_t  *io,
                      w_buf_data (overflow) + len,
                      w_buf_size (overflow));
             w_buf_resize (buffer, w_buf_size (buffer) - 1);
-            return w_buf_size (buffer);
+            return W_IO_RESULT (w_buf_size (buffer));
         }
 
         if (w_buf_alloc_size (overflow) < (w_buf_size (overflow) + readbytes))
@@ -372,14 +363,16 @@ w_io_read_until (w_io_t  *io,
             w_buf_size (overflow) = oldlen;
         }
 
-        c = w_io_read (io,
-                       w_buf_data (overflow) + w_buf_size (overflow),
-                       readbytes);
+        w_io_result_t r = w_io_read (io,
+                                     w_buf_data (overflow) + w_buf_size (overflow),
+                                     readbytes);
 
-        if (c > 0)
-            w_buf_size (overflow) += c;
-        else
-            return c;
+        if (!w_io_failed (r) && w_io_result_bytes (r) > 0) {
+            w_buf_size (overflow) += w_io_result_bytes (r);
+        } else {
+            /* Handles both EOF and errors. */
+            return r;
+        }
     }
 }
 

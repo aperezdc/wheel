@@ -1,6 +1,6 @@
 /*
  * wiofscan.c
- * Copyright (C) 2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2011-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -160,14 +160,15 @@ w_io_fscan_long (w_io_t *io, long *result)
 w_bool_t
 w_io_fscan_ulong (w_io_t *io, unsigned long *result)
 {
-    int chr;
-    unsigned long temp = 0;
-
     w_assert (io);
+
+    unsigned long temp = 0;
+    int chr;
 
     /* If the next character is not a digit, signal it as format error */
 start_digit:
-    if (!isdigit ((chr = w_io_getchar (io)))) {
+    chr = w_io_getchar (io);
+    if (chr == W_IO_EOF || !isdigit (chr)) {
         if (chr == '+') {
             goto start_digit;
         }
@@ -179,9 +180,9 @@ start_digit:
         temp *= 10;
         temp += chr - '0';
         chr = w_io_getchar (io);
-    } while (isdigit (chr));
+    } while (chr != W_IO_EOF && isdigit (chr));
 
-    if (chr != W_IO_EOF && chr != W_IO_ERR) {
+    if (chr != W_IO_EOF && chr >= 0) {
         w_io_putback (io, chr);
     }
 
@@ -214,10 +215,10 @@ _map_hexchar (int ch)
 w_bool_t
 w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result)
 {
-    int chr;
-    unsigned long temp = 0;
-
     w_assert (io);
+
+    unsigned long temp = 0;
+    int chr;
 
     if ((chr = w_io_getchar (io)) != '0') {
         w_io_putback (io, chr);
@@ -228,12 +229,12 @@ w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result)
         goto end;
     }
 
-    while (isxdigit ((chr = w_io_getchar (io)))) {
+    while ((chr = w_io_getchar (io)) != W_IO_EOF && isxdigit (chr)) {
         temp *= 16;
         temp += _map_hexchar (chr);
     }
 
-    if (chr != W_IO_EOF && chr != W_IO_ERR) {
+    if (chr != W_IO_EOF && chr >= 0) {
         w_io_putback (io, chr);
     }
 
@@ -249,22 +250,22 @@ end:
 w_bool_t
 w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
 {
-    int chr;
-    unsigned long temp = 0;
-
     w_assert (io);
+    unsigned long temp = 0;
+    int chr;
 
     if ((chr = w_io_getchar (io)) != '0') {
         w_io_putback (io, chr);
         return W_YES;
     }
 
-    while (isdigit ((chr = w_io_getchar (io))) && chr < '8') {
+    while ((chr = w_io_getchar (io)) != W_IO_EOF &&
+           isdigit (chr) && chr < '8') {
         temp *= 8;
         temp += chr - '0';
     }
 
-    if (chr != W_IO_EOF && chr != W_IO_ERR) {
+    if (chr != W_IO_EOF && chr >= 0) {
         w_io_putback (io, chr);
     }
 
@@ -364,10 +365,10 @@ w_io_fscan_word (w_io_t *io, char **result)
     int chr;
 
     while (!isspace ((chr = w_io_getchar (io))) &&
-           chr != W_IO_EOF && chr != W_IO_ERR)
+           chr != W_IO_EOF && chr >= 0)
         w_buf_append_char (&value, chr);
 
-    if (chr != W_IO_EOF && chr != W_IO_ERR)
+    if (chr != W_IO_EOF && chr >= 0)
         w_io_putback (io, chr);
 
     ret = !w_buf_size (&value);

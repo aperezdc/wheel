@@ -1,6 +1,6 @@
 /*
  * wio-stdio.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -15,59 +15,56 @@
 
 #include "wheel.h"
 #include <stdio.h>
+#include <errno.h>
 
 
-static w_bool_t
+static w_io_result_t
 w_io_stdio_close (w_io_t *io)
 {
-    return (fclose (((w_io_stdio_t*) io)->fp) == 0);
+    if (fclose (((w_io_stdio_t*) io)->fp) == EOF)
+        return W_IO_RESULT_ERROR (errno);
+
+    return W_IO_RESULT_SUCCESS;
 }
 
 
-static ssize_t
+static w_io_result_t
 w_io_stdio_write (w_io_t *io, const void *buf, size_t len)
 {
     size_t ret;
 
     if ((ret = fwrite (buf, sizeof (char), len, ((w_io_stdio_t*) io)->fp)) < len) {
-        if (ferror (((w_io_stdio_t*) io)->fp)) {
-            return -1;
-        }
-        else {
-            return ret;
-        }
+        if (ferror (((w_io_stdio_t*) io)->fp))
+            return W_IO_RESULT_ERROR (errno > 0 ? errno : EIO);
     }
-    w_assert (ret == len);
-    return ret;
+
+    return W_IO_RESULT (ret);
 }
 
 
-static ssize_t
+static w_io_result_t
 w_io_stdio_read (w_io_t *io, void *buf, size_t len)
 {
     size_t ret;
 
     if ((ret = fread (buf, sizeof (char), len, ((w_io_stdio_t*) io)->fp)) < len) {
-        if (ret == 0 && feof (((w_io_stdio_t*) io)->fp)) {
-            return W_IO_EOF;
-        }
-        else if (ferror (((w_io_stdio_t*) io)->fp)) {
-            return -1;
-        }
-        else {
-            w_assert (feof (((w_io_stdio_t*) io)->fp));
-            return ret;
-        }
+        if (ret == 0 && feof (((w_io_stdio_t*) io)->fp))
+            return W_IO_RESULT_EOF;
+        if (ferror (((w_io_stdio_t*) io)->fp))
+            return W_IO_RESULT_ERROR (errno > 0 ? errno : EIO);
     }
-    w_assert (ret == len);
-    return ret;
+
+    return W_IO_RESULT (ret);
 }
 
 
-static w_bool_t
+static w_io_result_t
 w_io_stdio_flush (w_io_t *io)
 {
-    return fflush (((w_io_stdio_t*) io)->fp) != 0;
+    if (fflush (((w_io_stdio_t*) io)->fp) == EOF)
+        return W_IO_RESULT_ERROR (errno);
+
+    return W_IO_RESULT_SUCCESS;
 }
 
 
