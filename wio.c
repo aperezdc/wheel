@@ -18,7 +18,8 @@
 static void
 w_io_cleanup (void *obj)
 {
-    w_io_close ((w_io_t*) obj);
+    /* Unfortunately, errors can't be reported here. */
+    (void) w_io_close ((w_io_t*) obj);
 }
 
 

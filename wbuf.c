@@ -65,12 +65,10 @@ w_buf_set_str (w_buf_t *buf, const char *str)
 void
 w_buf_append_mem (w_buf_t *buf, const void *ptr, size_t len)
 {
-    size_t bsize;
-
     w_assert (buf);
     w_assert (ptr);
 
-    bsize = buf->size;
+    size_t bsize = buf->size;
     _buf_xresize (buf, bsize + len);
     memcpy (buf->data + bsize, ptr, len);
 }
@@ -151,5 +149,18 @@ w_buf_format (w_buf_t *buf, const char *fmt, ...)
 
     va_end (al);
     return r;
+}
+
+
+w_io_result_t
+w_buf_formatv (w_buf_t *buf, const char *fmt, va_list args)
+{
+    w_assert (buf);
+    w_assert (fmt);
+
+    w_io_buf_t io;
+    w_io_buf_init (&io, buf, W_YES);
+
+    return w_io_formatv ((w_io_t*) &io, fmt, args);
 }
 

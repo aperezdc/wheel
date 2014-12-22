@@ -148,14 +148,20 @@ _program_name (const char *str)
 static inline void
 _print_some_chars (w_io_t *f, const char *s, size_t n)
 {
-    while (n-- && (*s != '\0')) w_io_putchar (f, *s++);
+    while (n-- && (*s != '\0')) {
+        /* TODO: Maybe hanle I/O errors. */
+        (void) w_io_putchar (f, *s++);
+    }
 }
 
 
 static inline void
 _print_blanks (w_io_t *f, size_t n)
 {
-    while (n--) w_io_putchar (f, ' ');
+    while (n--) {
+        /* TODO: Maybe hanle I/O errors. */
+        (void) w_io_putchar (f, ' ');
+    }
 }
 
 
@@ -186,7 +192,8 @@ _print_lspaced (w_io_t *f, const char *s, int l)
         else if ((col + len) > tty_cols) {
             /* Advance to next line. */
             col = l + len;
-            w_io_putchar (f, '\n');
+            /* TODO: Maybe hanle I/O errors. */
+            (void) w_io_putchar (f, '\n');
             _print_blanks (f, l);
             _print_some_chars (f, s, len);
         }
@@ -195,9 +202,11 @@ _print_lspaced (w_io_t *f, const char *s, int l)
             _print_some_chars (f, s, len);
         }
         s = (spc == NULL) ? NULL : spc + 1;
-        w_io_putchar (f, ' ');
+        /* TODO: Maybe hanle I/O errors. */
+        (void) w_io_putchar (f, ' ');
     }
-    w_io_putchar (f, '\n');
+    /* TODO: Maybe hanle I/O errors. */
+    (void) w_io_putchar (f, '\n');
 }
 
 
@@ -210,30 +219,31 @@ w_opt_help (const w_opt_t *opt,
     w_assert (opt != NULL);
     w_assert (out != NULL);
 
-    w_io_format (out, "Usage: $s [options] $s\n"
-                      "Command line options:\n\n", progname,
-                      (syntax != NULL) ? syntax : "");
+    /* TODO: Handle I/O errors. */
+    (void) w_io_format (out, "Usage: $s [options] $s\n"
+                        "Command line options:\n\n", progname,
+                        (syntax != NULL) ? syntax : "");
 
     for (; opt->string != NULL; opt++) {
         if (OPT_LETTER (opt->letter) && opt->string) {
-            w_io_format (out, "-$c, --$s ",
-                         OPT_LETTER (opt->letter),
-                         opt->string);
+            (void) w_io_format (out, "-$c, --$s ",
+                                OPT_LETTER (opt->letter),
+                                opt->string);
         }
         else if (opt->string) {
-            w_io_format (out, "--$s ", opt->string);
+            (void) w_io_format (out, "--$s ", opt->string);
         }
         else {
-            w_io_format (out, "-$c ", OPT_LETTER (opt->letter));
+            (void) w_io_format (out, "-$c ", OPT_LETTER (opt->letter));
         }
 
         switch (opt->narg) {
-            case  0: w_io_format (out, "\n   "); break;
-            case  1: w_io_format (out, "<ARG>\n   "); break;
-            default: w_io_format (out, "<ARG...>\n   ");
+            case  0: (void) w_io_format (out, "\n   "); break;
+            case  1: (void) w_io_format (out, "<ARG>\n   "); break;
+            default: (void) w_io_format (out, "<ARG...>\n   ");
         }
         _print_lspaced (out, opt->info, 3);
-        w_io_putchar (out, '\n');
+        (void) w_io_putchar (out, '\n');
     }
 }
 
@@ -280,15 +290,15 @@ _opt_lookup_fuzz (const w_opt_t *opt, const char *str, const char *prg)
         return ret;
 
     /* ...otherwise, we are in trouble. */
-    w_io_format (w_stderr,
-                 "$s: option '$s' is ambiguous, possibilities:\n",
-                 prg, str);
+    (void) w_io_format (w_stderr,
+                        "$s: option '$s' is ambiguous, possibilities:\n",
+                        prg, str);
     for (; ret->string != NULL; ret++) {
         if (!strncmp (ret->string, str, len)) {
-            w_io_format (w_stderr, "    --$s\n", ret->string);
+            (void) w_io_format (w_stderr, "    --$s\n", ret->string);
         }
     }
-    w_io_format (w_stderr, "Hint: try '$s --help'\n", prg);
+    (void) w_io_format (w_stderr, "Hint: try '$s --help'\n", prg);
 
     exit (EXIT_FAILURE);
     return NULL; /* Never reached -- but keeps compiler happy =) */
@@ -382,19 +392,19 @@ w_opt_parse (const w_opt_t *options,
         case W_OPT_BAD_ARG: /* Handle errors. */
         case W_OPT_MISSING_ARG:
             if (context.option == NULL) {
-                w_io_format (w_stderr,
-                             "$s: unknown option '$s'\nHint: try '$s --help'\n",
-                             _program_name (argv[0]), argv[i],
-                             _program_name (argv[0]));
+                (void) w_io_format (w_stderr,
+                                    "$s: unknown option '$s'\nHint: try '$s --help'\n",
+                                    _program_name (argv[0]), argv[i],
+                                    _program_name (argv[0]));
             }
             else {
-                w_io_format (w_stderr,
-                             "$s: $s --$s\nTry \"$s --help\" for more information.\n",
-                             _program_name (argv[0]), (status == W_OPT_BAD_ARG)
-                                                       ? "bad argument passed to"
-                                                       : "missing argument(s) to",
-                                            context.option->string,
-                                            _program_name (argv[0]));
+                (void) w_io_format (w_stderr,
+                                    "$s: $s --$s\nTry \"$s --help\" for more information.\n",
+                                    _program_name (argv[0]), (status == W_OPT_BAD_ARG)
+                                                               ? "bad argument passed to"
+                                                               : "missing argument(s) to",
+                                                   context.option->string,
+                                                   _program_name (argv[0]));
             }
             /* fall-through */
         case W_OPT_EXIT_FAIL: /* Exit with the given status hint. */

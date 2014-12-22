@@ -38,7 +38,8 @@ w_io_socket_cleanup (void *obj)
         struct sockaddr_un *un = (struct sockaddr_un*) io->sa;
         unlink (un->sun_path);
     }
-    w_io_close ((w_io_t*) obj);
+    /* Unfortunately, errors can't be reported here. */
+    (void) w_io_close ((w_io_t*) obj);
 }
 
 

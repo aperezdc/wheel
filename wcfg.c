@@ -270,11 +270,12 @@ w_cfg_del (w_cfg_t *cf, const char *key)
 
 
 
-#define W_CFG_DUMP_INDENT(_l, _o)     \
-    do {                              \
-        unsigned __tmp = (_l) * 4;    \
-        while (__tmp--)               \
-            w_io_putchar ((_o), ' '); \
+#define W_CFG_DUMP_INDENT(_l, _o)                       \
+    do {                                                \
+        unsigned __tmp = (_l) * 4;                      \
+        while (__tmp--)                                 \
+            if (w_io_failed (w_io_putchar ((_o), ' '))) \
+                return W_NO;                            \
     } while (0)
 
 
@@ -284,11 +285,14 @@ w_cfg_dump_string (w_io_t *out, const char *str)
     w_assert (out);
     w_assert (str);
 
-    w_io_putchar (out, '"');
+    if (w_io_failed (w_io_putchar (out, '"')))
+        return W_NO;
+
     for (; *str; str++) {
 #define ESCAPE(_c, _e) \
-        case _c : w_io_putchar (out, '\\'); \
-                  w_io_putchar (out, (_e)); \
+        case _c : if (w_io_failed (w_io_putchar (out, '\\')) || \
+                      w_io_failed (w_io_putchar (out, (_e))))   \
+                          return W_NO;                          \
                   break
         switch (*str) {
             ESCAPE ('\n', 'n');
@@ -299,11 +303,13 @@ w_cfg_dump_string (w_io_t *out, const char *str)
             ESCAPE ('\t', 't');
             ESCAPE ('\v', 'v');
             default:
-                w_io_putchar (out, *str);
+                if (w_io_failed (w_io_putchar (out, *str)))
+                    return W_NO;
         }
 #undef ESCAPE
     }
-    w_io_putchar (out, '"');
+    if (w_io_failed (w_io_putchar (out, '"')))
+        return W_NO;
     return W_YES;
 }
 
@@ -322,26 +328,32 @@ w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
 
         node = (w_variant_t*) *i;
 
-        w_io_format (out, "$s ", w_dict_iterator_get_key (i));
+        if (w_io_failed (w_io_format (out, "$s ", w_dict_iterator_get_key (i))))
+            return W_NO;
 
         switch (w_variant_type (node)) {
             case W_CFG_NODE:
-                w_io_putchar (out, '{');
-                w_io_putchar (out, '\n');
-                w_cfg_dump_cfg (w_variant_dict (node), out, indent + 1);
+                if (w_io_failed (w_io_putchar (out, '{')) ||
+                    w_io_failed (w_io_putchar (out, '\n')) ||
+                    !w_cfg_dump_cfg (w_variant_dict (node), out, indent + 1))
+                    return W_NO;
                 W_CFG_DUMP_INDENT (indent, out);
-                w_io_putchar (out, '}');
+                if (w_io_failed (w_io_putchar (out, '}')))
+                    return W_NO;
                 break;
             case W_CFG_STRING:
-                w_cfg_dump_string (out, w_variant_string (node));
+                if (!w_cfg_dump_string (out, w_variant_string (node)))
+                    return W_NO;
                 break;
             case W_CFG_NUMBER:
-                w_io_format_double (out, w_variant_float (node));
+                if (w_io_failed (w_io_format_double (out, w_variant_float (node))))
+                    return W_NO;
                 break;
             default:
                 break;
         }
-        w_io_putchar (out, '\n');
+        if (w_io_failed (w_io_putchar (out, '\n')))
+            return W_NO;
     }
 
     return W_YES;

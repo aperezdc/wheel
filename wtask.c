@@ -201,11 +201,15 @@ w_task_current (void)
 
 
 void
-w_task_set_system (w_task_t *task)
+w_task_set_is_system (w_task_t *task, w_bool_t is_system)
 {
     w_assert (task);
 
-    if (!task->is_system) {
+    if (task->is_system && !is_system) {
+        task->is_system = W_NO;
+        s_num_system_tasks--;
+        s_num_tasks++;
+    } else if (!task->is_system && is_system) {
         task->is_system = W_YES;
         s_num_system_tasks++;
         s_num_tasks--;
@@ -213,13 +217,20 @@ w_task_set_system (w_task_t *task)
 }
 
 
-w_task_t*
+w_bool_t
+w_task_get_is_system (w_task_t *task)
+{
+    w_assert (task);
+    return task->is_system;
+}
+
+
+void
 w_task_set_name (w_task_t *task, const char *name)
 {
     w_assert (task);
     w_free (task->name);
     task->name = name ? w_str_dup (name) : NULL;
-    return task;
 }
 
 
@@ -229,7 +240,7 @@ w_task_get_name (w_task_t *task)
     w_assert (task);
     if (!task->name) {
         w_buf_t b = W_BUF;
-        w_buf_format (&b, "Task<$p>", task);
+        (void) w_buf_format (&b, "Task<$p>", task);
         task->name = w_buf_str (&b);
     }
     return task->name;

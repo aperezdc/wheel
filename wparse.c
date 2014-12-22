@@ -52,19 +52,17 @@ w_parse_ferror (w_parse_t  *p,
                 const char *fmt,
                 ...)
 {
-    va_list args;
-    w_buf_t outbuf = W_BUF;
-    w_io_t *outio  = w_io_buf_open (&outbuf);
-
     w_assert (p != NULL);
     w_assert (fmt != NULL);
 
-    w_io_format (outio, "$I:$I ", p->line, p->lpos);
+    w_buf_t buf = W_BUF;
+    va_list args;
+
+    w_buf_format (&buf, "$I:$I ", p->line, p->lpos);
     va_start (args, fmt);
-    w_io_formatv (outio, fmt, args);
+    w_buf_formatv (&buf, fmt, args);
     va_end (args);
-    p->error = w_buf_str (&outbuf);
-    w_obj_unref (outio);
+    p->error = w_buf_str (&buf);
 }
 
 
@@ -79,19 +77,17 @@ w_parse_rerror (w_parse_t *p)
 void
 w_parse_error (w_parse_t *p, const char *fmt, ...)
 {
-    va_list args;
-    w_buf_t outbuf = W_BUF;
-    w_io_t *outio  = w_io_buf_open (&outbuf);
-
     w_assert (p != NULL);
     w_assert (fmt != NULL);
 
-    w_io_format (outio, "$I:$I ", p->line, p->lpos);
+    w_buf_t buf = W_BUF;
+    va_list args;
+
+    w_buf_format (&buf, "$I:$I ", p->line, p->lpos);
     va_start (args, fmt);
-    w_io_formatv (outio, fmt, args);
+    w_buf_formatv (&buf, fmt, args);
     va_end (args);
-    p->error = w_buf_str (&outbuf);
-    w_obj_unref (outio);
+    p->error = w_buf_str (&buf);
 
     w_parse_rerror (p);
 }

@@ -170,7 +170,9 @@ START_TEST (test_wbuf_format)
 {
     w_buf_t b = W_BUF;
 
-    w_buf_format (&b, "string: $s number: $l", "the answer", 42);
+    fail_if (w_io_failed (w_buf_format (&b, "string: $s number: $l", "the answer", 42)),
+             "w_buf_format() should never fail at I/O");
+
     ck_assert_str_eq ("string: the answer number: 42", w_buf_str (&b));
     ck_assert_int_eq (strlen ("string: the answer number: 42"), w_buf_size (&b));
 
@@ -185,7 +187,8 @@ START_TEST (test_wbuf_format_buf)
     w_buf_t b2 = W_BUF;
 
     w_buf_set_str (&b1, "0:~");
-    w_buf_format (&b2, "$L:$B]", w_buf_size (&b1), &b1);
+    fail_if (w_io_failed (w_buf_format (&b2, "$L:$B]", w_buf_size (&b1), &b1)),
+             "w_buf_format() should never fail at I/O");
 
     ck_assert_int_eq (6, w_buf_size (&b2));
     ck_assert_str_eq ("3:0:~]", w_buf_str (&b2));
@@ -201,8 +204,10 @@ START_TEST (test_wbuf_format_multiple)
 {
     w_buf_t b = W_BUF;
 
-    w_buf_format (&b, "the answer is: $L", 42);
-    w_buf_format (&b, " - sure man!");
+    fail_if (w_io_failed (w_buf_format (&b, "the answer is: $L", 42)),
+             "w_buf_format() should never fail at I/O");
+    fail_if (w_io_failed (w_buf_format (&b, " - sure man!")),
+             "w_buf_format() should never fail at I/O");
 
     ck_assert_str_eq ("the answer is: 42 - sure man!",
                       w_buf_str (&b));
