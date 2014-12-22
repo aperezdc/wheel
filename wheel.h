@@ -442,6 +442,7 @@ W_EXPORT char* w_strfmt (const char *fmt, ...)
  * \return Hash value.
  */
 W_EXPORT unsigned w_str_hashl (const char *str, size_t len)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
@@ -450,6 +451,7 @@ W_EXPORT unsigned w_str_hashl (const char *str, size_t len)
  * \return Hash value.
  */
 W_EXPORT unsigned w_str_hash (const char *str)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
