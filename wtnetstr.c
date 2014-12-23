@@ -335,36 +335,36 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
 static inline size_t
 peek_item_size (const w_buf_t *buffer)
 {
-    unsigned plen = 0;
-    unsigned blen;
-    char *pbuf;
-
     w_assert (buffer);
 
-    for (pbuf = w_buf_data (buffer), blen = w_buf_size (buffer);
+    unsigned plen = 0;
+    unsigned blen;
+    const char *pbuf;
+
+    for (pbuf = w_buf_const_data (buffer), blen = w_buf_size (buffer);
          blen-- && *pbuf != ':';
          pbuf++, plen *= 10)
         plen += *pbuf - '0';
 
     plen /= 10;
 
-    return (pbuf - w_buf_data (buffer)) + plen + 2;
+    return (pbuf - w_buf_const_data (buffer)) + plen + 2;
 }
 
 
 static inline bool
-slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
+slice_payload (const w_buf_t *buffer, w_buf_t* slice, int type_tag)
 {
+    w_assert (buffer);
+
     unsigned plen = 0;
     unsigned blen;
     char *pbuf;
 
-    w_assert (buffer);
-
     if (w_buf_size (buffer) < _W_TNS_MIN_LENGTH)
         return true;
 
-    for (pbuf = w_buf_data (buffer), blen = w_buf_size (buffer);
+    for (pbuf = buffer->data, blen = w_buf_size (buffer);
          blen-- && *pbuf != ':';
          pbuf++, plen *= 10)
         plen += *pbuf - '0';
@@ -372,7 +372,7 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
     plen /= 10;
 
     if (plen > _W_TNS_MAX_PAYLOAD ||
-        w_buf_size (buffer) < (size_t) ((pbuf - w_buf_data (buffer)) + plen + 2) ||
+        w_buf_size (buffer) < (size_t) ((pbuf - buffer->data) + plen + 2) ||
         *(pbuf + plen + 1) != type_tag)
         return true;
 
@@ -380,9 +380,9 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
      * XXX We cheat here: we make the "slice" buffer point to the same
      *     memory area of the input buffer, to avoid copying data.
      */
-    w_buf_alloc_size (slice) = 0;
-    w_buf_data (slice) = ++pbuf;
-    w_buf_size (slice) = plen;
+    slice->data  = ++pbuf;
+    slice->size  = plen;
+    slice->alloc = 0;
 
     return false;
 }
@@ -427,9 +427,9 @@ w_tnetstr_parse_null (const w_buf_t *buffer)
 {
     w_assert (buffer);
     return w_buf_size (buffer) < 3
-        || w_buf_data (buffer)[0] != '0'
-        || w_buf_data (buffer)[1] != ':'
-        || w_buf_data (buffer)[2] != _W_TNS_TAG_NULL;
+        || w_buf_const_data (buffer)[0] != '0'
+        || w_buf_const_data (buffer)[1] != ':'
+        || w_buf_const_data (buffer)[2] != _W_TNS_TAG_NULL;
 }
 
 
@@ -484,23 +484,23 @@ w_tnetstr_parse_boolean (const w_buf_t *buffer, bool *value)
     switch (w_buf_size (buffer)) {
         case 7:
             *value = true;
-            return w_buf_data (buffer)[0] != '4'
-                || w_buf_data (buffer)[1] != ':'
-                || w_buf_data (buffer)[2] != 't'
-                || w_buf_data (buffer)[3] != 'r'
-                || w_buf_data (buffer)[4] != 'u'
-                || w_buf_data (buffer)[5] != 'e'
-                || w_buf_data (buffer)[6] != _W_TNS_TAG_BOOLEAN;
+            return w_buf_const_data (buffer)[0] != '4'
+                || w_buf_const_data (buffer)[1] != ':'
+                || w_buf_const_data (buffer)[2] != 't'
+                || w_buf_const_data (buffer)[3] != 'r'
+                || w_buf_const_data (buffer)[4] != 'u'
+                || w_buf_const_data (buffer)[5] != 'e'
+                || w_buf_const_data (buffer)[6] != _W_TNS_TAG_BOOLEAN;
         case 8:
             *value = false;
-            return w_buf_data (buffer)[0] != '5'
-                || w_buf_data (buffer)[1] != ':'
-                || w_buf_data (buffer)[2] != 'f'
-                || w_buf_data (buffer)[3] != 'a'
-                || w_buf_data (buffer)[4] != 'l'
-                || w_buf_data (buffer)[5] != 's'
-                || w_buf_data (buffer)[6] != 'e'
-                || w_buf_data (buffer)[7] != _W_TNS_TAG_BOOLEAN;
+            return w_buf_const_data (buffer)[0] != '5'
+                || w_buf_const_data (buffer)[1] != ':'
+                || w_buf_const_data (buffer)[2] != 'f'
+                || w_buf_const_data (buffer)[3] != 'a'
+                || w_buf_const_data (buffer)[4] != 'l'
+                || w_buf_const_data (buffer)[5] != 's'
+                || w_buf_const_data (buffer)[6] != 'e'
+                || w_buf_const_data (buffer)[7] != _W_TNS_TAG_BOOLEAN;
         default:
             return true;
     }
@@ -536,12 +536,11 @@ w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
         return true;
 
     while (szdone < w_buf_size (&payload)) {
-        w_buf_t curitem = W_BUF;
+        w_buf_t curitem = {
+            .data = w_buf_data (&payload) + szdone,
+            .size = w_buf_size (&payload) - szdone,
+        };
         w_variant_t *variant;
-
-        w_buf_data (&curitem) = w_buf_data (&payload) + szdone;
-        w_buf_size (&curitem) = w_buf_size (&payload) - szdone;
-
         if (!(variant = w_tnetstr_parse (&curitem)))
             return true;
 
@@ -568,21 +567,21 @@ w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
         return true;
 
     while (szdone < w_buf_size (&payload)) {
-        w_buf_t curitem = W_BUF;
         w_buf_t key = W_BUF;
+        w_buf_t curitem = {
+            .data = w_buf_data (&payload) + szdone,
+            .size = w_buf_size (&payload) - szdone,
+        };
         w_variant_t *variant;
-
-        w_buf_data (&curitem) = w_buf_data (&payload) + szdone;
-        w_buf_size (&curitem) = w_buf_size (&payload) - szdone;
-
         if (w_tnetstr_parse_string (&curitem, &key))
             return true;
 
         szdone += peek_item_size (&curitem);
 
-        w_buf_data (&curitem) = w_buf_data (&payload) + szdone;
-        w_buf_size (&curitem) = w_buf_size (&payload) - szdone;
-
+        curitem = (w_buf_t) {
+            .data = w_buf_data (&payload) + szdone,
+            .size = w_buf_size (&payload) - szdone,
+        };
         if (!(variant = w_tnetstr_parse (&curitem))) {
             w_buf_clear (&key);
             return true;
@@ -620,7 +619,7 @@ w_tnetstr_parse (const w_buf_t *buffer)
     if (item_len < _W_TNS_MIN_LENGTH)
         return NULL;
 
-    switch (w_buf_data (buffer)[item_len-1]) {
+    switch (w_buf_const_data (buffer)[item_len-1]) {
         case _W_TNS_TAG_NULL:
             if (!w_tnetstr_parse_null (buffer))
                 ret = w_variant_new (W_VARIANT_NULL);

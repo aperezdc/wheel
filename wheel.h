@@ -642,19 +642,6 @@ typedef struct w_task w_task_t;
 typedef void (*w_task_func_t) (void*);
 
 /*!
- * Name of the current task. See \ref w_task_get_name() for more information.
- */
-#define w_task_name \
-    (w_task_get_name (w_task_current ()))
-
-/*!
- * Mark the current task as a system task. See \ref w_task_set_system() for
- * more information.
- */
-#define w_task_system( ) \
-    (w_task_set_system (w_task_current ()))
-
-/*!
  * Prepares a task for running. The task will start running ready when
  * the task scheduler (see \ref w_task_run_scheduler()) schedules it.
  *
@@ -709,6 +696,19 @@ W_EXPORT const char* w_task_get_name (w_task_t *task)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
+ * Name of the current task. See \ref w_task_get_name() for more information.
+ */
+static inline const char* w_task_name (void)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL_RETURN;
+
+static inline const char*
+w_task_name (void)
+{
+    return w_task_get_name (w_task_current ());
+}
+
+/*!
  * Marks a task as a system task. System tasks are those which must be
  * always running, and having active system tasks will not prevent \ref
  * w_task_run_scheduler() from returning.
@@ -718,6 +718,16 @@ W_EXPORT const char* w_task_get_name (w_task_t *task)
  */
 W_EXPORT void w_task_set_is_system (w_task_t *task, bool is_system)
     W_FUNCTION_ATTR_NOT_NULL ((1));
+
+/*!
+ * Mark the current task as a system task. See \ref w_task_set_system() for
+ * more information.
+ */
+static inline void
+w_task_system (void)
+{
+    w_task_set_is_system (w_task_current (), true);
+}
 
 /*!
  * Checks whether a task is a system task.
@@ -813,13 +823,33 @@ W_OBJ (w_list_t)
     /* actual data is stored in the private area of the list */
 };
 
-/*! Get the number of elements in a list. */
-#define w_list_size(_l) \
-    (w_assert (_l), (_l)->size)
+/*!
+ * Get the number of elements in a list.
+ */
+static inline size_t w_list_size (w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Checks whether a list is empty. */
-#define w_list_empty(_l) \
-    (w_assert (_l), (_l)->size > 0)
+static inline size_t
+w_list_size (w_list_t *list)
+{
+    w_assert (list);
+    return list->size;
+}
+
+/*! 
+ * Checks whether a list is empty.
+ */
+static inline bool w_list_is_empty (w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline bool
+w_list_is_empty (w_list_t *list)
+{
+    w_assert (list);
+    return list->size > 0;
+}
 
 /*!
  * Creates a new list.
@@ -827,6 +857,7 @@ W_OBJ (w_list_t)
  * \return A new, empty list.
  */
 W_EXPORT w_list_t* w_list_new (bool refs)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN;
 
 /*! Clears all elements from a list. */
@@ -839,12 +870,8 @@ W_EXPORT void w_list_clear (w_list_t *list)
  *              the list, i.e. \c -1 would be the last element.
  */
 W_EXPORT void* w_list_at (const w_list_t *list, long index)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
-
-/* Commonly-used aliases */
-#define w_list_insert w_list_insert_before
-#define w_list_append w_list_push_tail
-#define w_list_pop    w_list_pop_tail
 
 /*! Appends an element to the end of a list. */
 W_EXPORT void w_list_push_head (w_list_t *list, void *item)
@@ -861,6 +888,7 @@ W_EXPORT void w_list_push_tail (w_list_t *list, void *item)
  * item.
  */
 W_EXPORT void* w_list_pop_head (w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
@@ -870,30 +898,37 @@ W_EXPORT void* w_list_pop_head (w_list_t *list)
  * item.
  */
 W_EXPORT void* w_list_pop_tail (w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*! Obtains the element at the first position in the list. */
 W_EXPORT void* w_list_head (const w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*! Obtains the element at the last position in the list. */
 W_EXPORT void* w_list_tail (const w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*! Obtains a pointer to the first element in the list. */
 W_EXPORT w_iterator_t w_list_first (const w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*! Obtains a pointer to the last element in the list. */
 W_EXPORT w_iterator_t w_list_last (const w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*! Obtains a pointer to the next element. */
 W_EXPORT w_iterator_t w_list_next (const w_list_t *list, w_iterator_t i)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*! Obtains a pointer to the previous element. */
 W_EXPORT w_iterator_t w_list_prev (const w_list_t *list, w_iterator_t i)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
@@ -982,16 +1017,63 @@ W_EXPORT void w_list_del_at (w_list_t *list, long index)
  * \ref w_list_pop_head, the element is \b not returned, and the
  * reference counter decresed (if reference counting enabled).
  */
-#define w_list_del_head(_l) \
-    w_list_del ((_l), w_list_first (_l))
+static inline void w_list_del_head (w_list_t *list)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline void
+w_list_del_head (w_list_t *list)
+{
+    w_assert (list);
+    w_list_del (list, w_list_first (list));
+}
 
 /*!
  * Deletes the element at the end of the list. Contrary to
  * \ref w_list_pop_tail, the element is \b not returned, and the
  * reference counter decresed (if reference counting enabled).
  */
-#define w_list_del_tail(_l) \
-    w_list_del ((_l), w_list_last (_l))
+static inline void w_list_del_tail (w_list_t *list)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline void
+w_list_del_tail (w_list_t *list)
+{
+    w_assert (list);
+    w_list_del (list, w_list_last (list));
+}
+
+/* Commonly-used aliases */
+static inline void w_list_insert (w_list_t *list, w_iterator_t i, void *item)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+static inline void
+w_list_insert (w_list_t *list, w_iterator_t i, void* item)
+{
+    w_assert (list);
+    w_assert (i);
+    w_list_insert_before (list, i, item);
+}
+
+static inline void w_list_append (w_list_t *list, void *item)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline void
+w_list_append (w_list_t *list, void *item)
+{
+    w_assert (list);
+    w_list_push_tail (list, item);
+}
+
+static inline void* w_list_pop (w_list_t *list)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline void*
+w_list_pop (w_list_t *list)
+{
+    w_assert (list);
+    return w_list_pop_tail (list);
+}
 
 /*\}*/
 
@@ -1033,16 +1115,33 @@ W_EXPORT void w_dict_clear (w_dict_t *d)
 /*!
  * Get the number of items in a dictionary.
  */
-#define w_dict_size(_d) \
-    ((_d)->count)
+static inline size_t w_dict_size (const w_dict_t *d)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline size_t
+w_dict_size (const w_dict_t *d)
+{
+    w_assert (d);
+    return d->count;
+}
 
 /*!
  * Check whether a dictionary is empty.
  */
-#define w_dict_empty(_d) \
-    (!(_d)->count)
+static inline bool w_dict_is_empty (const w_dict_t *d)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline bool
+w_dict_is_empty (const w_dict_t *d)
+{
+    w_assert (d);
+    return d->count == 0;
+}
 
 W_EXPORT void* w_dict_getn (const w_dict_t *d, const char *key, size_t keylen)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
 W_EXPORT void w_dict_setn (w_dict_t *d, const char *key, size_t keylen, void *data)
@@ -1067,6 +1166,7 @@ W_EXPORT void w_dict_set (w_dict_t *d, const char *key, void *data)
  * Get an item from a dictionary.
  */
 W_EXPORT void* w_dict_get (const w_dict_t *d, const char *key)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
 /*!
@@ -1089,12 +1189,15 @@ W_EXPORT void w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
 W_EXPORT w_iterator_t w_dict_first (const w_dict_t *d)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 W_EXPORT w_iterator_t w_dict_next (const w_dict_t *d, w_iterator_t i)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 W_EXPORT const char* w_dict_iterator_get_key (w_iterator_t i)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -1170,7 +1273,8 @@ struct w_opt_context
 
 #define _W_M_(x) \
     W_EXPORT w_opt_status_t x(const w_opt_context_t*) \
-    W_FUNCTION_ATTR_NOT_NULL ((1))
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT \
+        W_FUNCTION_ATTR_NOT_NULL ((1))
 _W_M_(W_OPT_BOOL);
 _W_M_(W_OPT_INT);
 _W_M_(W_OPT_UINT);
@@ -1183,8 +1287,8 @@ _W_M_(W_OPT_TIME_PERIOD);
 _W_M_(W_OPT_DATA_SIZE);
 #undef _W_M_
 
-
 W_EXPORT w_opt_status_t w_opt_files_action(const w_opt_context_t*)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
@@ -1461,12 +1565,18 @@ W_EXPORT bool w_parse_long (w_parse_t *p, long *value)
  * Checks the next character in the input. If the character is not matched,
  * then an error is generated.
  *
- * \param _p Pointer to a \c w_parse_t.
- * \param _c Character to be matched.
+ * \param p Pointer to a \c w_parse_t.
+ * \param c Character to be matched.
  */
-#define w_parse_match(_p, _c) \
-        w_parse_match_with_cleanup((_p), (_c), (void)0)
+static inline void w_parse_match (w_parse_t *p, int c)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
 
+static inline void
+w_parse_match (w_parse_t *p, int c)
+{
+    w_assert (p);
+    w_parse_match_with_cleanup(p, c, (void)0);
+}
 
 /*\}*/
 
@@ -1524,31 +1634,61 @@ struct w_buf
 /*!
  * Initializer for \ref w_buf_t
  */
-#define W_BUF { NULL, 0, 0 }
+#define W_BUF ((w_buf_t) { NULL, 0, 0 })
 
 
 /*!
  * Get the length of a buffer.
  */
-#define w_buf_size(_b) ((_b)->size)
+static inline size_t w_buf_size (const w_buf_t *buf)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Obtains the size of the allocated space for stored data.
- * This will be always equal or larger that the size of the
- * actual stored data.
- */
-#define w_buf_alloc_size(_b) ((_b)->alloc)
+static inline size_t w_buf_size (const w_buf_t *buf)
+{
+    w_assert (buf);
+    return buf->size;
+}
 
 /*!
  * Get a pointer to the internal data stored by the buffer.
  * Note that this may be \c NULL.
  */
-#define w_buf_data(_b) ((_b)->data)
+static inline char* w_buf_data (w_buf_t *buf)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline char*
+w_buf_data (w_buf_t *buf)
+{
+    w_assert (buf);
+    return buf->data;
+}
+
+static inline const char* w_buf_const_data (const w_buf_t *buf)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline const char*
+w_buf_const_data (const w_buf_t *buf)
+{
+    w_assert (buf);
+    return buf->data;
+}
 
 /*!
  * Checks whether a buffer is empty.
  */
-#define w_buf_empty(_b) (!(_b)->size)
+static inline bool w_buf_is_empty (const w_buf_t *buf)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline bool
+w_buf_is_empty (const w_buf_t *buf)
+{
+    w_assert (buf);
+    return buf->size == 0;
+}
 
 /*!
  * Adjust the size of a buffer keeping contents.
@@ -1637,6 +1777,7 @@ W_EXPORT void w_buf_clear (w_buf_t *buf)
  * \param buf A \ref w_buf_t buffer
  */
 W_EXPORT char* w_buf_str (w_buf_t *buf)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -1828,8 +1969,23 @@ W_EXPORT w_io_result_t w_io_read_until (w_io_t  *io,
  * This is a convenience macro that calls \ref w_io_read_until passing \c
  * '\n' as stop character.
  */
-#define w_io_read_line(_io, _data, _overflow, _maxbytes) \
-       (w_io_read_until ((_io), (_data), (_overflow), '\n', (_maxbytes)))
+static inline w_io_result_t w_io_read_line (w_io_t  *io,
+                                            w_buf_t *data,
+                                            w_buf_t *overflow,
+                                            unsigned maxbytes)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2, 3));
+
+static inline w_io_result_t w_io_read_line (w_io_t  *io,
+                                            w_buf_t *data,
+                                            w_buf_t *overflow,
+                                            unsigned maxbytes)
+{
+    w_assert (io);
+    w_assert (data);
+    w_assert (overflow);
+    return w_io_read_until (io, data, overflow, '\n', maxbytes);
+}
 
 /*!
  * Formats text and writes it to an I/O object. Implements naïve (but

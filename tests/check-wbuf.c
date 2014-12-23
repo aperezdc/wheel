@@ -14,7 +14,7 @@ START_TEST (test_wbuf_init)
     w_buf_t b = W_BUF;
     fail_if (w_buf_data (&b), "buffer is not null upon creation");
     fail_if (w_buf_size (&b), "buffer length is not 0 upon creation");
-    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 upon creation");
+    fail_if (b.alloc, "buffer size is not 0 upon creation");
 }
 END_TEST
 
@@ -25,14 +25,14 @@ START_TEST (test_wbuf_free)
 
     fail_if (w_buf_data (&b), "buffer is not null upon creation");
     fail_if (w_buf_size (&b), "buffer length is not 0 upon creation");
-    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 upon creation");
+    fail_if (b.alloc, "buffer size is not 0 upon creation");
 
     /* freeing should get to a sane state, always */
     w_buf_clear (&b);
 
     fail_if (w_buf_data (&b), "buffer is not null after reset");
     fail_if (w_buf_size (&b), "buffer length is not 0 after reset");
-    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 after reset");
+    fail_if (b.alloc, "buffer size is not 0 after reset");
 
     /* append something and then free again */
     w_buf_set_str (&b, "This is some content");
@@ -40,7 +40,7 @@ START_TEST (test_wbuf_free)
 
     fail_if (w_buf_data (&b), "buffer is not null after reset");
     fail_if (w_buf_size (&b), "buffer length is not 0 after reset");
-    fail_if (w_buf_alloc_size (&b), "buffer size is not 0 after reset");
+    fail_if (b.alloc, "buffer size is not 0 after reset");
 }
 END_TEST
 

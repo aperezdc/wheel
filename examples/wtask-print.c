@@ -15,7 +15,7 @@ print_message (void *data)
     unsigned count = 10;
 
     while (count--) {
-        printf ("%s - %s\n", w_task_name, message);
+        printf ("%s - %s\n", w_task_name (), message);
         w_task_yield ();
     }
 }

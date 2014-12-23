@@ -20,7 +20,7 @@ w_cfg_getnode (const w_cfg_t *cf, const char *key)
     w_assert (key);
     w_assert (cf);
 
-    if (w_dict_empty (cf)) return NULL;
+    if (w_dict_is_empty (cf)) return NULL;
 
     if ((sep = strchr (key, '.')) != NULL) {
         /* Dotted key. */
@@ -223,7 +223,7 @@ w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **
     w_assert (cf);
     w_assert (key);
 
-    if (w_dict_empty (cf))
+    if (w_dict_is_empty (cf))
         return NULL;
 
     sep = strchr (key, '.');
@@ -290,7 +290,7 @@ dump_buffer (const w_buf_t *buf, w_io_t *out)
 
     if (w_buf_size (buf)) {
         for (unsigned i = 0; i < w_buf_size (buf); i++) {
-            int c = w_buf_data (buf)[i];
+            int c = w_buf_const_data (buf)[i];
 #define ESCAPE(_c, _e) \
             case _c : W_IO_CHAIN (r, w_io_putchar (out, '\\')); \
                       W_IO_CHAIN (r, w_io_putchar (out, (_e))); \

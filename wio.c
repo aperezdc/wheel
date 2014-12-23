@@ -344,7 +344,7 @@ w_io_read_until (w_io_t  *io,
              */
             unsigned len = pos - w_buf_data (overflow) + 1;
             w_buf_append_mem (buffer, w_buf_data (overflow), len);
-            w_buf_size (overflow) -= len;
+            overflow->size -= len;
             memmove (w_buf_data (overflow),
                      w_buf_data (overflow) + len,
                      w_buf_size (overflow));
@@ -352,7 +352,7 @@ w_io_read_until (w_io_t  *io,
             return W_IO_RESULT (w_buf_size (buffer));
         }
 
-        if (w_buf_alloc_size (overflow) < (w_buf_size (overflow) + readbytes))
+        if (overflow->alloc < (w_buf_size (overflow) + readbytes))
         {
             /*
              * XXX Calling w_buf_resize() will *both* resize the buffer
@@ -361,7 +361,7 @@ w_io_read_until (w_io_t  *io,
              */
             size_t oldlen = w_buf_size (overflow);
             w_buf_resize (overflow, w_buf_size (overflow) + readbytes);
-            w_buf_size (overflow) = oldlen;
+            overflow->size = oldlen;
         }
 
         w_io_result_t r = w_io_read (io,
@@ -369,7 +369,7 @@ w_io_read_until (w_io_t  *io,
                                      readbytes);
 
         if (!w_io_failed (r) && w_io_result_bytes (r) > 0) {
-            w_buf_size (overflow) += w_io_result_bytes (r);
+            overflow->size += w_io_result_bytes (r);
         } else {
             /* Handles both EOF and errors. */
             return r;
