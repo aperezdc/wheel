@@ -1,6 +1,6 @@
 /*
  * wloop-cat.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -10,7 +10,7 @@
 #include <errno.h>
 
 
-static w_bool_t
+static bool
 input_data_ready (w_event_loop_t *loop, w_event_t *event)
 {
     char buffer[32];
@@ -31,7 +31,7 @@ main (int argc, char *argv[])
 {
     w_event_loop_t *loop;
     w_event_t      *event;
-    w_bool_t        success;
+    bool            success;
 
     w_unused (argc);
     w_unused (argv);
@@ -44,7 +44,7 @@ main (int argc, char *argv[])
 
     if (w_event_loop_add (loop, event)) {
         w_obj_unref (event);
-        w_io_format (w_stderr, "$s: $E\n", argv[0]);
+        W_IGNORE_RESULT (w_io_format (w_stderr, "$s: $E\n", argv[0]));
         return EXIT_FAILURE;
     }
 

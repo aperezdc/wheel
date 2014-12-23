@@ -1,6 +1,6 @@
 /*
  * wcfg-to-tnetstring.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */

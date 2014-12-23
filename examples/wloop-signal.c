@@ -1,6 +1,6 @@
 /*
  * wloop-cat.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -11,7 +11,7 @@
 #include <errno.h>
 
 
-static w_bool_t
+static bool
 signal_arrived (w_event_loop_t *loop, w_event_t *event)
 {
     printf ("signal: %i, tstamp = %f\n",
@@ -25,7 +25,7 @@ main (int argc, char *argv[])
 {
     w_event_loop_t *loop;
     w_event_t      *event;
-    w_bool_t        success;
+    bool            success;
 
     w_unused (argc);
     w_unused (argv);

@@ -1,6 +1,6 @@
 /*
  * wio-sock-echo-server.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -14,28 +14,28 @@
 #endif /* !BUFFER_SIZE */
 
 
-static w_bool_t
+static bool
 serve_request (w_io_socket_t *io)
 {
+    W_IGNORE_RESULT (w_io_format (w_stdout, "BEGIN REQUEST\n"));
+
     char buf[BUFFER_SIZE];
-    ssize_t ret;
+    w_io_result_t r;
 
-    w_io_format (w_stdout, "BEGIN REQUEST\n");
-
-    while ((ret = w_io_read ((w_io_t*) io, buf, BUFFER_SIZE)) > 0) {
-        ret = write (STDOUT_FILENO, buf, ret);
-        w_io_write ((w_io_t*) io, buf, ret);
+    while (w_io_result_bytes (r = w_io_read ((w_io_t*) io, buf, BUFFER_SIZE)) > 0) {
+        write (STDOUT_FILENO, buf, w_io_result_bytes (r));
+        W_IGNORE_RESULT (w_io_write ((w_io_t*) io, buf, w_io_result_bytes (r)));
     }
 
     w_io_socket_send_eof (io);
 
-    if (ret < 0) {
-        w_io_format (w_stderr, "Error: $E\n");
+    if (w_io_failed (r)) {
+        W_IGNORE_RESULT (w_io_format (w_stderr, "Error: $E\n"));
     }
 
-    w_io_format (w_stdout, "END REQUEST\n");
+    W_IGNORE_RESULT (w_io_format (w_stdout, "END REQUEST\n"));
 
-    return W_YES;
+    return true;
 }
 
 

@@ -1,6 +1,6 @@
 /*
  * wopt-basic.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 
-static w_bool_t verbose = W_NO;
+static bool verbose = false;
 
 static const w_opt_t option_spec[] = {
     { 0, 'v', "verbose", W_OPT_BOOL, &verbose,
@@ -27,7 +27,9 @@ file_arg_cb (void *filename, void *ctx)
     w_unused (ctx);
 
     if (verbose) {
-        w_io_format (w_stdout, "File name: $s\n", filename);
+        W_IGNORE_RESULT (w_io_format (w_stdout,
+                                      "File name: $s\n",
+                                      filename));
     }
 }
 

@@ -1,6 +1,6 @@
 /*
  * wopt-longhelp.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -8,7 +8,7 @@
 #include "../wheel.h"
 #include <unistd.h>
 
-static w_bool_t dofoo = W_NO;
+static bool dofoo = false;
 
 static const w_opt_t options[] = {
     { 0, 'l', "long-option", W_OPT_BOOL, &dofoo,

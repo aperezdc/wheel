@@ -1,6 +1,6 @@
 /*
  * wcfg-from-tnetstring.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -19,7 +19,7 @@ main (int argc, char *argv[])
     if (w_tnetstr_read_dict (w_stdin, cfg))
         w_die ("Could not parse input tnetstring");
 
-    w_cfg_dump (cfg, w_stdout);
+    W_IGNORE_RESULT (w_cfg_dump (cfg, w_stdout));
     w_obj_unref (cfg);
 
     return EXIT_SUCCESS;

@@ -1,6 +1,6 @@
 /*
  * wtty-term-size.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -18,7 +18,7 @@ int main (int argc, char **argv)
     if (!w_tty_size (&cols, &rows))
         w_die ("Could not get terminal size\n");
 
-    w_io_format (w_stdout, "$I $I\n", cols, rows);
+    W_IGNORE_RESULT (w_io_format (w_stdout, "$I $I\n", cols, rows));
 
     return EXIT_SUCCESS;
 }

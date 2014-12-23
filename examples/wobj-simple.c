@@ -1,6 +1,6 @@
 /*
  * wobj-simple.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -32,7 +32,7 @@ main (int argc, char **argv)
     w_unused (argv);
 
     obj = my_obj_new (10);
-    w_io_format (w_stdout, "$i\n", obj->val);
+    W_IGNORE_RESULT (w_io_format (w_stdout, "$i\n", obj->val));
     w_obj_unref (obj);
 
     return EXIT_SUCCESS;

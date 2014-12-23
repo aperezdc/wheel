@@ -1,6 +1,6 @@
 /*
  * wcfg-noop.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -23,7 +23,7 @@ main (int argc, char **argv)
     }
 
     w_free (err);
-    w_cfg_dump (cfg, w_stdout);
+    W_IGNORE_RESULT (w_cfg_dump (cfg, w_stdout));
 
     return EXIT_SUCCESS;
 }

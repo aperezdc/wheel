@@ -1,6 +1,6 @@
 /*
  * wio-cat.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -14,13 +14,13 @@ int
 main (int argc, char **argv)
 {
     char buf[BUFFER_SIZE];
-    ssize_t ret;
 
     w_unused (argc);
     w_unused (argv);
 
-    while ((ret = w_io_read (w_stdin, buf, BUFFER_SIZE)) > 0) {
-        w_io_write (w_stdout, buf, ret);
+    w_io_result_t r;
+    while (w_io_result_bytes (r = w_io_read (w_stdin, buf, BUFFER_SIZE)) > 0) {
+        W_IGNORE_RESULT (w_io_write (w_stdout, buf, w_io_result_bytes (r)));
     }
 
     return EXIT_SUCCESS;

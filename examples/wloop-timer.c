@@ -1,6 +1,6 @@
 /*
  * wloop-cat.c
- * Copyright (C) 2012 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2012-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -11,7 +11,7 @@
 #include <errno.h>
 
 
-static w_bool_t
+static bool
 signal_arrived (w_event_loop_t *loop, w_event_t *event)
 {
     w_unused (loop);
@@ -21,12 +21,12 @@ signal_arrived (w_event_loop_t *loop, w_event_t *event)
 }
 
 
-static w_bool_t
+static bool
 timer_triggered (w_event_loop_t *loop, w_event_t *event)
 {
     w_unused (event);
     printf ("timer triggered, timestamp: %f\n", w_event_loop_now (loop));
-    return W_NO;
+    return false;
 }
 
 
@@ -35,12 +35,12 @@ main (int argc, char *argv[])
 {
     w_event_loop_t *loop;
     w_event_t      *event;
-    w_bool_t        success;
+    bool            success;
 
     w_unused (argc);
     w_unused (argv);
 
-    w_io_format (w_stdout, "Press Ctrl-C to stop\n");
+    W_IGNORE_RESULT (w_io_format (w_stdout, "Press Ctrl-C to stop\n"));
 
     loop  = w_event_loop_new ();
 

@@ -1,6 +1,6 @@
 /*
  * wio-sock-echo-server.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -34,7 +34,6 @@ main (int argc, char **argv)
 {
     w_io_t *ios;
     char buf[BUFFER_SIZE];
-    ssize_t ret;
 
     w_opt_parse (options, NULL, NULL, NULL, argc, argv);
 
@@ -44,13 +43,15 @@ main (int argc, char **argv)
 
     w_io_socket_connect ((w_io_socket_t*) ios);
 
-    while ((ret = w_io_read (w_stdin, buf, BUFFER_SIZE)) > 0) {
-        w_io_write (ios, buf, ret);
+    w_io_result_t r;
+    while (w_io_result_bytes (r = w_io_read (w_stdin, buf, BUFFER_SIZE)) > 0) {
+        W_IO_CHECK_RETURN (w_io_write (ios, buf, w_io_result_bytes (r)),
+                           EXIT_FAILURE);
     }
     w_io_socket_send_eof ((w_io_socket_t*) ios);
 
-    while ((ret = w_io_read (ios, buf, BUFFER_SIZE)) > 0) {
-        w_io_write (w_stdout, buf, ret);
+    while (w_io_result_bytes (r = w_io_read (ios, buf, BUFFER_SIZE)) > 0) {
+        W_IGNORE_RESULT (w_io_write (w_stdout, buf, w_io_result_bytes (r)));
     }
 
     w_obj_unref (ios);

@@ -1,6 +1,6 @@
 /*
  * wopt-loadfile.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
@@ -9,8 +9,8 @@
 #include <unistd.h>
 
 
-static w_bool_t verbose   = W_NO;
-static int      sleeptime = 5;
+static bool verbose   = false;
+static int  sleeptime = 5;
 
 
 static const w_opt_t option_spec[] = {
@@ -29,7 +29,9 @@ main (int argc, char **argv)
 
     w_opt_parse_io (option_spec, w_stdin, &errmsg);
     if (errmsg != NULL) {
-        w_io_format (w_stderr, "<stdin>:$s\n", errmsg);
+        W_IGNORE_RESULT (w_io_format (w_stderr,
+                                      "<stdin>:$s\n",
+                                      errmsg));
         w_free (errmsg);
         return EXIT_FAILURE;
     }
