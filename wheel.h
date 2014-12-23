@@ -1703,6 +1703,13 @@ struct w_io_result {
             return W__LCAT (io_check_r);                  \
     } while (0)
 
+#define W_IO_CHECK_RETURN(_iocall, _retval)               \
+    do {                                                  \
+        w_io_result_t W__LCAT (io_check_do) = (_iocall);  \
+        if (w_io_failed (W__LCAT (io_check_do)))          \
+            return (_retval);                             \
+    } while (0)
+
 #define W_IO_CHECK_BYTES(_iocall1, _action, _iocall2)     \
     do {                                                  \
         w_io_result_t W__LCAT (io_check_b1) = (_iocall1); \
