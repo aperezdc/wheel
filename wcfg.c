@@ -423,15 +423,27 @@ w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 }
 
 
+static char* parse_identifier (w_parse_t *p)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
 static char*
 parse_identifier (w_parse_t *p)
 {
     w_assert(p);
 
     w_buf_t buf = W_BUF;
-    while (!isspace(p->look) && p->look != ':') {
+    while (p->look != W_IO_EOF &&
+           !isspace(p->look) &&
+           p->look != ':') {
         w_buf_append_char (&buf, p->look);
         w_parse_getchar (p);
+    }
+
+    /* Identifiers must not be empty strings. */
+    if (!w_buf_size (&buf)) {
+        w_buf_clear (&buf);
+        return NULL;
     }
 
     w_parse_skip_ws (p);
