@@ -123,6 +123,11 @@ typedef enum w_bool w_bool_t;
 # define W_FUNCTION_ATTR_WARN_UNUSED_RESULT
 #endif
 
+#define W_IGNORE_RESULT(_stmt) \
+    do {                       \
+        (void) (_stmt);        \
+    } while (0)
+
 /*\}*/
 
 /*--------------------------------------------------[ libc includes ]-----*/
