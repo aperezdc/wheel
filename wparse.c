@@ -217,8 +217,8 @@ w_parse_run (w_parse_t    *p,
 
     /* Initialize parser structure */
     memset (p, 0x00, sizeof (w_parse_t));
-    p->input   = w_obj_ref (input);
     p->comment = comment;
+    p->input   = input;
     p->line    = 1;
 
     if (msg) {
@@ -241,7 +241,7 @@ w_parse_run (w_parse_t    *p,
         (*parse_fun) (p, context);
     }
 
-    w_obj_unref (input);
+    p->input = NULL;
     return p->result;
 }
 
