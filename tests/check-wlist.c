@@ -10,7 +10,7 @@
 
 START_TEST (test_wlist_itemcount)
 {
-    w_list_t *l = w_list_new (W_NO);
+    w_list_t *l = w_list_new (false);
     ck_assert_int_eq (0, w_list_size (l));
 
     w_list_append (l, (void*) 0xcafebabe);
@@ -26,7 +26,7 @@ END_TEST
 
 START_TEST (test_wlist_firstlast)
 {
-    w_list_t *l = w_list_new (W_NO);
+    w_list_t *l = w_list_new (false);
 
     fail_if (w_list_first (l), "Empty list should not have first element");
     fail_if (w_list_last  (l), "Empty list should not have last element");
@@ -75,7 +75,7 @@ START_TEST (test_wlist_iterate)
     unsigned i;
     w_iterator_t iter;
 
-    w_list_t *l = w_list_new (W_NO);
+    w_list_t *l = w_list_new (false);
 
     for (i = 0; i < w_lengthof (items); i++)
         w_list_append (l, items[i]);

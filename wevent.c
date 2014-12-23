@@ -41,17 +41,17 @@
 #include <time.h>
 
 
-static size_t   w_event_loop_backend_size  (void);
-static w_bool_t w_event_loop_backend_init  (w_event_loop_t*);
-static void     w_event_loop_backend_free  (w_event_loop_t*);
-static w_bool_t w_event_loop_backend_start (w_event_loop_t*);
-static w_bool_t w_event_loop_backend_stop  (w_event_loop_t*);
-static w_bool_t w_event_loop_backend_add   (w_event_loop_t*, w_event_t*);
-static w_bool_t w_event_loop_backend_del   (w_event_loop_t*, w_event_t*);
-static w_bool_t w_event_loop_backend_poll  (w_event_loop_t*, w_timestamp_t);
+static size_t w_event_loop_backend_size  (void);
+static bool   w_event_loop_backend_init  (w_event_loop_t*);
+static void   w_event_loop_backend_free  (w_event_loop_t*);
+static bool   w_event_loop_backend_start (w_event_loop_t*);
+static bool   w_event_loop_backend_stop  (w_event_loop_t*);
+static bool   w_event_loop_backend_add   (w_event_loop_t*, w_event_t*);
+static bool   w_event_loop_backend_del   (w_event_loop_t*, w_event_t*);
+static bool   w_event_loop_backend_poll  (w_event_loop_t*, w_timestamp_t);
 
 
-static inline w_bool_t
+static inline bool
 fd_set_nonblocking (int fd)
 {
     int flags;
@@ -64,7 +64,7 @@ w_timestamp_t
 w_timestamp_now (void)
 {
 #if _POSIX_TIMERS
-    static w_bool_t use_realtime = W_YES;
+    static bool use_realtime = true;
 
     if (use_realtime) {
         struct timespec ts;
@@ -76,7 +76,7 @@ w_timestamp_now (void)
          * If control reaches here, using the clock_gettime failed,
          * so mark it to not be used and fall-back to gettimeofday.
          */
-        use_realtime = W_NO;
+        use_realtime = false;
     }
 #endif /* _POSIX_TIMERS */
     {
@@ -166,28 +166,28 @@ w_event_loop_new (void)
         return NULL;
     }
 
-    loop->running = W_NO;
-    loop->events  = w_list_new (W_YES);
+    loop->running = false;
+    loop->events  = w_list_new (true);
     loop->now     = w_timestamp_now ();
     return w_obj_dtor (loop, _w_event_loop_destroy);
 }
 
 
-w_bool_t
+bool
 w_event_loop_run (w_event_loop_t *loop)
 {
     w_assert (loop);
 
     if (w_event_loop_backend_start (loop))
-        return W_YES;
+        return true;
 
-    loop->running = W_YES;
+    loop->running = true;
 
     /* TODO Allow control of timeouts for polling! */
     /* XXX Does that _actually_ make sense?? */
     while (loop->running) {
         if (w_event_loop_backend_poll (loop, -1.0)) {
-            loop->running = W_NO;
+            loop->running = false;
         }
         else {
             w_iterator_t i;
@@ -212,14 +212,14 @@ void
 w_event_loop_stop (w_event_loop_t *loop)
 {
     w_assert (loop);
-    loop->running = W_NO;
+    loop->running = false;
 }
 
 
-w_bool_t
+bool
 w_event_loop_add (w_event_loop_t *loop, w_event_t *event)
 {
-    w_bool_t ret = W_NO;
+    bool ret = false;
 
     w_assert (loop);
     w_assert (event);
@@ -234,7 +234,7 @@ w_event_loop_add (w_event_loop_t *loop, w_event_t *event)
 }
 
 
-w_bool_t
+bool
 w_event_loop_del (w_event_loop_t *loop, w_event_t *event)
 {
     w_iterator_t i;
@@ -246,12 +246,12 @@ w_event_loop_del (w_event_loop_t *loop, w_event_t *event)
         ? loop->idle_events
         : loop->events;
 
-    w_bool_t ret = W_NO;
+    bool ret = false;
     for (i = w_list_first (list); i; i = w_list_next (list, i))
         if (*i == event)
             goto found;
 
-    return W_YES;
+    return true;
 
 found:
     /* Removing from the list will also w_obj_unref() the event */
@@ -289,7 +289,7 @@ w_event_loop_backend_size (void)
 }
 
 
-static w_bool_t
+static bool
 w_event_loop_backend_init (w_event_loop_t *loop)
 {
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
@@ -303,7 +303,7 @@ w_event_loop_backend_init (w_event_loop_t *loop)
      */
     ep->fd = ep->signal_fd = -1;
     sigemptyset (&ep->signal_mask);
-    ep->signal_events = w_list_new (W_NO);
+    ep->signal_events = w_list_new (false);
     return 0;
 }
 
@@ -323,10 +323,10 @@ w_event_loop_backend_free (w_event_loop_t *loop)
 }
 
 
-static w_bool_t
+static bool
 w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
 {
-    w_bool_t stop_loop = W_NO;
+    bool stop_loop = false;
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event events[W_EVENT_LOOP_NEVENTS];
     int nevents, i;
@@ -360,7 +360,7 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
                 event = *i;
                 if (si.ssi_signo == (uint32_t) event->signum)
                     if ((*event->callback) (loop, event))
-                        stop_loop = W_YES;
+                        stop_loop = true;
             }
         }
         else {
@@ -379,14 +379,14 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
             }
 
             if ((*event->callback) (loop, event))
-                stop_loop = W_YES;
+                stop_loop = true;
         }
     }
     return stop_loop;
 }
 
 
-static w_bool_t
+static bool
 w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 {
     w_assert (event->type != W_EVENT_IDLE);
@@ -394,7 +394,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event ep_ev;
     sigset_t old_sigmask;
-    w_bool_t ret;
+    bool ret;
     int fd = -1;
 
     w_assert (loop);
@@ -402,7 +402,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
     w_assert (ep);
 
     if (ep->fd < 0 && (ep->fd = epoll_create1 (EPOLL_CLOEXEC)) == -1)
-        return W_YES;
+        return true;
 
     ep_ev.data.ptr = event;
     ep_ev.events   = EPOLLET; /* Always use edge-triggered events */
@@ -420,7 +420,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
                 ep_ev.events |= EPOLLOUT;
 
             if (fd_set_nonblocking (fd))
-                return W_YES;
+                return true;
             break;
 
         case W_EVENT_SIGNAL:
@@ -428,12 +428,12 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
                 /* This kind of signal is already being handled */
                 w_assert (ep->signal_fd >= 0);
                 w_list_push_tail (ep->signal_events, event);
-                return W_NO;
+                return false;
             }
 
             sigaddset (&ep->signal_mask, event->signum);
             if (sigprocmask (SIG_BLOCK, &ep->signal_mask, &old_sigmask) != 0)
-                return W_YES;
+                return true;
 
             if ((fd = signalfd (ep->signal_fd, &ep->signal_mask, SFD_CLOEXEC)) == -1) {
                 /*
@@ -442,7 +442,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
                  * failure (if possible).
                  */
                 sigprocmask (SIG_SETMASK, &old_sigmask, NULL);
-                return W_YES;
+                return true;
             }
 
             ep_ev.data.ptr = W_EPOLL_SIGNAL_MARK;
@@ -452,10 +452,10 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 
         case W_EVENT_TIMER:
             if ((fd = event->flags = timerfd_create (CLOCK_MONOTONIC, TFD_CLOEXEC)) == -1)
-                return W_YES;
+                return true;
             if (fd_set_nonblocking (fd)) {
                 close (fd);
-                return W_YES;
+                return true;
             }
             ep_ev.events = EPOLLIN;
             break;
@@ -474,7 +474,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
 }
 
 
-static w_bool_t
+static bool
 w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
 {
     w_assert (event->type != W_EVENT_IDLE);
@@ -494,9 +494,9 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
         case W_EVENT_SIGNAL:
             /* It is only needed to modify the signal mask. */
             if (ep->signal_fd < 0)
-                return W_YES;
+                return true;
             if (!sigismember (&ep->signal_mask, event->signum))
-                return W_YES;
+                return true;
 
             fd = 0;
             w_list_foreach (ep->signal_events, i) {
@@ -510,12 +510,12 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
                 sigaddset (&sigmask, event->signum);
                 sigdelset (&ep->signal_mask, event->signum);
                 if (sigprocmask (SIG_UNBLOCK, &sigmask, NULL) != 0)
-                    return W_YES;
+                    return true;
                 if (signalfd (ep->signal_fd, &ep->signal_mask, O_CLOEXEC) == -1)
-                    return W_YES;
+                    return true;
             }
             w_list_del (ep->signal_events, delpos);
-            return W_NO;
+            return false;
 
         case W_EVENT_FD:
             fd = event->fd;
@@ -546,7 +546,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
 }
 
 
-static w_bool_t
+static bool
 w_event_loop_backend_start (w_event_loop_t *loop)
 {
     w_iterator_t i;
@@ -564,15 +564,15 @@ w_event_loop_backend_start (w_event_loop_t *loop)
             its.it_interval.tv_nsec = (long) ((event->time - its.it_interval.tv_sec) * 1e9);
 
             if (timerfd_settime ((int) event->flags, 0, &its, NULL) == -1)
-                return W_YES;
+                return true;
         }
     }
 
-    return W_NO;
+    return false;
 }
 
 
-static w_bool_t
+static bool
 w_event_loop_backend_stop (w_event_loop_t *loop)
 {
     struct itimerspec its;
@@ -588,11 +588,11 @@ w_event_loop_backend_stop (w_event_loop_t *loop)
         w_event_t *event = *i;
         if (event->type == W_EVENT_TIMER) {
             if (timerfd_settime ((int) event->flags, 0, &its, NULL) == -1)
-                return W_YES;
+                return true;
         }
     }
 
-    return W_NO;
+    return false;
 }
 
 #endif /* W_EVENT_BACKEND_EPOLL */

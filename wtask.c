@@ -76,7 +76,7 @@ struct w_task
 {
     char           *name;
     enum task_state state;
-    w_bool_t        is_system;
+    bool            is_system;
     w_task_func_t   task_func;
     void           *task_data;
     ucontext_t      context;
@@ -201,23 +201,23 @@ w_task_current (void)
 
 
 void
-w_task_set_is_system (w_task_t *task, w_bool_t is_system)
+w_task_set_is_system (w_task_t *task, bool is_system)
 {
     w_assert (task);
 
     if (task->is_system && !is_system) {
-        task->is_system = W_NO;
+        task->is_system = false;
         s_num_system_tasks--;
         s_num_tasks++;
     } else if (!task->is_system && is_system) {
-        task->is_system = W_YES;
+        task->is_system = true;
         s_num_system_tasks++;
         s_num_tasks--;
     }
 }
 
 
-w_bool_t
+bool
 w_task_get_is_system (w_task_t *task)
 {
     w_assert (task);

@@ -80,8 +80,8 @@ w_str_hashl (const char *str, size_t len)
 }
 
 
-w_bool_t
-w_str_bool(const char *str, w_bool_t *opt)
+bool
+w_str_bool(const char *str, bool *opt)
 {
 	w_assert(str != NULL);
 	w_assert(opt != NULL);
@@ -90,44 +90,44 @@ w_str_bool(const char *str, w_bool_t *opt)
 		case 1: /* One character length. */
 			switch (*str) {
 				case '0': case 'f': case 'F': case 'n': case 'N':
-					*opt = W_NO;
+					*opt = false;
 					break;
 				case '1': case 't': case 'T': case 'y': case 'Y':
-					*opt = W_YES;
+					*opt = true;
 					break;
 				default:
-					return W_NO;
+					return false;
 			}
-			return W_YES;
+			return true;
 
 		/* FIXME Tests below may be speed up. */
 
 		case 2: /* Two characters: "no", "ok" */
-			if (!w_str_casecmp ("no", str)) return (*opt = W_NO , W_YES);
-			if (!w_str_casecmp ("ok", str)) return (*opt = W_YES, W_YES);
-			return W_NO;
+			if (!w_str_casecmp ("no", str)) return (*opt = false, true);
+			if (!w_str_casecmp ("ok", str)) return (*opt = true,  true);
+			return false;
 		case 3: /* Three characters: "yes", "nah", "nop" */
-			if (!w_str_casecmp ("yes", str)) return (*opt = W_YES, W_YES);
-			if (!w_str_casecmp ("nop", str)) return (*opt = W_NO , W_YES);
-			if (!w_str_casecmp ("nah", str)) return (*opt = W_NO , W_YES);
-			return W_NO;
+			if (!w_str_casecmp ("yes", str)) return (*opt = true , true);
+			if (!w_str_casecmp ("nop", str)) return (*opt = false, true);
+			if (!w_str_casecmp ("nah", str)) return (*opt = false, true);
+			return false;
 		case 4: /* Four characters: "yeah", "okay", "nope", true */
-			if (!w_str_casecmp ("true", str)) return (*opt = W_YES, W_YES);
-			if (!w_str_casecmp ("yeah", str)) return (*opt = W_YES, W_YES);
-			if (!w_str_casecmp ("okay", str)) return (*opt = W_YES, W_YES);
-			if (!w_str_casecmp ("nope", str)) return (*opt = W_NO , W_YES);
-			return W_NO;
+			if (!w_str_casecmp ("true", str)) return (*opt = true,  true);
+			if (!w_str_casecmp ("yeah", str)) return (*opt = true,  true);
+			if (!w_str_casecmp ("okay", str)) return (*opt = true,  true);
+			if (!w_str_casecmp ("nope", str)) return (*opt = false, true);
+			return false;
 		case 5: /* Five characters: "false". */
-			if (!w_str_casecmp ("false", str)) return (*opt = W_NO, W_YES);
-			return W_NO;
+			if (!w_str_casecmp ("false", str)) return (*opt = false, true);
+			return false;
 	}
 
-	return W_NO;
+	return false;
 }
 
 
 
-w_bool_t
+bool
 w_str_int(const char *str, int *val)
 {
 	long v;
@@ -139,14 +139,14 @@ w_str_int(const char *str, int *val)
 	if ((*str != '\0') && (*chkstr == '\0') && (v <= INT_MAX) && (v >= INT_MIN)
 	    && !(((v == LONG_MIN) || (v == LONG_MAX)) && (errno == ERANGE)))
     {
-        return (*val = v, W_YES);
+        return (*val = v, true);
     }
 
-	return W_NO;
+	return false;
 }
 
 
-w_bool_t
+bool
 w_str_uint(const char *str, unsigned *val)
 {
 	unsigned long v;
@@ -157,13 +157,13 @@ w_str_uint(const char *str, unsigned *val)
 	v = strtoull(str, &chkstr, 0);
 	if ((*str != '\0') && (*chkstr == '\0') && (v <= UINT_MAX) &&
 			!((v == ULONG_MAX) && (errno == ERANGE)))
-		return (*val = v, W_YES);
+		return (*val = v, true);
 
-	return W_NO;
+	return false;
 }
 
 
-w_bool_t
+bool
 w_str_long(const char *str, long *val)
 {
 	long v;
@@ -174,13 +174,13 @@ w_str_long(const char *str, long *val)
 	v = strtol(str, &chkstr, 0);
 	if ((*str != '\0') && (*chkstr == '\0') &&
 	        !((v == LONG_MAX || v == LONG_MIN) && (errno == ERANGE)))
-		return (*val = v, W_YES);
+		return (*val = v, true);
 
-	return W_NO;
+	return false;
 }
 
 
-w_bool_t
+bool
 w_str_ulong(const char *str, unsigned long *val)
 {
 	unsigned long v;
@@ -191,14 +191,14 @@ w_str_ulong(const char *str, unsigned long *val)
 	v = strtoul(str, &chkstr, 0);
 	if ((*str != '\0') && (*chkstr == '\0') &&
 	        !(v == ULONG_MAX && errno == ERANGE))
-		return (*val = v, W_YES);
+		return (*val = v, true);
 
-	return W_NO;
+	return false;
 }
 
 
 #ifdef HUGE_VALF
-w_bool_t
+bool
 w_str_float(const char *str, float *val)
 {
 	float v;
@@ -208,15 +208,15 @@ w_str_float(const char *str, float *val)
 
 	v = strtof(str, &chkstr);
 	if (((v == HUGE_VALF) || (v == -HUGE_VALF)) && (errno == ERANGE))
-		return W_NO;
+		return false;
 
-	return (*val = v, W_YES);
+	return (*val = v, true);
 }
 #endif /* HUGE_VALF */
 
 
 #ifdef HUGE_VAL
-w_bool_t
+bool
 w_str_double(const char *str, double *val)
 {
 	double v;
@@ -226,14 +226,14 @@ w_str_double(const char *str, double *val)
 
 	v = strtod(str, &chkstr);
 	if (((v == HUGE_VAL) || (v == -HUGE_VAL)) && (errno == ERANGE))
-		return W_NO;
+		return false;
 
-	return (*val = v, W_YES);
+	return (*val = v, true);
 }
 #endif /* HUGE_VAL */
 
 
-w_bool_t
+bool
 w_str_size_bytes (const char *str, unsigned long long *val)
 {
     unsigned long long v = 0;
@@ -245,7 +245,7 @@ w_str_size_bytes (const char *str, unsigned long long *val)
     v = strtoull (str, &endpos, 0);
 
     if (v == ULLONG_MAX && errno == ERANGE)
-        return W_NO;
+        return false;
 
     if (endpos) {
         switch (*endpos) {
@@ -253,15 +253,15 @@ w_str_size_bytes (const char *str, unsigned long long *val)
             case 'm': case 'M': v *= 1024 * 1024;        break; /* megabytes */
             case 'k': case 'K': v *= 1024;               break; /* kilobytes */
             case 'b': case 'B': case '\0':               break; /* bytes     */
-            default : return W_NO;
+            default : return false;
         }
     }
 
-    return (*val = v, W_YES);
+    return (*val = v, true);
 }
 
 
-w_bool_t
+bool
 w_str_time_period (const char *str, unsigned long long *val)
 {
     unsigned long long v = 0;
@@ -273,7 +273,7 @@ w_str_time_period (const char *str, unsigned long long *val)
     v = strtoull (str, &endpos, 0);
 
     if (v == ULLONG_MAX && errno == ERANGE)
-        return W_NO;
+        return false;
 
     if (endpos) {
         switch (*endpos) {
@@ -284,9 +284,9 @@ w_str_time_period (const char *str, unsigned long long *val)
             case 'h': v *= 60 * 60;            break; /* hours   */
             case 'm': v *= 60;                 break; /* minutes */
             case 's': case '\0':               break; /* seconds */
-            default : return W_NO;
+            default : return false;
         }
     }
 
-    return (*val = v, W_YES);
+    return (*val = v, true);
 }

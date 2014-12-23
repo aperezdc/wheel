@@ -53,7 +53,7 @@ w_tty_rows(void)
 }
 
 
-w_bool_t
+bool
 w_tty_size(unsigned *cols, unsigned *rows)
 {
 #ifdef TIOCGWINSZ
@@ -62,18 +62,18 @@ w_tty_size(unsigned *cols, unsigned *rows)
 #endif
 
 	/* No place where to store stuff exists -> no action taken. */
-	if ((cols == NULL) && (rows == NULL)) return W_NO;
+	if ((cols == NULL) && (rows == NULL)) return false;
 
 	if (cols != NULL) *cols = W_TTY_DEFAULT_COLS;
 	if (rows != NULL) *rows = W_TTY_DEFAULT_ROWS;
 
 #ifdef TIOCGWINSZ
 	if ((tty_fd = open("/dev/tty", O_RDONLY, 0)) == -1)
-		return W_NO;
+		return false;
 
 	if (ioctl(tty_fd, TIOCGWINSZ, &tty_size) == -1) {
 		close(tty_fd);
-		return W_NO;
+		return false;
 	}
 	close(tty_fd);
 
@@ -81,7 +81,7 @@ w_tty_size(unsigned *cols, unsigned *rows)
 	if (rows != NULL) *rows = tty_size.ws_row;
 #endif
 
-	return W_YES;
+	return true;
 }
 
 
@@ -101,8 +101,7 @@ update_tty_size (int signum)
 #endif /* SIGWINCH */
 
 
-/* TODO Finish implementation of this function. */
-w_bool_t
+bool
 w_tty_size_notify(w_tty_notify_fun_t function, void *context)
 {
 	w_unused(function);
@@ -119,7 +118,7 @@ w_tty_size_notify(w_tty_notify_fun_t function, void *context)
 
     return sigaction (SIGWINCH, &sa, NULL) < 0;
 #else /* !SIGWINCH */
-	return W_NO;
+	return false;
 #endif /* SIGWINCH */
 }
 

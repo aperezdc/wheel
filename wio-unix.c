@@ -93,7 +93,7 @@ w_io_unix_open_fd (int fd)
 }
 
 
-w_bool_t
+bool
 w_io_unix_init (w_io_unix_t *io,
                 const char  *path,
                 int          mode,
@@ -104,10 +104,10 @@ w_io_unix_init (w_io_unix_t *io,
     w_assert (path);
 
     if ((fd = open (path, mode, perm)) < 0)
-        return W_NO;
+        return false;
 
     w_io_unix_init_fd (io, fd);
-    return W_YES;
+    return true;
 }
 
 void

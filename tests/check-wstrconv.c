@@ -11,7 +11,7 @@
 
 START_TEST (test_wstr_conv_bool_t)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("t", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -19,7 +19,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_T)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("T", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -27,7 +27,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_y)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("y", &val), "Could no convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -35,7 +35,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_Y)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("Y", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -43,7 +43,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_1)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("1", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -51,7 +51,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_f)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("f", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -59,7 +59,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_F)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("F", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -67,7 +67,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_n)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("n", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -75,7 +75,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_N)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("N", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -83,7 +83,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_0)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("0", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -91,7 +91,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_1_letter_error)
 {
-    w_bool_t dummy;
+    bool dummy;
     fail_if (w_str_bool ("g", &dummy), "Could convert invalid value");
     fail_if (w_str_bool ("6", &dummy), "Could convert invalid value");
     fail_if (w_str_bool ("$", &dummy), "Could convert invalid value");
@@ -104,7 +104,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_no)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("no", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -112,7 +112,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_ok)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("ok", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -120,7 +120,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_yes)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("yes", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -128,7 +128,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_nah)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("nah", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -136,7 +136,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_nop)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("nop", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -144,7 +144,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_true)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("true", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -152,7 +152,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_yeah)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("yeah", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -160,7 +160,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_okay)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("okay", &val), "Could not convert");
     fail_unless (val, "Converted value is not true");
 }
@@ -168,7 +168,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_nope)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("nope", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -176,7 +176,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_false)
 {
-    w_bool_t val;
+    bool val;
     fail_unless (w_str_bool ("false", &val), "Could not convert");
     fail_if (val, "Converted value is not false");
 }
@@ -184,7 +184,7 @@ END_TEST
 
 START_TEST (test_wstr_conv_bool_fail)
 {
-    w_bool_t dummy;
+    bool dummy;
     fail_if (w_str_bool ("", &dummy), "Could convert ''");
     fail_if (w_str_bool (" ", &dummy), "Could convert ' '");
     fail_if (w_str_bool ("foo", &dummy), "Could convert 'foo'");

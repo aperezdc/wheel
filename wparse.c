@@ -113,7 +113,7 @@ w_parse_ident (w_parse_t *p)
 }
 
 
-w_bool_t
+bool
 w_parse_ulong (w_parse_t      *p,
                unsigned long  *value)
 {
@@ -124,12 +124,12 @@ w_parse_ulong (w_parse_t      *p,
         w_parse_getchar (p);
         if (p->look == 'x' || p->look == 'X') {
             if (w_io_fscan_ulong_hex (p->input, value))
-                return W_NO;
+                return false;
         }
         else if (isdigit (p->look)) {
             w_io_putback (p->input, p->look);
             if (w_io_fscan_ulong_oct (p->input, value))
-                return W_NO;
+                return false;
         }
         else {
             w_io_putback (p->input, p->look);
@@ -139,16 +139,16 @@ w_parse_ulong (w_parse_t      *p,
     else {
         w_io_putback (p->input, p->look);
         if (w_io_fscan_ulong (p->input, value))
-            return W_NO;
+            return false;
     }
 
     w_parse_getchar (p);
     w_parse_skip_ws (p);
-    return W_YES;
+    return true;
 }
 
 
-w_bool_t
+bool
 w_parse_long (w_parse_t *p, long *value)
 {
     unsigned long uval;
@@ -160,13 +160,13 @@ w_parse_long (w_parse_t *p, long *value)
         w_parse_getchar (p);
         if (p->look == 'x' || p->look == 'X') {
             if (w_io_fscan_ulong_hex (p->input, &uval))
-                return W_NO;
+                return false;
             *value = uval;
         }
         else if (isdigit (p->look)) {
             w_io_putback (p->input, p->look);
             if (w_io_fscan_ulong_oct (p->input, &uval))
-                return W_NO;
+                return false;
             *value = uval;
         }
         else {
@@ -177,16 +177,16 @@ w_parse_long (w_parse_t *p, long *value)
     else {
         w_io_putback (p->input, p->look);
         if (w_io_fscan_long (p->input, value))
-            return W_NO;
+            return false;
     }
 
     w_parse_getchar (p);
     w_parse_skip_ws (p);
-    return W_YES;
+    return true;
 }
 
 
-w_bool_t
+bool
 w_parse_double (w_parse_t *p, double *value)
 {
     w_assert (p != NULL);
@@ -194,12 +194,12 @@ w_parse_double (w_parse_t *p, double *value)
 
     w_io_putback (p->input, p->look);
     if (w_io_fscan_double (p->input, value))
-        return W_NO;
+        return false;
 
     w_parse_getchar (p);
     w_parse_skip_ws (p);
 
-    return W_YES;
+    return true;
 }
 
 

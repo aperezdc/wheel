@@ -12,7 +12,7 @@
 
 START_TEST (test_wdict_get_set)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_set (d, "foo", "FOO");
     fail_unless (w_dict_size (d) == 1,
@@ -33,7 +33,7 @@ END_TEST
 
 START_TEST (test_wdict_getn)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_set (d, "foo", "FOO");
     fail_if (strcmp ("FOO", w_dict_get (d, "foo")),
@@ -50,7 +50,7 @@ END_TEST
 
 START_TEST (test_wdict_setn)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_setn (d, "foobar", 3, "FOO");
     fail_unless (w_dict_size (d) == 1,
@@ -65,7 +65,7 @@ END_TEST
 
 START_TEST (test_wdict_clear)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_set (d, "no.1", (void*) 1);
     w_dict_set (d, "no.2", (void*) 2);
@@ -87,7 +87,7 @@ END_TEST
 
 START_TEST (test_wdict_del)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_set (d, "no.1", (void*) 1);
     w_dict_set (d, "no.2", (void*) 2);
@@ -119,7 +119,7 @@ END_TEST
 
 START_TEST (test_wdict_deln)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_set (d, "no.1", (void*) 1);
     w_dict_set (d, "no.2", (void*) 2);
@@ -141,8 +141,8 @@ END_TEST
 
 START_TEST (test_wdict_update)
 {
-    w_dict_t *d1 = w_dict_new (W_NO);
-    w_dict_t *d2 = w_dict_new (W_NO);
+    w_dict_t *d1 = w_dict_new (false);
+    w_dict_t *d2 = w_dict_new (false);
 
     w_dict_set (d1, "foo", "FOO");
     w_dict_set (d2, "bar", "BAR");
@@ -169,7 +169,7 @@ END_TEST
 
 START_TEST (test_wdict_first)
 {
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
 
     w_dict_set (d, "foo", "FOO");
     fail_if (strcmp ("FOO", *w_dict_first (d)),
@@ -183,7 +183,7 @@ END_TEST
 START_TEST (test_wdict_iter)
 {
     unsigned count = 0;
-    w_dict_t *d = w_dict_new (W_NO);
+    w_dict_t *d = w_dict_new (false);
     w_iterator_t i;
 
     w_dict_set (d, "no.1", (void*) 1);

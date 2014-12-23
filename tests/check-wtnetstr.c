@@ -20,13 +20,13 @@ START_TEST (test_wtnetstr_dump_basetypes)
     ck_assert_int_eq (3, w_buf_size (&b));
     w_buf_clear (&b);
 
-    fail_if (w_io_failed (w_tnetstr_dump_boolean (&b, W_YES)),
+    fail_if (w_io_failed (w_tnetstr_dump_boolean (&b, true)),
              "could not dump boolean");
     ck_assert_str_eq ("4:true!", w_buf_str (&b));
     ck_assert_int_eq (7, w_buf_size (&b));
     w_buf_clear (&b);
 
-    fail_if (w_io_failed (w_tnetstr_dump_boolean (&b, W_NO)),
+    fail_if (w_io_failed (w_tnetstr_dump_boolean (&b, false)),
              "could not dump boolean");
     ck_assert_str_eq ("5:false!", w_buf_str (&b));
     ck_assert_int_eq (8, w_buf_size (&b));
@@ -64,7 +64,7 @@ END_TEST
 START_TEST (test_wtnetstr_dump_list)
 {
     w_variant_t *variant;
-    w_list_t *list = w_list_new (W_YES);
+    w_list_t *list = w_list_new (true);
     w_buf_t b = W_BUF;
 
     /* empty list */
@@ -100,7 +100,7 @@ END_TEST
 START_TEST (test_wtnetstr_dump_dict)
 {
     w_variant_t *variant;
-    w_dict_t *dict = w_dict_new (W_YES);
+    w_dict_t *dict = w_dict_new (true);
     w_buf_t b = W_BUF;
 
     /* empty dict */
@@ -151,18 +151,18 @@ END_TEST
 
 START_TEST (test_wtnetstr_parse_bool)
 {
-    w_bool_t value = W_NO;
+    bool value = false;
     w_buf_t b = W_BUF;
 
     w_buf_set_str (&b, "4:true!");
     fail_if (w_tnetstr_parse_boolean (&b, &value),
              "Could not parse valid boolean");
-    ck_assert_int_eq (W_YES, value);
+    ck_assert_int_eq (true, value);
 
     w_buf_set_str (&b, "5:false!");
     fail_if (w_tnetstr_parse_boolean (&b, &value),
              "Could not parse valid boolean");
-    ck_assert_int_eq (W_NO, value);
+    ck_assert_int_eq (false, value);
 
     w_buf_set_str (&b, "4:burp!");
     fail_unless (w_tnetstr_parse_boolean (&b, &value),
@@ -292,7 +292,7 @@ END_TEST
 
 START_TEST (test_wtnetstr_parse_list)
 {
-    w_list_t *list = w_list_new (W_YES);
+    w_list_t *list = w_list_new (true);
     w_buf_t b = W_BUF;
 
     /* empty list */
@@ -341,7 +341,7 @@ END_TEST
 START_TEST (test_wtnetstr_parse_dict)
 {
     w_variant_t *variant;
-    w_dict_t *dict = w_dict_new (W_YES);
+    w_dict_t *dict = w_dict_new (true);
     w_buf_t b = W_BUF;
 
     /* empty dict */

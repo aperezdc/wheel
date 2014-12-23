@@ -43,7 +43,7 @@ w_io_socket_cleanup (void *obj)
 }
 
 
-static w_bool_t
+static bool
 w_io_socket_init_unix (w_io_socket_t *io, const char *path)
 {
     struct sockaddr_un *un;
@@ -55,7 +55,7 @@ w_io_socket_init_unix (w_io_socket_t *io, const char *path)
 
     /* Create socket fd. */
     if ((fd = socket (AF_UNIX, SOCK_STREAM, 0)) < 0) {
-        return W_NO;
+        return false;
     }
 
     un = (struct sockaddr_un*) io->sa;
@@ -70,11 +70,11 @@ w_io_socket_init_unix (w_io_socket_t *io, const char *path)
     w_assert (memcmp (un, io->sa, io->slen) == 0);
 
     w_obj_dtor (io, w_io_socket_cleanup);
-    return W_YES;
+    return true;
 }
 
 
-static w_bool_t
+static bool
 w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
 {
     struct sockaddr_in *in;
@@ -90,7 +90,7 @@ w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
     if (host) {
         if (!inet_aton (host, &in->sin_addr)) {
             errno = EINVAL;
-            return W_NO;
+            return false;
         }
     }
     else {
@@ -101,7 +101,7 @@ w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
     in->sin_family = AF_INET;
 
     if ((fd = socket (AF_INET, SOCK_STREAM, 0)) < 0) {
-        return W_NO;
+        return false;
     }
 
     w_io_unix_init_fd ((w_io_unix_t*) io, fd);
@@ -112,11 +112,11 @@ w_io_socket_init_tcp4 (w_io_socket_t *io, const char *host, int port)
     w_assert (memcmp (in, io->sa, io->slen) == 0);
 
     w_obj_dtor (io, w_io_socket_cleanup);
-    return W_YES;
+    return true;
 }
 
 
-static w_bool_t
+static bool
 w_io_socket_initv (w_io_socket_t *io, w_io_socket_kind_t kind, va_list args)
 {
     char *host;
@@ -133,17 +133,17 @@ w_io_socket_initv (w_io_socket_t *io, w_io_socket_kind_t kind, va_list args)
             port = va_arg (args, int);
             return w_io_socket_init_tcp4 (io, (const char*) host, port);
         default:
-            return W_NO;
+            return false;
     }
 
-    return W_YES;
+    return true;
 }
 
 
-w_bool_t
+bool
 w_io_socket_init (w_io_socket_t *io, w_io_socket_kind_t kind, ...)
 {
-    w_bool_t ret;
+    bool ret;
     va_list args;
     va_start (args, kind);
     ret = w_io_socket_initv (io, kind, args);
@@ -157,7 +157,7 @@ w_io_socket_open (w_io_socket_kind_t kind, ...)
 {
     w_io_socket_t *io = w_obj_new (w_io_socket_t);
     va_list args;
-    w_bool_t ret;
+    bool ret;
 
     /* Start with an invalid socket fd */
     W_IO_SOCKET_FD (io) = -1;
@@ -179,7 +179,7 @@ w_io_socket_open (w_io_socket_kind_t kind, ...)
 struct w_io_socket_thread
 {
     pthread_t      thread;
-    w_bool_t        (*hnd) (w_io_socket_t*);
+    bool        (*hnd) (w_io_socket_t*);
     w_io_socket_t *io;
 };
 
@@ -216,9 +216,9 @@ w_io_socket_serve_thread_run (void *udata)
 }
 
 
-static w_bool_t
+static bool
 w_io_socket_serve_thread (w_io_socket_t *io,
-                          w_bool_t (*handler) (w_io_socket_t*))
+                          bool (*handler) (w_io_socket_t*))
 {
     struct w_io_socket_thread *st = w_new0 (struct w_io_socket_thread);
 
@@ -242,9 +242,9 @@ w_io_socket_serve_thread (w_io_socket_t *io,
 #endif /* W_CONF_PTHREAD */
 
 
-static w_bool_t
+static bool
 w_io_socket_serve_fork (w_io_socket_t *io,
-                        w_bool_t (*handler) (w_io_socket_t*))
+                        bool (*handler) (w_io_socket_t*))
 {
     pid_t pid;
 
@@ -257,13 +257,13 @@ w_io_socket_serve_fork (w_io_socket_t *io,
     exit (((*handler) (io)) ? EXIT_SUCCESS : EXIT_FAILURE);
 
     /* Keep compiler happy */
-    return W_NO;
+    return false;
 }
 
 
-static w_bool_t
+static bool
 w_io_socket_serve_single (w_io_socket_t *io,
-                          w_bool_t (*handler) (w_io_socket_t*))
+                          bool (*handler) (w_io_socket_t*))
 {
     w_assert (handler);
     w_assert (io);
@@ -271,7 +271,7 @@ w_io_socket_serve_single (w_io_socket_t *io,
 }
 
 
-w_bool_t
+bool
 w_io_socket_connect (w_io_socket_t *io)
 {
     w_assert (io);
@@ -282,15 +282,15 @@ w_io_socket_connect (w_io_socket_t *io)
 }
 
 
-w_bool_t
+bool
 w_io_socket_serve (w_io_socket_t *io,
                    w_io_socket_serve_mode_t mode,
-                   w_bool_t (*handler) (w_io_socket_t*))
+                   bool (*handler) (w_io_socket_t*))
 {
-    w_bool_t (*mode_handler) (w_io_socket_t*, w_bool_t (*) (w_io_socket_t*));
+    bool (*mode_handler) (w_io_socket_t*, bool (*) (w_io_socket_t*));
     struct sockaddr sa;
     socklen_t slen;
-    w_bool_t ret;
+    bool ret;
     int fd;
 
 #ifdef W_CONF_PTHREAD
@@ -325,12 +325,12 @@ w_io_socket_serve (w_io_socket_t *io,
     w_assert (mode_handler);
 
     if (bind (W_IO_SOCKET_FD (io), (struct sockaddr*) io->sa, io->slen) == -1) {
-        return W_NO;
+        return false;
     }
-    io->bound = W_YES;
+    io->bound = true;
 
     if (listen (W_IO_SOCKET_FD (io), W_IO_SOCKET_BACKLOG) == -1) {
-        return W_NO;
+        return false;
     }
 
     slen = W_IO_SOCKET_SA_LEN;
@@ -350,11 +350,11 @@ w_io_socket_serve (w_io_socket_t *io,
         slen = W_IO_SOCKET_SA_LEN;
     }
 
-    return W_YES;
+    return true;
 }
 
 
-w_bool_t
+bool
 w_io_socket_send_eof (w_io_socket_t *io)
 {
     w_assert (io);

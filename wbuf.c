@@ -140,7 +140,7 @@ w_buf_format (w_buf_t *buf, const char *fmt, ...)
     w_assert (fmt);
 
     w_io_buf_t io;
-    w_io_buf_init (&io, buf, W_YES);
+    w_io_buf_init (&io, buf, true);
 
     va_list al;
     va_start (al, fmt);
@@ -159,7 +159,7 @@ w_buf_formatv (w_buf_t *buf, const char *fmt, va_list args)
     w_assert (fmt);
 
     w_io_buf_t io;
-    w_io_buf_init (&io, buf, W_YES);
+    w_io_buf_init (&io, buf, true);
 
     return w_io_formatv ((w_io_t*) &io, fmt, args);
 }

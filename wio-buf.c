@@ -51,7 +51,7 @@ w_io_buf_read (w_io_t *iobase, void *buf, size_t len)
 
 
 void
-w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, w_bool_t append)
+w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, bool append)
 {
     w_assert (io);
 
@@ -75,7 +75,7 @@ w_io_t*
 w_io_buf_open (w_buf_t *buf)
 {
     w_io_buf_t *io = w_obj_new (w_io_buf_t);
-    w_io_buf_init (io, buf, W_NO);
+    w_io_buf_init (io, buf, false);
     return (w_io_t*) io;
 }
 

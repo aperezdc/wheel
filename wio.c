@@ -274,19 +274,18 @@ w_io_fscan (w_io_t *io, const char *fmt, ...)
 ssize_t
 w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
 {
-    w_bool_t (*rfun) (w_io_t*, void*);
-    ssize_t retval = 0;
-    int ch;
-
     w_assert (io);
     w_assert (fmt);
 
+    ssize_t retval = 0;
+
 #define CHAR_TO_FUN(_c, _f) \
-        case _c : rfun = (w_bool_t (*)(w_io_t*, void*)) _f; break
+        case _c : rfun = (bool (*)(w_io_t*, void*)) _f; break
 
     for (; *fmt ; fmt++) {
         if (*fmt == '$') {
             void *dptr = va_arg (args, void*);
+            bool (*rfun) (w_io_t*, void*);
 
             switch (*(++fmt)) {
                 CHAR_TO_FUN ('i', w_io_fscan_int);
@@ -308,6 +307,7 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
             }
         }
 
+        int ch;
         if ((ch = w_io_getchar (io)) != *fmt) {
             w_io_putback (io, ch);
             break;

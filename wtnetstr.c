@@ -49,7 +49,7 @@ w_tnetstr_write_null (w_io_t *io)
 
 
 w_io_result_t
-w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value)
+w_tnetstr_dump_boolean (w_buf_t *buffer, bool value)
 {
     w_assert (buffer);
 
@@ -66,7 +66,7 @@ w_tnetstr_dump_boolean (w_buf_t *buffer, w_bool_t value)
 
 
 w_io_result_t
-w_tnetstr_write_boolean (w_io_t *io, w_bool_t value)
+w_tnetstr_write_boolean (w_io_t *io, bool value)
 {
     w_assert (io);
     if (value) {
@@ -352,7 +352,7 @@ peek_item_size (const w_buf_t *buffer)
 }
 
 
-static inline w_bool_t
+static inline bool
 slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
 {
     unsigned plen = 0;
@@ -362,7 +362,7 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
     w_assert (buffer);
 
     if (w_buf_size (buffer) < _W_TNS_MIN_LENGTH)
-        return W_YES;
+        return true;
 
     for (pbuf = w_buf_data (buffer), blen = w_buf_size (buffer);
          blen-- && *pbuf != ':';
@@ -374,7 +374,7 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
     if (plen > _W_TNS_MAX_PAYLOAD ||
         w_buf_size (buffer) < (size_t) ((pbuf - w_buf_data (buffer)) + plen + 2) ||
         *(pbuf + plen + 1) != type_tag)
-        return W_YES;
+        return true;
 
     /*
      * XXX We cheat here: we make the "slice" buffer point to the same
@@ -384,11 +384,11 @@ slice_payload (const w_buf_t *buffer, w_buf_t *slice, int type_tag)
     w_buf_data (slice) = ++pbuf;
     w_buf_size (slice) = plen;
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
 {
     w_assert (io);
@@ -422,7 +422,7 @@ return_error:
 }
 
 
-w_bool_t
+bool
 w_tnetstr_parse_null (const w_buf_t *buffer)
 {
     w_assert (buffer);
@@ -433,7 +433,7 @@ w_tnetstr_parse_null (const w_buf_t *buffer)
 }
 
 
-w_bool_t
+bool
 w_tnetstr_parse_float (const w_buf_t *buffer, double *value)
 {
     w_buf_t payload;
@@ -445,14 +445,14 @@ w_tnetstr_parse_float (const w_buf_t *buffer, double *value)
     /* Shortest length value: 1:0^ */
     if (w_buf_size (buffer) < 4 ||
         slice_payload (buffer, &payload, _W_TNS_TAG_FLOAT))
-        return W_YES;
+        return true;
 
-    w_io_buf_init (&iobuf, &payload, W_NO);
+    w_io_buf_init (&iobuf, &payload, false);
     return w_io_fscan_double ((w_io_t*) &iobuf, value);
 }
 
 
-w_bool_t
+bool
 w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
 {
     w_buf_t payload;
@@ -464,15 +464,15 @@ w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
     /* Shortest length value: 1:0# */
     if (w_buf_size (buffer) < 4 ||
         slice_payload (buffer, &payload, _W_TNS_TAG_NUMBER))
-        return W_YES;
+        return true;
 
-    w_io_buf_init (&iobuf, &payload, W_NO);
+    w_io_buf_init (&iobuf, &payload, false);
     return w_io_fscan_long ((w_io_t*) &iobuf, value);
 }
 
 
-w_bool_t
-w_tnetstr_parse_boolean (const w_buf_t *buffer, w_bool_t *value)
+bool
+w_tnetstr_parse_boolean (const w_buf_t *buffer, bool *value)
 {
     w_assert (buffer);
     w_assert (value);
@@ -483,7 +483,7 @@ w_tnetstr_parse_boolean (const w_buf_t *buffer, w_bool_t *value)
      */
     switch (w_buf_size (buffer)) {
         case 7:
-            *value = W_YES;
+            *value = true;
             return w_buf_data (buffer)[0] != '4'
                 || w_buf_data (buffer)[1] != ':'
                 || w_buf_data (buffer)[2] != 't'
@@ -492,7 +492,7 @@ w_tnetstr_parse_boolean (const w_buf_t *buffer, w_bool_t *value)
                 || w_buf_data (buffer)[5] != 'e'
                 || w_buf_data (buffer)[6] != _W_TNS_TAG_BOOLEAN;
         case 8:
-            *value = W_NO;
+            *value = false;
             return w_buf_data (buffer)[0] != '5'
                 || w_buf_data (buffer)[1] != ':'
                 || w_buf_data (buffer)[2] != 'f'
@@ -502,12 +502,12 @@ w_tnetstr_parse_boolean (const w_buf_t *buffer, w_bool_t *value)
                 || w_buf_data (buffer)[6] != 'e'
                 || w_buf_data (buffer)[7] != _W_TNS_TAG_BOOLEAN;
         default:
-            return W_YES;
+            return true;
     }
 }
 
 
-w_bool_t
+bool
 w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value)
 {
     w_buf_t payload;
@@ -516,14 +516,14 @@ w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value)
     w_assert (value);
 
     if (slice_payload (buffer, &payload, _W_TNS_TAG_STRING))
-        return W_YES;
+        return true;
 
     w_buf_append_buf (value, &payload);
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
 {
     w_buf_t payload;
@@ -533,7 +533,7 @@ w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
     w_assert (value);
 
     if (slice_payload (buffer, &payload, _W_TNS_TAG_LIST))
-        return W_YES;
+        return true;
 
     while (szdone < w_buf_size (&payload)) {
         w_buf_t curitem = W_BUF;
@@ -543,7 +543,7 @@ w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
         w_buf_size (&curitem) = w_buf_size (&payload) - szdone;
 
         if (!(variant = w_tnetstr_parse (&curitem)))
-            return W_YES;
+            return true;
 
         szdone += peek_item_size (&curitem);
 
@@ -551,11 +551,11 @@ w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
         w_obj_unref (variant);
     }
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
 {
     w_buf_t payload;
@@ -565,7 +565,7 @@ w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
     w_assert (value);
 
     if (slice_payload (buffer, &payload, _W_TNS_TAG_DICT))
-        return W_YES;
+        return true;
 
     while (szdone < w_buf_size (&payload)) {
         w_buf_t curitem = W_BUF;
@@ -576,7 +576,7 @@ w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
         w_buf_size (&curitem) = w_buf_size (&payload) - szdone;
 
         if (w_tnetstr_parse_string (&curitem, &key))
-            return W_YES;
+            return true;
 
         szdone += peek_item_size (&curitem);
 
@@ -585,7 +585,7 @@ w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
 
         if (!(variant = w_tnetstr_parse (&curitem))) {
             w_buf_clear (&key);
-            return W_YES;
+            return true;
         }
 
         szdone += peek_item_size (&curitem);
@@ -595,7 +595,7 @@ w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
         w_buf_clear (&key);
     }
 
-    return W_NO;
+    return false;
 }
 
 
@@ -606,7 +606,7 @@ w_tnetstr_parse (const w_buf_t *buffer)
     size_t item_len;
     union {
         w_buf_t   vbuf;
-        w_bool_t  vbool;
+        bool      vbool;
         double    vdouble;
         long      vlong;
         w_list_t *vlist;
@@ -648,14 +648,14 @@ w_tnetstr_parse (const w_buf_t *buffer)
             break;
 
         case _W_TNS_TAG_LIST:
-            v.vlist = w_list_new (W_YES);
+            v.vlist = w_list_new (true);
             if (!w_tnetstr_parse_list (buffer, v.vlist))
                 ret = w_variant_new (W_VARIANT_LIST, v.vlist);
             w_obj_unref (v.vlist);
             break;
 
         case _W_TNS_TAG_DICT:
-            v.vdict = w_dict_new (W_YES);
+            v.vdict = w_dict_new (true);
             if (!w_tnetstr_parse_dict (buffer, v.vdict))
                 ret = w_variant_new (W_VARIANT_DICT, v.vdict);
             w_obj_unref (v.vdict);

@@ -20,14 +20,14 @@ START_TEST (test_wvariant_store_vals)
     ck_assert_int_eq (W_VARIANT_INVALID, w_variant_type (var));
     w_obj_unref (var);
 
-    var = w_variant_new (W_VARIANT_BOOL, W_YES);
+    var = w_variant_new (W_VARIANT_BOOL, true);
     ck_assert_int_eq (W_VARIANT_BOOL, w_variant_type (var));
-    ck_assert_int_eq (W_YES, w_variant_bool (var));
+    ck_assert_int_eq (true, w_variant_bool (var));
     w_obj_unref (var);
 
-    var = w_variant_new (W_VARIANT_BOOL, W_NO);
+    var = w_variant_new (W_VARIANT_BOOL, false);
     ck_assert_int_eq (W_VARIANT_BOOL, w_variant_type (var));
-    ck_assert_int_eq (W_NO, w_variant_bool (var));
+    ck_assert_int_eq (false, w_variant_bool (var));
     w_obj_unref (var);
 
     var = w_variant_new (W_VARIANT_STRING, "Hello, world!");
@@ -46,7 +46,7 @@ START_TEST (test_wvariant_store_vals)
     ck_assert_int_eq (W_VARIANT_NULL, w_variant_type (var));
     w_obj_unref (var);
 
-    list = w_list_new (W_NO);
+    list = w_list_new (false);
     var = w_variant_new (W_VARIANT_LIST, list);
     ck_assert_int_eq (W_VARIANT_LIST, w_variant_type (var));
     fail_if (list != w_variant_list (var),
@@ -56,7 +56,7 @@ START_TEST (test_wvariant_store_vals)
     w_obj_unref (list);
     w_obj_unref (var);
 
-    dict = w_dict_new (W_NO);
+    dict = w_dict_new (false);
     var = w_variant_new (W_VARIANT_DICT, dict);
     ck_assert_int_eq (W_VARIANT_DICT, w_variant_type (var));
     fail_if (dict != w_variant_dict (var),
@@ -71,8 +71,8 @@ END_TEST
 
 START_TEST (test_wvariant_mutate)
 {
-    w_list_t *list = w_list_new (W_NO);
-    w_dict_t *dict = w_dict_new (W_NO);
+    w_list_t *list = w_list_new (false);
+    w_dict_t *dict = w_dict_new (false);
     w_variant_t *var = w_variant_new (W_VARIANT_INVALID);
 
     /* mutate to a list, the list gets an extra ref */

@@ -12,7 +12,7 @@
 #include <math.h>
 
 
-w_bool_t
+bool
 w_io_fscan_double (w_io_t *io, double *result)
 {
     /*
@@ -24,8 +24,8 @@ w_io_fscan_double (w_io_t *io, double *result)
      *
      * TODO Have our own strtod/atod routines.
      */
-    w_bool_t got_exp = W_NO;
-    w_bool_t got_dot = W_NO;
+    bool got_exp = false;
+    bool got_dot = false;
     w_buf_t buf = W_BUF;
     int c;
 
@@ -71,7 +71,7 @@ w_io_fscan_double (w_io_t *io, double *result)
                 w_io_putback (io, c);
                 break;
             }
-            got_dot = W_YES;
+            got_dot = true;
         }
         else if (c == 'e' || c == 'E') {
             if (got_exp) break;
@@ -83,7 +83,7 @@ w_io_fscan_double (w_io_t *io, double *result)
                 w_io_putback (io, c);
                 c = 'e';
             }
-            got_exp = W_YES;
+            got_exp = true;
         }
         else if (!isdigit (c)) {
             w_io_putback (io, c);
@@ -106,19 +106,19 @@ w_io_fscan_double (w_io_t *io, double *result)
 
 success:
     w_buf_clear (&buf);
-    return W_NO;
+    return false;
 
 failure:
     w_io_putback (io, c);
     w_buf_clear (&buf);
-    return W_YES;
+    return true;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_long (w_io_t *io, long *result)
 {
-    w_bool_t signchange = W_NO;
+    bool signchange = false;
     unsigned long uval;
     int chr;
 
@@ -126,7 +126,7 @@ w_io_fscan_long (w_io_t *io, long *result)
 
     switch ((chr = w_io_getchar (io))) {
         case '-':
-            signchange = W_YES;
+            signchange = true;
         case '+':
             break;
         default:
@@ -134,30 +134,30 @@ w_io_fscan_long (w_io_t *io, long *result)
     }
 
     if (w_io_fscan_ulong (io, &uval))
-        return W_YES;
+        return true;
 
     *result = 0;
 
     if (signchange) {
         if (uval > LONG_MAX) {
             *result = LONG_MIN;
-            return W_YES;
+            return true;
         }
         *result = -uval;
     }
     else {
         if (uval > LONG_MAX) {
             *result = LONG_MAX;
-            return W_YES;
+            return true;
         }
         *result = uval;
     }
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_ulong (w_io_t *io, unsigned long *result)
 {
     w_assert (io);
@@ -173,7 +173,7 @@ start_digit:
             goto start_digit;
         }
         w_io_putback (io, chr);
-        return W_YES;
+        return true;
     }
 
     do {
@@ -193,7 +193,7 @@ start_digit:
         *result = temp;
     }
 
-    return W_NO;
+    return false;
 }
 
 
@@ -212,7 +212,7 @@ _map_hexchar (int ch)
 }
 
 
-w_bool_t
+bool
 w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result)
 {
     w_assert (io);
@@ -222,7 +222,7 @@ w_io_fscan_ulong_hex (w_io_t *io, unsigned long *result)
 
     if ((chr = w_io_getchar (io)) != '0') {
         w_io_putback (io, chr);
-        return W_YES;
+        return true;
     }
 
     if ((chr = w_io_getchar (io)) != 'x' && chr != 'X') {
@@ -243,11 +243,11 @@ end:
         *result = temp;
     }
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
 {
     w_assert (io);
@@ -256,7 +256,7 @@ w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
 
     if ((chr = w_io_getchar (io)) != '0') {
         w_io_putback (io, chr);
-        return W_YES;
+        return true;
     }
 
     while ((chr = w_io_getchar (io)) != W_IO_EOF &&
@@ -273,67 +273,67 @@ w_io_fscan_ulong_oct (w_io_t *io, unsigned long *result)
         *result = temp;
     }
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_int (w_io_t *io, int *result)
 {
     long value;
     w_assert (io);
 
     if (w_io_fscan_long (io, &value))
-        return W_YES;
+        return true;
 
     if (value > INT_MAX) {
         if (result)
             *result = INT_MAX;
-        return W_YES;
+        return true;
     }
     if (value < INT_MIN) {
         if (result)
             *result = INT_MIN;
-        return W_YES;
+        return true;
     }
 
     if (result)
         *result = (int) value;
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_uint (w_io_t *io, unsigned int *result)
 {
     unsigned long value;
     w_assert (io);
 
     if (w_io_fscan_ulong (io, &value))
-        return W_YES;
+        return true;
 
     if (value > UINT_MAX) {
         if (result)
             *result = UINT_MAX;
-        return W_YES;
+        return true;
     }
 
     if (result)
         *result = (unsigned int) value;
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_float (w_io_t *io, float *result)
 {
     double value;
     w_assert (io);
 
     if (w_io_fscan_double (io, &value))
-        return W_YES;
+        return true;
 
     if (isnan (value) || isinf (value))
         goto success;
@@ -341,27 +341,27 @@ w_io_fscan_float (w_io_t *io, float *result)
     if (value > FLT_MAX) {
         if (result)
             *result = FLT_MAX;
-        return W_YES;
+        return true;
     }
     if (value < FLT_MIN) {
         if (result)
             *result = FLT_MIN;
-        return W_YES;
+        return true;
     }
 
 success:
     if (result)
         *result = (float) value;
 
-    return W_NO;
+    return false;
 }
 
 
-w_bool_t
+bool
 w_io_fscan_word (w_io_t *io, char **result)
 {
     w_buf_t value = W_BUF;
-    w_bool_t ret = W_NO;
+    bool ret = false;
     int chr;
 
     while (!isspace ((chr = w_io_getchar (io))) &&

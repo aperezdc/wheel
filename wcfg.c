@@ -69,7 +69,7 @@ w_cfg_ensurenode (w_cfg_t *cf, const char *key)
     }
 
     if (sep) {
-        w_dict_t *d = w_dict_new (W_YES);
+        w_dict_t *d = w_dict_new (true);
         w_variant_set_dict (node, d);
         w_obj_unref (d);
         return w_cfg_ensurenode (d, ++sep);
@@ -79,10 +79,10 @@ w_cfg_ensurenode (w_cfg_t *cf, const char *key)
 }
 
 
-static w_bool_t
+static bool
 w_cfg_setv (w_cfg_t *cf, va_list args)
 {
-    w_bool_t ret = W_YES;
+    bool ret = true;
     w_cfg_type_t kind;
     w_variant_t *node;
     w_assert (cf);
@@ -92,7 +92,7 @@ w_cfg_setv (w_cfg_t *cf, va_list args)
         w_assert (key);
 
         if (!(node = w_cfg_ensurenode (cf, key)))
-            ret = W_NO;
+            ret = false;
 
         switch (kind) {
             case W_CFG_NUMBER:
@@ -106,7 +106,7 @@ w_cfg_setv (w_cfg_t *cf, va_list args)
                 break;
             default:
                 /* XXX For now just trust the programmer. */
-                ret = W_NO;
+                ret = false;
                 break;
         }
     }
@@ -114,10 +114,10 @@ w_cfg_setv (w_cfg_t *cf, va_list args)
 }
 
 
-static w_bool_t
+static bool
 w_cfg_getv (const w_cfg_t *cf, va_list args)
 {
-    w_bool_t ret = W_YES;
+    bool ret = true;
     w_cfg_type_t kind;
     w_variant_t *node;
     double *pnumber;
@@ -130,30 +130,30 @@ w_cfg_getv (const w_cfg_t *cf, va_list args)
         w_assert (key);
 
         if (!(node = w_cfg_getnode (cf, key)))
-            ret = W_NO;
+            ret = false;
 
         switch (kind) {
             case W_CFG_NUMBER:
                 pnumber = va_arg (args, double*);
                 if (node && w_variant_is_float (node))
                     *pnumber = w_variant_float (node);
-                else ret = W_NO;
+                else ret = false;
                 break;
             case W_CFG_STRING:
                 pstring = va_arg (args, const char**);
                 if (node && w_variant_is_string (node))
                     *pstring = w_variant_string (node);
-                else ret = W_NO;
+                else ret = false;
                 break;
             case W_CFG_NODE:
                 pnode = va_arg (args, w_cfg_t**);
                 if (node && w_variant_is_dict (node))
                     *pnode = w_variant_dict (node);
-                else ret = W_NO;
+                else ret = false;
                 break;
             default:
                 /* XXX For now just trust the programmer. */
-                ret = W_NO;
+                ret = false;
                 break;
         }
     }
@@ -161,10 +161,10 @@ w_cfg_getv (const w_cfg_t *cf, va_list args)
 }
 
 
-w_bool_t
+bool
 w_cfg_set (w_cfg_t *cf, ...)
 {
-    w_bool_t ret;
+    bool ret;
     va_list args;
     w_assert (cf);
     va_start (args, cf);
@@ -174,10 +174,10 @@ w_cfg_set (w_cfg_t *cf, ...)
 }
 
 
-w_bool_t
+bool
 w_cfg_get (const w_cfg_t *cf, ...)
 {
-    w_bool_t ret;
+    bool ret;
     va_list args;
     w_assert (cf);
     va_start (args, cf);
@@ -187,7 +187,7 @@ w_cfg_get (const w_cfg_t *cf, ...)
 }
 
 
-w_bool_t
+bool
 w_cfg_has (const w_cfg_t *cf, const char *key)
 {
     w_assert (cf);
@@ -247,7 +247,7 @@ w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **
 }
 
 
-w_bool_t
+bool
 w_cfg_del (w_cfg_t *cf, const char *key)
 {
     w_variant_t *node;
@@ -258,14 +258,14 @@ w_cfg_del (w_cfg_t *cf, const char *key)
     w_assert (key);
 
     if (!(node = w_cfg_getnodelocation (cf, key, &it, &where)))
-        return W_NO;
+        return false;
 
     w_assert (where);
     w_assert (it);
 
     w_dict_del (where, w_dict_iterator_get_key (it));
 
-    return W_YES;
+    return true;
 }
 
 
@@ -275,24 +275,24 @@ w_cfg_del (w_cfg_t *cf, const char *key)
         unsigned __tmp = (_l) * 4;                      \
         while (__tmp--)                                 \
             if (w_io_failed (w_io_putchar ((_o), ' '))) \
-                return W_NO;                            \
+                return false;                            \
     } while (0)
 
 
-static w_bool_t
+static bool
 w_cfg_dump_string (w_io_t *out, const char *str)
 {
     w_assert (out);
     w_assert (str);
 
     if (w_io_failed (w_io_putchar (out, '"')))
-        return W_NO;
+        return false;
 
     for (; *str; str++) {
 #define ESCAPE(_c, _e) \
         case _c : if (w_io_failed (w_io_putchar (out, '\\')) || \
                       w_io_failed (w_io_putchar (out, (_e))))   \
-                          return W_NO;                          \
+                          return false;                          \
                   break
         switch (*str) {
             ESCAPE ('\n', 'n');
@@ -304,17 +304,17 @@ w_cfg_dump_string (w_io_t *out, const char *str)
             ESCAPE ('\v', 'v');
             default:
                 if (w_io_failed (w_io_putchar (out, *str)))
-                    return W_NO;
+                    return false;
         }
 #undef ESCAPE
     }
     if (w_io_failed (w_io_putchar (out, '"')))
-        return W_NO;
-    return W_YES;
+        return false;
+    return true;
 }
 
 
-static w_bool_t
+static bool
 w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
 {
     w_iterator_t i;
@@ -329,41 +329,41 @@ w_cfg_dump_cfg (const w_cfg_t *cf, w_io_t *out, unsigned indent)
         node = (w_variant_t*) *i;
 
         if (w_io_failed (w_io_format (out, "$s ", w_dict_iterator_get_key (i))))
-            return W_NO;
+            return false;
 
         switch (w_variant_type (node)) {
             case W_CFG_NODE:
                 if (w_io_failed (w_io_putchar (out, '{')) ||
                     w_io_failed (w_io_putchar (out, '\n')) ||
                     !w_cfg_dump_cfg (w_variant_dict (node), out, indent + 1))
-                    return W_NO;
+                    return false;
                 W_CFG_DUMP_INDENT (indent, out);
                 if (w_io_failed (w_io_putchar (out, '}')))
-                    return W_NO;
+                    return false;
                 break;
             case W_CFG_STRING:
                 if (!w_cfg_dump_string (out, w_variant_string (node)))
-                    return W_NO;
+                    return false;
                 break;
             case W_CFG_NUMBER:
                 if (w_io_failed (w_io_format_double (out, w_variant_float (node))))
-                    return W_NO;
+                    return false;
                 break;
             default:
                 break;
         }
         if (w_io_failed (w_io_putchar (out, '\n')))
-            return W_NO;
+            return false;
     }
 
-    return W_YES;
+    return true;
 }
 
 
 /*
  * TODO Better error checking of IO functions.
  */
-w_bool_t
+bool
 w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
 {
     w_assert (cf);
@@ -372,17 +372,17 @@ w_cfg_dump (const w_cfg_t *cf, w_io_t *output)
 }
 
 
-w_bool_t
+bool
 w_cfg_dump_file (const w_cfg_t *cf, const char *path)
 {
     w_io_t *io;
-    w_bool_t ret;
+    bool ret;
 
     w_assert (cf);
     w_assert (path);
 
     if (!(io = w_io_unix_open (path, O_WRONLY | O_CREAT | O_TRUNC, 0666)))
-        return W_NO;
+        return false;
 
     ret = w_cfg_dump (cf, io);
     w_obj_unref (io);
