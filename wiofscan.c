@@ -26,6 +26,7 @@ w_io_fscan_double (w_io_t *io, double *result)
      */
     bool got_exp = false;
     bool got_dot = false;
+    bool got_sgn = false;
     w_buf_t buf = W_BUF;
     int c;
 
@@ -60,6 +61,7 @@ w_io_fscan_double (w_io_t *io, double *result)
         case '-':
         case '+':
             w_buf_append_char (&buf, c);
+            got_sgn = true;
             break;
         default:
             w_io_putback (io, c);
@@ -95,9 +97,21 @@ w_io_fscan_double (w_io_t *io, double *result)
     if (!w_buf_size (&buf))
         goto failure;
 
+    if (got_sgn && w_buf_size (&buf) == 1) {
+        w_assert (w_buf_data (&buf)[0] == '-' || w_buf_data (&buf)[0] == '+');
+        c = w_buf_data (&buf)[0];
+        goto failure;
+    }
+
     if (got_dot && w_buf_size (&buf) == 1) {
         w_assert (w_buf_data (&buf)[0] == '.');
         c = '.';
+        goto failure;
+    }
+
+    if (got_dot && got_sgn && w_buf_size (&buf) == 2) {
+        // FIXME: We cannot call w_io_putback() twice for both characters.
+        c = w_buf_data (&buf)[1];
         goto failure;
     }
 
