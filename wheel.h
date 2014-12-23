@@ -126,6 +126,7 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -2272,6 +2273,77 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, bool append)
  */
 #define W_IO_BUF_STR(_p) \
     (w_io_buf_str (W_IO_BUF_BUF (_p)))
+
+
+/*!
+ * Perform input/output on fixed-size memory regions.
+ */
+W_OBJ (w_io_mem_t)
+{
+    w_io_t   parent;
+    uint8_t *data;
+    size_t   size;
+    size_t   pos;
+};
+
+
+/*!
+ * Create an I/O object to be used with a fixed-size memory region.
+ *
+ * \param data Pointer to a memory region.
+ * \param size Size, in bytes, of the memory region.
+ */
+W_EXPORT w_io_t* w_io_mem_open (uint8_t *data, size_t size)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL_RETURN
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+/*!
+ * Initialize an I/O object in the stack to be used with a fixed-size memory
+ * region. This function is not meant to be used directly, but is provided as
+ * a convenience for other code extending \ref w_io_mem_t, or wanting to
+ * quickly allocate a \ref w_io_mem_T in the stack.
+ *
+ * \param io In-memory I/O object.
+ * \param data Pointer to a memory region.
+ * \param size Size, in bytes, of the memory region.
+ */
+W_EXPORT void w_io_mem_init (w_io_mem_t *io, uint8_t *data, size_t size)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+/*!
+ * Obtains the base pointer to the data buffer.
+ *
+ * \param io In-memory I/O object.
+ * \return   Base pointer to data buffer.
+ */
+static inline uint8_t* w_io_mem_data (w_io_mem_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL_RETURN
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline uint8_t*
+w_io_mem_data (w_io_mem_t *io)
+{
+    w_assert (io);
+    return io->data;
+}
+
+/*!
+ * Obtains the size of the memory region.
+ *
+ * \param io In-memory I/O object.
+ * \return   Size of the memory region.
+ */
+static inline size_t w_io_mem_size (w_io_mem_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline size_t w_io_mem_size (w_io_mem_t *io)
+{
+    w_assert (io);
+    return io->size;
+}
 
 /*\}*/
 
