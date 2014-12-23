@@ -125,7 +125,7 @@ w_io_putchar (w_io_t *io, int ch)
 
 
 void
-w_io_putback (w_io_t *io, char ch)
+w_io_putback (w_io_t *io, int ch)
 {
     w_assert (io);
     io->backch = ch;

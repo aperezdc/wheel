@@ -1983,7 +1983,7 @@ W_EXPORT w_io_result_t w_io_putchar (w_io_t *io, int ch)
 
 /*!
  */
-W_EXPORT void w_io_putback (w_io_t *io, char ch)
+W_EXPORT void w_io_putback (w_io_t *io, int ch)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
