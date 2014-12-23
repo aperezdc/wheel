@@ -299,9 +299,21 @@ w_parse_string (w_parse_t *p)
         w_buf_append_char (&buf, chr);
     }
 
+    /* Premature end of string. */
+    if (chr == W_IO_EOF) {
+        w_buf_clear (&buf);
+        return NULL;
+    }
+
+    /* I/O error. */
+    if (chr < 0) {
+        w_buf_clear (&buf);
+        w_parse_error (p, "I/O error: $E");
+    }
+
+    w_assert (chr == '"');
     w_parse_getchar (p);
     w_parse_skip_ws (p);
-
     return w_buf_str (&buf);
 }
 
