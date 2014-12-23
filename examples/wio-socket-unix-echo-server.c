@@ -20,21 +20,21 @@ serve_request (w_io_socket_t *io)
     char buf[BUFFER_SIZE];
     w_io_result_t r;
 
-    W_IGNORE_RESULT (w_io_format (w_stdout, "BEGIN REQUEST\n"));
+    W_IO_NORESULT (w_io_format (w_stdout, "BEGIN REQUEST\n"));
 
     while (!w_io_failed (r = w_io_read ((w_io_t*) io, buf, BUFFER_SIZE)) &&
            w_io_result_bytes (r) > 0) {
         W_IO_CHECK_RETURN (w_io_write ((w_io_t*) io, buf, w_io_result_bytes (r)), false);
-        W_IGNORE_RESULT (w_io_write (w_stdout, buf, w_io_result_bytes (r)));
+        W_IO_NORESULT (w_io_write (w_stdout, buf, w_io_result_bytes (r)));
     }
 
     w_io_socket_send_eof (io);
 
     if (w_io_failed (r)) {
-        W_IGNORE_RESULT (w_io_format (w_stderr, "Error: %E\n"));
+        W_IO_NORESULT (w_io_format (w_stderr, "Error: %E\n"));
     }
 
-    W_IGNORE_RESULT (w_io_format (w_stdout, "END REQUEST\n"));
+    W_IO_NORESULT (w_io_format (w_stdout, "END REQUEST\n"));
     return true;
 }
 

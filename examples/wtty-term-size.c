@@ -18,7 +18,7 @@ int main (int argc, char **argv)
     if (!w_tty_size (&cols, &rows))
         w_die ("Could not get terminal size\n");
 
-    W_IGNORE_RESULT (w_io_format (w_stdout, "$I $I\n", cols, rows));
+    W_IO_NORESULT (w_io_format (w_stdout, "$I $I\n", cols, rows));
 
     return EXIT_SUCCESS;
 }

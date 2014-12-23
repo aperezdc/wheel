@@ -90,6 +90,7 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 	  (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 1)
 # define W_EXPORT __attribute__((visibility("default")))
 # define W_HIDDEN __attribute__((visibility("hidden")))
+# define W_UNUSED __attribute__((unused))
 # define W_FUNCTION_ATTR_MALLOC __attribute__((malloc))
 # define W_FUNCTION_ATTR_PURE \
     __attribute__((pure))
@@ -104,6 +105,7 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 #else
 # define W_EXPORT
 # define W_HIDDEN
+# define W_UNUSED
 # define W_FUNCTION_ATTR_PURE
 # define W_FUNCTION_ATTR_MALLOC
 # define W_FUNCTION_ATTR_NORETURN
@@ -111,11 +113,6 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 # define W_FUNCTION_ATTR_NOT_NULL_RETURN
 # define W_FUNCTION_ATTR_WARN_UNUSED_RESULT
 #endif
-
-#define W_IGNORE_RESULT(_stmt) \
-    do {                       \
-        (void) (_stmt);        \
-    } while (0)
 
 /*\}*/
 
@@ -1712,6 +1709,13 @@ struct w_io_result {
             W__LCAT (io_check_b2).bytes)                  \
             return W_IO_RESULT_ERROR(1);                  \
         _action W__LCAT (io_check_b2);                    \
+    } while (0)
+
+#define W_IO_NORESULT(_iocall)                            \
+    do {                                                  \
+        W_UNUSED w_io_result_t W__LCAT (io_ignore) =      \
+            (_iocall);                                    \
+        (void) W__LCAT (io_ignore);                       \
     } while (0)
 
 

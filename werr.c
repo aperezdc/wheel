@@ -29,7 +29,7 @@ w_diev(const char *fmt, va_list al)
 {
     if (fmt) {
         /* Unfortunately, errors cannot be reported from here. */
-        (void) w_io_formatv (w_stderr, fmt, al);
+        W_IO_NORESULT (w_io_formatv (w_stderr, fmt, al));
         fsync (W_IO_UNIX_FD (w_stderr));
     }
     exit(EXIT_FAILURE);
@@ -43,9 +43,9 @@ __w_debug(const char *fmt, ...)
 
     va_start(al, fmt);
     /* Unfortunately, errors cannot be reported from here. */
-    (void) w_io_format  (w_stderr, "DEBUG: ");
-    (void) w_io_formatv (w_stderr, fmt, al);
-    (void) w_io_putchar (w_stderr, '\n');
+    W_IO_NORESULT (w_io_format  (w_stderr, "DEBUG: "));
+    W_IO_NORESULT (w_io_formatv (w_stderr, fmt, al));
+    W_IO_NORESULT (w_io_putchar (w_stderr, '\n'));
     va_end(al);
 }
 

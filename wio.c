@@ -19,7 +19,7 @@ static void
 w_io_cleanup (void *obj)
 {
     /* Unfortunately, errors can't be reported here. */
-    (void) w_io_close ((w_io_t*) obj);
+    W_IO_NORESULT (w_io_close ((w_io_t*) obj));
 }
 
 

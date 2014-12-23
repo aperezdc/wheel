@@ -39,7 +39,7 @@ w_io_socket_cleanup (void *obj)
         unlink (un->sun_path);
     }
     /* Unfortunately, errors can't be reported here. */
-    (void) w_io_close ((w_io_t*) obj);
+    W_IO_NORESULT (w_io_close ((w_io_t*) obj));
 }
 
 

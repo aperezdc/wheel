@@ -23,7 +23,7 @@ main (int argc, char **argv)
     }
 
     w_free (err);
-    W_IGNORE_RESULT (w_cfg_dump (cfg, w_stdout));
+    W_IO_NORESULT (w_cfg_dump (cfg, w_stdout));
 
     return EXIT_SUCCESS;
 }

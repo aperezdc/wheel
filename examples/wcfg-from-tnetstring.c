@@ -19,7 +19,7 @@ main (int argc, char *argv[])
     if (w_tnetstr_read_dict (w_stdin, cfg))
         w_die ("Could not parse input tnetstring");
 
-    W_IGNORE_RESULT (w_cfg_dump (cfg, w_stdout));
+    W_IO_NORESULT (w_cfg_dump (cfg, w_stdout));
     w_obj_unref (cfg);
 
     return EXIT_SUCCESS;

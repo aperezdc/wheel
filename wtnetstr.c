@@ -236,10 +236,10 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
 
     switch (w_variant_type (value)) {
         case W_VARIANT_BUFFER:
-            (void) w_io_format (w_stderr,
-                                "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
-                                "This is a bug, execution aborted!\n");
-            (void) w_io_flush (w_stderr);
+            W_IO_NORESULT (w_io_format (w_stderr,
+                                        "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
+                                        "This is a bug, execution aborted!\n"));
+            W_IO_NORESULT (w_io_flush (w_stderr));
             abort ();
 
         case W_VARIANT_OBJECT:  /* Can't serialize object values. */
@@ -269,10 +269,10 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
     }
 
     /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
-    (void) w_io_format (w_stderr,
-                        "w_variant_t with unhandled type.\n"
-                        "This is a bug, execution aborted!\n");
-    (void) w_io_flush (w_stderr);
+    W_IO_NORESULT (w_io_format (w_stderr,
+                                "w_variant_t with unhandled type.\n"
+                                "This is a bug, execution aborted!\n"));
+    W_IO_NORESULT (w_io_flush (w_stderr));
     abort ();
     return W_IO_RESULT_ERROR (EINVAL);  /* Keep compiler happy */
 }
@@ -290,10 +290,10 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
     switch (w_variant_type (value)) {
         case W_VARIANT_BUFFER:
             /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
-            (void) w_io_format (w_stderr,
-                                "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
-                                "This is a bug, execution aborted!\n");
-            (void) w_io_flush (w_stderr);
+            W_IO_NORESULT (w_io_format (w_stderr,
+                                        "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
+                                        "This is a bug, execution aborted!\n"));
+            W_IO_NORESULT (w_io_flush (w_stderr));
             abort();
 
         case W_VARIANT_OBJECT:  /* Can't serialize object values. */
@@ -323,10 +323,10 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
     }
 
     /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
-    (void) w_io_format (w_stderr,
-                        "w_variant_t with unhandled type.\n"
-                        "This is a bug, execution aborted!\n");
-    (void) w_io_flush (w_stderr);
+    W_IO_NORESULT (w_io_format (w_stderr,
+                                "w_variant_t with unhandled type.\n"
+                                "This is a bug, execution aborted!\n"));
+    W_IO_NORESULT (w_io_flush (w_stderr));
     abort ();
     return W_IO_RESULT_ERROR (EINVAL);  /* Keep compiler happy */
 }

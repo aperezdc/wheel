@@ -32,7 +32,7 @@ main (int argc, char **argv)
     w_unused (argv);
 
     obj = my_obj_new (10);
-    W_IGNORE_RESULT (w_io_format (w_stdout, "$i\n", obj->val));
+    W_IO_NORESULT (w_io_format (w_stdout, "$i\n", obj->val));
     w_obj_unref (obj);
 
     return EXIT_SUCCESS;

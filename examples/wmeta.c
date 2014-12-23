@@ -15,46 +15,46 @@ format_meta (w_io_t *io, const w_meta_item_t *meta, int indent)
     while (w_meta_item_is_valid (meta)) {
         if (indent) {
             int i = indent << 1;
-            while (i--) W_IGNORE_RESULT (w_io_putchar (io, ' '));
+            while (i--) W_IO_NORESULT (w_io_putchar (io, ' '));
         }
 
         switch (meta->type) {
-            case W_META_TYPE_I8:  W_IGNORE_RESULT (w_io_format (io, "int8_t ")); break;
-            case W_META_TYPE_I16: W_IGNORE_RESULT (w_io_format (io, "int16_t ")); break;
-            case W_META_TYPE_I32: W_IGNORE_RESULT (w_io_format (io, "int32_t ")); break;
-            case W_META_TYPE_I64: W_IGNORE_RESULT (w_io_format (io, "int64_t ")); break;
-            case W_META_TYPE_U8 : W_IGNORE_RESULT (w_io_format (io, "uint8_t ")); break;
-            case W_META_TYPE_U16: W_IGNORE_RESULT (w_io_format (io, "uint16_t ")); break;
-            case W_META_TYPE_U32: W_IGNORE_RESULT (w_io_format (io, "uint32_t ")); break;
-            case W_META_TYPE_U64: W_IGNORE_RESULT (w_io_format (io, "uint64_t ")); break;
-            case W_META_TYPE_STR: W_IGNORE_RESULT (w_io_format (io, "char *")); break;
-            case W_META_TYPE_BOOL:W_IGNORE_RESULT (w_io_format (io, "bool ")); break;
+            case W_META_TYPE_I8:  W_IO_NORESULT (w_io_format (io, "int8_t ")); break;
+            case W_META_TYPE_I16: W_IO_NORESULT (w_io_format (io, "int16_t ")); break;
+            case W_META_TYPE_I32: W_IO_NORESULT (w_io_format (io, "int32_t ")); break;
+            case W_META_TYPE_I64: W_IO_NORESULT (w_io_format (io, "int64_t ")); break;
+            case W_META_TYPE_U8 : W_IO_NORESULT (w_io_format (io, "uint8_t ")); break;
+            case W_META_TYPE_U16: W_IO_NORESULT (w_io_format (io, "uint16_t ")); break;
+            case W_META_TYPE_U32: W_IO_NORESULT (w_io_format (io, "uint32_t ")); break;
+            case W_META_TYPE_U64: W_IO_NORESULT (w_io_format (io, "uint64_t ")); break;
+            case W_META_TYPE_STR: W_IO_NORESULT (w_io_format (io, "char *")); break;
+            case W_META_TYPE_BOOL:W_IO_NORESULT (w_io_format (io, "bool ")); break;
             default: break;
         }
 
         if (meta->type == W_META_TYPE_REG) {
             if (meta->alen)
-                W_IGNORE_RESULT (w_io_format (io, "$s $s[$I] {\n",
-                                              w_meta_desc_name (meta->mref),
-                                              meta->name,
-                                              meta->alen));
+                W_IO_NORESULT (w_io_format (io, "$s $s[$I] {\n",
+                                            w_meta_desc_name (meta->mref),
+                                            meta->name,
+                                            meta->alen));
             else
-                W_IGNORE_RESULT (w_io_format (io, "$s $s {\n",
-                                              w_meta_desc_name (meta->mref),
-                                              meta->name));
+                W_IO_NORESULT (w_io_format (io, "$s $s {\n",
+                                            w_meta_desc_name (meta->mref),
+                                            meta->name));
             format_meta (io, w_meta_desc_items (meta->mref), indent + 1);
             if (indent) {
                 int i = indent << 1;
-                while (i--) W_IGNORE_RESULT (w_io_putchar (io, ' '));
+                while (i--) W_IO_NORESULT (w_io_putchar (io, ' '));
             }
-            W_IGNORE_RESULT (w_io_format (io, "};\n"));
+            W_IO_NORESULT (w_io_format (io, "};\n"));
         }
         else {
-            W_IGNORE_RESULT (w_io_format (io, "$s", meta->name));
+            W_IO_NORESULT (w_io_format (io, "$s", meta->name));
             if (meta->alen)
-                W_IGNORE_RESULT (w_io_format (io, "[$I];\n", meta->alen));
+                W_IO_NORESULT (w_io_format (io, "[$I];\n", meta->alen));
             else
-                W_IGNORE_RESULT (w_io_format (io, ";\n"));
+                W_IO_NORESULT (w_io_format (io, ";\n"));
         }
 
         meta = w_meta_item_next (meta);
@@ -97,17 +97,17 @@ main (int argc, char **argv)
     w_unused (argc);
     w_unused (argv);
 
-    W_IGNORE_RESULT (w_io_format (w_stdout,
-                                  "$s {\n",
-                                  w_meta_desc_name (s_meta)));
+    W_IO_NORESULT (w_io_format (w_stdout,
+                                "$s {\n",
+                                w_meta_desc_name (s_meta)));
     format_meta (w_stdout, w_meta_desc_items (s_meta), 1);
-    W_IGNORE_RESULT (w_io_format (w_stdout, "};\n\n"));
+    W_IO_NORESULT (w_io_format (w_stdout, "};\n\n"));
 
-    W_IGNORE_RESULT (w_io_format (w_stdout,
-                                  "$s {\n",
-                                  w_meta_desc_name (t_meta)));
+    W_IO_NORESULT (w_io_format (w_stdout,
+                                "$s {\n",
+                                w_meta_desc_name (t_meta)));
     format_meta (w_stdout, w_meta_desc_items (t_meta), 1);
-    W_IGNORE_RESULT (w_io_format (w_stdout, "};\n"));
+    W_IO_NORESULT (w_io_format (w_stdout, "};\n"));
 
     return 0;
 }

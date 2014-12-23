@@ -51,7 +51,7 @@ main (int argc, char **argv)
     w_io_socket_send_eof ((w_io_socket_t*) ios);
 
     while (w_io_result_bytes (r = w_io_read (ios, buf, BUFFER_SIZE)) > 0) {
-        W_IGNORE_RESULT (w_io_write (w_stdout, buf, w_io_result_bytes (r)));
+        W_IO_NORESULT (w_io_write (w_stdout, buf, w_io_result_bytes (r)));
     }
 
     w_obj_unref (ios);

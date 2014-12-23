@@ -71,9 +71,9 @@ int
 main (int argc, char **argv)
 {
     w_opt_parse (option_spec, NULL, NULL, NULL, argc, argv);
-    W_IGNORE_RESULT (w_io_format (w_stdout,
-                                  "Time value, in seconds: $L\n",
-                                  seconds));
+    W_IO_NORESULT (w_io_format (w_stdout,
+                                "Time value, in seconds: $L\n",
+                                seconds));
     return EXIT_SUCCESS;
 }
 

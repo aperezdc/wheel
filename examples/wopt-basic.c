@@ -27,9 +27,9 @@ file_arg_cb (void *filename, void *ctx)
     w_unused (ctx);
 
     if (verbose) {
-        W_IGNORE_RESULT (w_io_format (w_stdout,
-                                      "File name: $s\n",
-                                      filename));
+        W_IO_NORESULT (w_io_format (w_stdout,
+                                    "File name: $s\n",
+                                    filename));
     }
 }
 

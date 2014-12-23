@@ -44,7 +44,7 @@ main (int argc, char *argv[])
 
     if (w_event_loop_add (loop, event)) {
         w_obj_unref (event);
-        W_IGNORE_RESULT (w_io_format (w_stderr, "$s: $E\n", argv[0]));
+        W_IO_NORESULT (w_io_format (w_stderr, "$s: $E\n", argv[0]));
         return EXIT_FAILURE;
     }
 

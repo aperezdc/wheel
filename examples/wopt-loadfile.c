@@ -29,9 +29,9 @@ main (int argc, char **argv)
 
     w_opt_parse_io (option_spec, w_stdin, &errmsg);
     if (errmsg != NULL) {
-        W_IGNORE_RESULT (w_io_format (w_stderr,
-                                      "<stdin>:$s\n",
-                                      errmsg));
+        W_IO_NORESULT (w_io_format (w_stderr,
+                                    "<stdin>:$s\n",
+                                    errmsg));
         w_free (errmsg);
         return EXIT_FAILURE;
     }
