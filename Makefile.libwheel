@@ -31,6 +31,16 @@ libwheel_SRCS := wcfg.c       \
                  wtask.c      \
                  wtty.c
 
+# A C99 compiler is mandatory.
+libwheel_GNU_ALIKE_COMPILER := $(shell \
+	if $(CC) -dumpversion &> /dev/null ; \
+	then $(CC) -dumpversion ; \
+	else echo 0 ; fi)
+
+ifneq ($(libwheel_GNU_ALIKE_COMPILER),0)
+CFLAGS        += -std=gnu99
+endif
+
 ifneq ($(libwheel_PTHREAD),0)
 LDFLAGS       += -pthread
 CFLAGS        += -pthread
