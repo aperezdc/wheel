@@ -26,7 +26,7 @@ w_io_fscan_double (w_io_t *io, double *result)
      */
     bool got_exp = false;
     bool got_dot = false;
-    bool got_sgn = false;
+    bool got_num = false;
     w_buf_t buf = W_BUF;
     int c;
 
@@ -61,7 +61,6 @@ w_io_fscan_double (w_io_t *io, double *result)
         case '-':
         case '+':
             w_buf_append_char (&buf, c);
-            got_sgn = true;
             break;
         default:
             w_io_putback (io, c);
@@ -74,22 +73,21 @@ w_io_fscan_double (w_io_t *io, double *result)
                 break;
             }
             got_dot = true;
-        }
-        else if (c == 'e' || c == 'E') {
+        } else if (c == 'e' || c == 'E') {
             if (got_exp) break;
             /* Take into account sign in exponent */
             if ((c = w_io_getchar (io)) != W_IO_EOF && (c == '-' || c == '+')) {
                 w_buf_append_char (&buf, 'e');
-            }
-            else {
+            } else {
                 w_io_putback (io, c);
                 c = 'e';
             }
             got_exp = true;
-        }
-        else if (!isdigit (c)) {
+        } else if (!isdigit (c)) {
             w_io_putback (io, c);
             break;
+        } else {
+            got_num = true;
         }
         w_buf_append_char (&buf, c);
     }
@@ -97,21 +95,9 @@ w_io_fscan_double (w_io_t *io, double *result)
     if (!w_buf_size (&buf))
         goto failure;
 
-    if (got_sgn && w_buf_size (&buf) == 1) {
-        w_assert (w_buf_data (&buf)[0] == '-' || w_buf_data (&buf)[0] == '+');
-        c = w_buf_data (&buf)[0];
-        goto failure;
-    }
-
-    if (got_dot && w_buf_size (&buf) == 1) {
-        w_assert (w_buf_data (&buf)[0] == '.');
-        c = '.';
-        goto failure;
-    }
-
-    if (got_dot && got_sgn && w_buf_size (&buf) == 2) {
-        // FIXME: We cannot call w_io_putback() twice for both characters.
-        c = w_buf_data (&buf)[1];
+    if (!got_num) {
+        // FIXME: Cannot call w_io_putback() for more than the last character.
+        c = w_buf_data (&buf)[w_buf_size (&buf) - 1];
         goto failure;
     }
 
