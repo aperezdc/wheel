@@ -42,8 +42,12 @@ while read -r testname ; do
 		echo "    if (c) suite_add_tcase (s, c);"
 		echo "    c = tcase_create (\"${testcase}\");"
 	fi
-	echo "    tcase_add_test (c, ${funcname});"
 
+	if [[ ${testcase} = *__loop ]] ; then
+		echo "    tcase_add_loop_test (c, ${funcname}, 0, w_lengthof (${testcase}__data) - 1);"
+	else
+		echo "    tcase_add_test (c, ${funcname});"
+	fi
 done < <( pick_test_names "$1" | sort)
 
 echo "    if (c) suite_add_tcase (s, c);"
