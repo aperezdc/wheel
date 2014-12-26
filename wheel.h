@@ -3370,8 +3370,17 @@ W_OBJ_DEF (w_event_t)
 };
 
 
-#define w_event_type(_event) \
-    (((w_event_t*) (_event))->type)
+static inline w_event_type_t w_event_get_type (const w_event_t *event)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline w_event_type_t
+w_event_get_type (const w_event_t *event)
+{
+    w_assert (event);
+    return event->type;
+}
+
 
 w_event_t* w_event_new (w_event_type_t     type,
                         w_event_callback_t callback,
@@ -3398,20 +3407,30 @@ W_OBJ_DEF (w_event_loop_t)
  *
  * \return A \ref w_timestamp_t value.
  */
-#define w_event_loop_now(_loop) \
-    ((_loop)->now)
+static inline w_timestamp_t w_event_loop_now (const w_event_loop_t *loop)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Obtains the list of events registered in an event loop.
- */
-#define w_event_loop_events(_loop) \
-    ((_loop)->events)
+static inline w_timestamp_t
+w_event_loop_now (const w_event_loop_t *loop)
+{
+    w_assert (loop);
+    return loop->now;
+}
 
 /*!
  * Checks whether an event loop is running.
  */
-#define w_event_loop_is_running(_loop) \
-    ((_loop)->running)
+static inline bool w_event_loop_is_running (const w_event_loop_t *loop)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline bool
+w_event_loop_is_running (const w_event_loop_t *loop)
+{
+    w_assert (loop);
+    return loop->running;
+}
 
 /*!
  * Creates a new event loop. Event loops can be used to listen for
