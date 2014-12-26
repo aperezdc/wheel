@@ -2043,7 +2043,6 @@ W_EXPORT w_io_result_t w_io_formatv (w_io_t     *io,
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-
 W_EXPORT w_io_result_t w_io_format_long (w_io_t *io, long value)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
@@ -2064,6 +2063,10 @@ W_EXPORT w_io_result_t w_io_format_ulong_oct (w_io_t *io, unsigned long value)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
+#define w_print(...) \
+        W_IO_NORESULT (w_io_format (w_stdout, __VA_ARGS__))
+#define w_printerr(...) \
+        W_IO_NORESULT (w_io_format (w_stderr, __VA_ARGS__))
 
 /*!
  * Reads formatted input from an I/O object.
