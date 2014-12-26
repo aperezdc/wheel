@@ -177,9 +177,8 @@ w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value)
 
     w_buf_t buf = W_BUF;
     w_io_result_t r;
-    w_iterator_t item;
 
-    w_list_foreach (value, item) {
+    w_list_foreach (item, value) {
         r = w_tnetstr_dump (&buf, (w_variant_t*) *item);
         if (w_unlikely (w_io_failed (r)))
             break;
@@ -204,9 +203,8 @@ w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value)
 
     w_buf_t buf = W_BUF;
     w_io_result_t r;
-    w_iterator_t item;
 
-    w_dict_foreach (value, item) {
+    w_dict_foreach (item, value) {
         r = w_tnetstr_dump_string (&buf, w_dict_iterator_get_key (item));
         if (w_unlikely (w_io_failed (r)))
             break;

@@ -73,7 +73,6 @@ START_TEST (test_wlist_iterate)
         (void*) 0xf0caf0ca,
     };
     unsigned i;
-    w_iterator_t iter;
 
     w_list_t *l = w_list_new (false);
 
@@ -83,11 +82,11 @@ START_TEST (test_wlist_iterate)
     ck_assert_int_eq (w_lengthof (items), w_list_size (l));
 
     i = 0;
-    w_list_foreach (l, iter)
+    w_list_foreach (iter, l)
         fail_unless (items[i++] == *iter, "items do not match");
 
     i = w_lengthof (items);
-    w_list_foreach_rev (l, iter)
+    w_list_foreach_reverse (iter, l)
         fail_unless (items[--i] == *iter, "items do not match");
 
     w_obj_unref (l);

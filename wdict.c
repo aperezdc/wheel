@@ -318,26 +318,21 @@ w_dict_iterator_get_key (w_iterator_t i)
 void
 w_dict_traverse (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 {
-	w_iterator_t i;
-
 	w_assert (d != NULL);
 	w_assert (f != NULL);
 
-	w_dict_foreach (d, i) {
+	w_dict_foreach (i, d)
 		*i = (*f) (*i, ctx);
-    }
 }
 
 
 void
 w_dict_traverse_keys (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 {
-	w_iterator_t i;
-
 	w_assert (d != NULL);
 	w_assert (f != NULL);
 
-	for (i = w_dict_first (d); i; i = w_dict_next (d, i))
+    w_dict_foreach (i, d)
 		(*f) ((void*) w_dict_iterator_get_key (i), ctx);
 }
 
@@ -345,12 +340,10 @@ w_dict_traverse_keys (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 void
 w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 {
-	w_iterator_t i;
-
 	w_assert (d != NULL);
 	w_assert (f != NULL);
 
-	for (i = w_dict_first (d); i; i = w_dict_next (d, i))
+	w_dict_foreach (i, d)
 		*i = (*f) (*i, ctx);
 }
 
@@ -358,12 +351,10 @@ w_dict_traverse_values (w_dict_t *d, w_traverse_fun_t f, void *ctx)
 void
 w_dict_update (w_dict_t *dst, const w_dict_t *src)
 {
-    w_iterator_t i;
-
     w_assert (dst != NULL);
     w_assert (src != NULL);
 
-    for (i = w_dict_first (src); i; i = w_dict_next (src, i))
+    w_dict_foreach (i, src)
         w_dict_set (dst, w_dict_iterator_get_key (i), *i);
 }
 

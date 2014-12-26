@@ -966,17 +966,21 @@ W_EXPORT void w_list_traverse_rev (const w_list_t *list, w_traverse_fun_t f, voi
  *
  * \see w_list_foreach_rev, w_list_traverse.
  */
-#define w_list_foreach(_l, _v) \
-    for ((_v) = w_list_first (_l); (_v) != NULL; (_v) = w_list_next ((_l), (_v)))
+#define w_list_foreach(_v, _l)                \
+    for (w_iterator_t _v = w_list_first (_l); \
+         _v != NULL;                          \
+         _v = w_list_next ((_l), _v))
 
 /*!
  * Defines a loop, in reverse order, over all items in a list. This can be
  * used as an alternative to \ref w_list_traverse_rev.
  *
- * \see w_list_foreach, w_list_traverse_rev.
+ * \see w_list_foreach, w_list_traverse_reverse.
  */
-#define w_list_foreach_rev(_l, _v) \
-    for ((_v) = w_list_last (_l); (_v) != NULL; (_v) = w_list_prev ((_l), (_v)))
+#define w_list_foreach_reverse(_v, _l)       \
+    for (w_iterator_t _v = w_list_last (_l); \
+         _v != NULL;                         \
+         _v = w_list_prev ((_l), _v))
 
 /*!
  * Inserts an element in a list before a particular position.
@@ -1204,8 +1208,10 @@ W_EXPORT const char* w_dict_iterator_get_key (w_iterator_t i)
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-#define w_dict_foreach(_d, _i) \
-    for ((_i) = w_dict_first (_d); (_i) != NULL; (_i) = w_dict_next ((_d), (_i)))
+#define w_dict_foreach(_i, _d)                \
+    for (w_iterator_t _i = w_dict_first (_d); \
+         _i != NULL;                          \
+         _i = w_dict_next ((_d), _i))
 
 /*\}*/
 

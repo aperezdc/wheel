@@ -215,7 +215,6 @@ w_cfg_type (const w_cfg_t *cf, const char *key)
 static w_variant_t*
 w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **where)
 {
-    w_iterator_t i;
     const char *sep;
     size_t len;
 
@@ -229,7 +228,7 @@ w_cfg_getnodelocation (w_cfg_t *cf, const char *key, w_iterator_t *j, w_cfg_t **
     sep = strchr (key, '.');
     len = sep ? (size_t)(sep - key) : (size_t)(strlen (key));
 
-    w_dict_foreach (cf, i) {
+    w_dict_foreach (i, cf) {
         w_variant_t *node = (w_variant_t*) *i;
         if (!strncmp (key, w_dict_iterator_get_key (i), len)) {
             if (sep) {
@@ -323,14 +322,11 @@ static w_io_result_t
 dump_list (const w_list_t *list, w_io_t* stream, unsigned indent)
 {
     w_io_result_t r = W_IO_RESULT (0);
-    w_iterator_t i;
-
-    w_list_foreach (list, i) {
+    w_list_foreach (i, list) {
         DUMP_INDENT (r, indent, stream);
         W_IO_CHAIN (r, dump_value ((w_variant_t*) *i, stream, indent));
         W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
     }
-
     return r;
 }
 
@@ -385,15 +381,12 @@ static w_io_result_t
 dump_dict (const w_dict_t *dict, w_io_t *stream, unsigned indent)
 {
     w_io_result_t r = W_IO_RESULT (0);
-    w_iterator_t i;
-
-    w_dict_foreach (dict, i) {
+    w_dict_foreach (i, dict) {
         DUMP_INDENT (r, indent, stream);
         W_IO_CHAIN (r, w_io_format (stream, "$s: ",  w_dict_iterator_get_key (i)));
         W_IO_CHAIN (r, dump_value ((w_variant_t*) *i, stream, indent));
         W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
     }
-
     return r;
 }
 

@@ -191,7 +191,7 @@ START_TEST (test_wdict_iter)
     w_dict_set (d, "no.3", (void*) 3);
     w_dict_set (d, "no.4", (void*) 4);
 
-    w_dict_foreach (d, i)
+    w_dict_foreach (i, d)
         count++;
 
     fail_unless (count == 4,

@@ -190,8 +190,7 @@ w_event_loop_run (w_event_loop_t *loop)
             loop->running = false;
         }
         else {
-            w_iterator_t i;
-            w_list_foreach (loop->idle_events, i) {
+            w_list_foreach (i, loop->idle_events) {
                 w_event_t *event = *i;
                 w_assert (event->type == W_EVENT_IDLE);
 
@@ -347,16 +346,15 @@ w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
     for (i = 0; i < nevents && !stop_loop; i++) {
         w_event_t *event = events[i].data.ptr;
         if (event == W_EPOLL_SIGNAL_MARK) {
-            struct signalfd_siginfo si;
-            w_iterator_t i;
-
             w_assert (ep->signal_fd >= 0);
+
+            struct signalfd_siginfo si;
             if (read (ep->signal_fd, &si, sizeof (struct signalfd_siginfo))
                                        != sizeof (struct signalfd_siginfo))
                 /* XXX This may be too drastic... */
                 abort ();
 
-            w_list_foreach (ep->signal_events, i) {
+            w_list_foreach (i, ep->signal_events) {
                 event = *i;
                 if (si.ssi_signo == (uint32_t) event->signum)
                     if ((*event->callback) (loop, event))
@@ -481,7 +479,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
 
     w_epoll_t *ep = w_obj_priv (loop, w_event_loop_t);
     struct epoll_event ep_ev;
-    w_iterator_t delpos = 0, i;
+    w_iterator_t delpos = 0;
     sigset_t sigmask;
     int fd = -1;
 
@@ -499,7 +497,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
                 return true;
 
             fd = 0;
-            w_list_foreach (ep->signal_events, i) {
+            w_list_foreach (i, ep->signal_events) {
                 if (((w_event_t *) *i)->signum == event->signum) fd++;
                 if (event == *i) delpos = i;
             }
@@ -549,11 +547,10 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
 static bool
 w_event_loop_backend_start (w_event_loop_t *loop)
 {
-    w_iterator_t i;
     w_assert (loop);
 
     /* Arm timers */
-    w_list_foreach (loop->events, i) {
+    w_list_foreach (i, loop->events) {
         w_event_t *event = *i;
         if (event->type == W_EVENT_TIMER) {
             struct itimerspec its;
@@ -567,7 +564,6 @@ w_event_loop_backend_start (w_event_loop_t *loop)
                 return true;
         }
     }
-
     return false;
 }
 
@@ -575,23 +571,20 @@ w_event_loop_backend_start (w_event_loop_t *loop)
 static bool
 w_event_loop_backend_stop (w_event_loop_t *loop)
 {
-    struct itimerspec its;
-    w_iterator_t i;
-
     w_assert (loop);
 
     /* Setting the structure to all zeros disarms a timer */
+    struct itimerspec its;
     memset (&its, 0x00, sizeof (struct itimerspec));
 
     /* Disarm timers */
-    w_list_foreach (loop->events, i) {
+    w_list_foreach (i, loop->events) {
         w_event_t *event = *i;
         if (event->type == W_EVENT_TIMER) {
             if (timerfd_settime ((int) event->flags, 0, &its, NULL) == -1)
                 return true;
         }
     }
-
     return false;
 }
 
