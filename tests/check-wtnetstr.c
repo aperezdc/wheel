@@ -75,7 +75,7 @@ START_TEST (test_wtnetstr_dump_list)
     w_buf_clear (&b);
 
     /* list with one item */
-    w_list_append (list, (variant = w_variant_new (W_VARIANT_NULL)));
+    w_list_append (list, (variant = w_variant_new (W_VARIANT_TYPE_NULL)));
     w_obj_unref (variant);
     fail_if (w_io_failed (w_tnetstr_dump_list (&b, list)),
              "could not dump list");
@@ -84,7 +84,7 @@ START_TEST (test_wtnetstr_dump_list)
     w_buf_clear (&b);
 
     /* Now with two items */
-    w_list_append (list, (variant = w_variant_new (W_VARIANT_NUMBER, 42)));
+    w_list_append (list, (variant = w_variant_new (W_VARIANT_TYPE_NUMBER, 42)));
     w_obj_unref (variant);
     fail_if (w_io_failed (w_tnetstr_dump_list (&b, list)),
              "could not dump list");
@@ -111,7 +111,7 @@ START_TEST (test_wtnetstr_dump_dict)
     w_buf_clear (&b);
 
     /* Dictionary with one item */
-    w_dict_set (dict, "Null", (variant = w_variant_new (W_VARIANT_NULL)));
+    w_dict_set (dict, "Null", (variant = w_variant_new (W_VARIANT_TYPE_NULL)));
     w_obj_unref (variant);
     fail_if (w_io_failed (w_tnetstr_dump_dict (&b, dict)),
              "could not dump dict");

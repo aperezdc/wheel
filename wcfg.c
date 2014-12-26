@@ -66,7 +66,7 @@ w_cfg_ensurenode (w_cfg_t *cf, const char *key)
 
     if (!node) {
         /* Node not found -> create it. */
-        node = w_variant_new (W_VARIANT_INVALID);
+        node = w_variant_new (W_VARIANT_TYPE_INVALID);
         w_dict_setn (cf, key, len, node);
     }
 
@@ -341,23 +341,23 @@ dump_value (const w_variant_t *value, w_io_t *stream, unsigned indent)
     w_io_result_t r = W_IO_RESULT (0);
 
     switch (w_variant_type (value)) {
-        case W_VARIANT_STRING:
+        case W_VARIANT_TYPE_STRING:
             W_IO_CHAIN (r, dump_buffer (w_variant_buffer (value), stream));
             break;
-        case W_VARIANT_BOOL:
+        case W_VARIANT_TYPE_BOOL:
             W_IO_CHAIN (r, w_io_format (stream, "$s",
                                         w_variant_bool (value)
                                             ? "true" : "false"));
             break;
-        case W_VARIANT_NUMBER:
+        case W_VARIANT_TYPE_NUMBER:
             W_IO_CHAIN (r, w_io_format_long (stream,
                                              w_variant_number (value)));
             break;
-        case W_VARIANT_FLOAT:
+        case W_VARIANT_TYPE_FLOAT:
             W_IO_CHAIN (r, w_io_format_double (stream,
                                                w_variant_float (value)));
             break;
-        case W_VARIANT_LIST:
+        case W_VARIANT_TYPE_LIST:
             W_IO_CHAIN (r, w_io_putchar (stream, '['));
             W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
             W_IO_CHAIN (r, dump_list (w_variant_list (value),
@@ -365,7 +365,7 @@ dump_value (const w_variant_t *value, w_io_t *stream, unsigned indent)
             W_IO_CHAIN (r, w_io_putchar (stream, ']'));
             W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
             break;
-        case W_VARIANT_DICT:
+        case W_VARIANT_TYPE_DICT:
             W_IO_CHAIN (r, w_io_putchar (stream, '{'));
             W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
             W_IO_CHAIN (r, dump_dict (w_variant_dict (value), stream, indent + 1));

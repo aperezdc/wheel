@@ -30,7 +30,7 @@ w_diev(const char *fmt, va_list al)
     if (fmt) {
         /* Unfortunately, errors cannot be reported from here. */
         W_IO_NORESULT (w_io_formatv (w_stderr, fmt, al));
-        fsync (W_IO_UNIX_FD (w_stderr));
+        fsync (w_io_unix_get_fd ((w_io_unix_t*) w_stderr));
     }
     exit(EXIT_FAILURE);
 }

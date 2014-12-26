@@ -20,7 +20,7 @@ static const char *msg = "Too much work and no joy makes Jack a dull boy.\n"
 START_TEST (test_wio_buf_open_empty)
 {
     w_io_t *io = w_io_buf_open (NULL);
-    w_buf_t *buf = W_IO_BUF_BUF ((w_io_buf_t*) io);
+    w_buf_t *buf = w_io_buf_get_buffer ((w_io_buf_t*) io);
 
     fail_unless (buf != NULL,
                  "I/O has no autocreated buffer");
@@ -40,14 +40,14 @@ START_TEST (test_wio_buf_open_nonempty)
     w_buf_set_str (&b, msg);
     io = w_io_buf_open (&b);
 
-    fail_unless (W_IO_BUF_BUF ((w_io_buf_t*) io) != NULL,
+    fail_unless (w_io_buf_get_buffer ((w_io_buf_t*) io) != NULL,
                 "I/O has no buffer");
-    fail_unless (W_IO_BUF_BUF ((w_io_buf_t*) io) == &b,
+    fail_unless (w_io_buf_get_buffer ((w_io_buf_t*) io) == &b,
                  "I/O buffer is not the same as the specified one");
-    fail_unless (w_buf_size (W_IO_BUF_BUF ((w_io_buf_t*) io)) == strlen (msg),
+    fail_unless (w_buf_size (w_io_buf_get_buffer ((w_io_buf_t*) io)) == strlen (msg),
                  "I/O buffer has different length than message, "
                  "buffer = %lu, message = %lu",
-                 w_buf_size (W_IO_BUF_BUF ((w_io_buf_t*) io)),
+                 w_buf_size (w_io_buf_get_buffer ((w_io_buf_t*) io)),
                  strlen (msg));
 
     w_obj_unref (io);
@@ -109,7 +109,7 @@ START_TEST (test_wio_buf_write)
     ck_assert_int_eq (10, w_io_result_bytes (w_io_write (io, msg, 10)));
     ck_assert_int_eq (10, w_io_result_bytes (w_io_write (io, msg, 10)));
 
-    w_buf_t *b = W_IO_BUF_BUF ((w_io_buf_t*) io);
+    w_buf_t *b = w_io_buf_get_buffer ((w_io_buf_t*) io);
     fail_if (b == NULL, "null autocreated buffer");
 
     fail_unless (w_buf_size (b) == 30,
@@ -130,7 +130,7 @@ START_TEST (test_wio_buf_format)
     w_io_t *io = w_io_buf_open (NULL);
     ck_assert_int_eq (2, w_io_result_bytes (w_io_format (io, "$i", 42)));
 
-    ck_assert_str_eq ("42", w_buf_str (W_IO_BUF_BUF ((w_io_buf_t*) io)));
+    ck_assert_str_eq ("42", w_buf_str (w_io_buf_get_buffer ((w_io_buf_t*) io)));
 
     w_obj_unref (io);
 }

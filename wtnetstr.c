@@ -232,39 +232,39 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
     w_assert (value);
 
     /* This should *never* happen. */
-    w_assert (w_variant_type (value) != W_VARIANT_BUFFER);
+    w_assert (w_variant_type (value) != W_VARIANT_TYPE_BUFFER);
 
     switch (w_variant_type (value)) {
-        case W_VARIANT_BUFFER:
+        case W_VARIANT_TYPE_BUFFER:
             W_IO_NORESULT (w_io_format (w_stderr,
                                         "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
                                         "This is a bug, execution aborted!\n"));
             W_IO_NORESULT (w_io_flush (w_stderr));
             abort ();
 
-        case W_VARIANT_OBJECT:  /* Can't serialize object values. */
-        case W_VARIANT_INVALID: /* Can't serialize invalid values. */
+        case W_VARIANT_TYPE_OBJECT:  /* Can't serialize object values. */
+        case W_VARIANT_TYPE_INVALID: /* Can't serialize invalid values. */
             return W_IO_RESULT_ERROR (EINVAL);
 
-        case W_VARIANT_NULL:
+        case W_VARIANT_TYPE_NULL:
             return w_tnetstr_dump_null (buffer);
 
-        case W_VARIANT_BOOL:
+        case W_VARIANT_TYPE_BOOL:
             return w_tnetstr_dump_boolean (buffer, w_variant_bool (value));
 
-        case W_VARIANT_STRING:
-            return w_tnetstr_dump_buffer (buffer, w_variant_string_buf (value));
+        case W_VARIANT_TYPE_STRING:
+            return w_tnetstr_dump_buffer (buffer, w_variant_buffer (value));
 
-        case W_VARIANT_NUMBER:
+        case W_VARIANT_TYPE_NUMBER:
             return w_tnetstr_dump_number (buffer, w_variant_number (value));
 
-        case W_VARIANT_FLOAT:
+        case W_VARIANT_TYPE_FLOAT:
             return w_tnetstr_dump_float (buffer, w_variant_float (value));
 
-        case W_VARIANT_LIST:
+        case W_VARIANT_TYPE_LIST:
             return w_tnetstr_dump_list (buffer, w_variant_list (value));
 
-        case W_VARIANT_DICT:
+        case W_VARIANT_TYPE_DICT:
             return w_tnetstr_dump_dict (buffer, w_variant_dict (value));
     }
 
@@ -285,10 +285,10 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
     w_assert (value);
 
     /* This should *never* happen. */
-    w_assert (w_variant_type (value) != W_VARIANT_BUFFER);
+    w_assert (w_variant_type (value) != W_VARIANT_TYPE_BUFFER);
 
     switch (w_variant_type (value)) {
-        case W_VARIANT_BUFFER:
+        case W_VARIANT_TYPE_BUFFER:
             /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
             W_IO_NORESULT (w_io_format (w_stderr,
                                         "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
@@ -296,29 +296,29 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
             W_IO_NORESULT (w_io_flush (w_stderr));
             abort();
 
-        case W_VARIANT_OBJECT:  /* Can't serialize object values. */
-        case W_VARIANT_INVALID: /* Can't serialize invalid values. */
+        case W_VARIANT_TYPE_OBJECT:  /* Can't serialize object values. */
+        case W_VARIANT_TYPE_INVALID: /* Can't serialize invalid values. */
             return W_IO_RESULT_ERROR (EINVAL);
 
-        case W_VARIANT_NULL:
+        case W_VARIANT_TYPE_NULL:
             return w_tnetstr_write_null (io);
 
-        case W_VARIANT_BOOL:
+        case W_VARIANT_TYPE_BOOL:
             return w_tnetstr_write_boolean (io, w_variant_bool (value));
 
-        case W_VARIANT_STRING:
-            return w_tnetstr_write_buffer (io, w_variant_string_buf (value));
+        case W_VARIANT_TYPE_STRING:
+            return w_tnetstr_write_buffer (io, w_variant_buffer (value));
 
-        case W_VARIANT_NUMBER:
+        case W_VARIANT_TYPE_NUMBER:
             return w_tnetstr_write_number (io, w_variant_number (value));
 
-        case W_VARIANT_FLOAT:
+        case W_VARIANT_TYPE_FLOAT:
             return w_tnetstr_write_float (io, w_variant_float (value));
 
-        case W_VARIANT_LIST:
+        case W_VARIANT_TYPE_LIST:
             return w_tnetstr_write_list (io, w_variant_list (value));
 
-        case W_VARIANT_DICT:
+        case W_VARIANT_TYPE_DICT:
             return w_tnetstr_write_dict (io, w_variant_dict (value));
     }
 
@@ -622,41 +622,41 @@ w_tnetstr_parse (const w_buf_t *buffer)
     switch (w_buf_const_data (buffer)[item_len-1]) {
         case _W_TNS_TAG_NULL:
             if (!w_tnetstr_parse_null (buffer))
-                ret = w_variant_new (W_VARIANT_NULL);
+                ret = w_variant_new (W_VARIANT_TYPE_NULL);
             break;
 
         case _W_TNS_TAG_FLOAT:
             if (!w_tnetstr_parse_float (buffer, &v.vdouble))
-                ret = w_variant_new (W_VARIANT_FLOAT, v.vdouble);
+                ret = w_variant_new (W_VARIANT_TYPE_FLOAT, v.vdouble);
             break;
 
         case _W_TNS_TAG_NUMBER:
             if (!w_tnetstr_parse_number (buffer, &v.vlong))
-                ret = w_variant_new (W_VARIANT_NUMBER, v.vlong);
+                ret = w_variant_new (W_VARIANT_TYPE_NUMBER, v.vlong);
             break;
 
         case _W_TNS_TAG_STRING:
             if (!w_tnetstr_parse_string (buffer, &v.vbuf))
-                ret = w_variant_new (W_VARIANT_BUFFER, &v.vbuf);
+                ret = w_variant_new (W_VARIANT_TYPE_BUFFER, &v.vbuf);
             w_buf_clear (&v.vbuf);
             break;
 
         case _W_TNS_TAG_BOOLEAN:
             if (!w_tnetstr_parse_boolean (buffer, &v.vbool))
-                ret = w_variant_new (W_VARIANT_BOOL, v.vbool);
+                ret = w_variant_new (W_VARIANT_TYPE_BOOL, v.vbool);
             break;
 
         case _W_TNS_TAG_LIST:
             v.vlist = w_list_new (true);
             if (!w_tnetstr_parse_list (buffer, v.vlist))
-                ret = w_variant_new (W_VARIANT_LIST, v.vlist);
+                ret = w_variant_new (W_VARIANT_TYPE_LIST, v.vlist);
             w_obj_unref (v.vlist);
             break;
 
         case _W_TNS_TAG_DICT:
             v.vdict = w_dict_new (true);
             if (!w_tnetstr_parse_dict (buffer, v.vdict))
-                ret = w_variant_new (W_VARIANT_DICT, v.vdict);
+                ret = w_variant_new (W_VARIANT_TYPE_DICT, v.vdict);
             w_obj_unref (v.vdict);
             break;
     }

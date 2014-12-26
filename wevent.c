@@ -411,7 +411,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
         case W_EVENT_IO:
         case W_EVENT_FD:
             fd = (event->type == W_EVENT_IO)
-               ? W_IO_UNIX_FD (event->io)
+               ? w_io_unix_get_fd ((w_io_unix_t*) event->io)
                : event->fd;
 
             if (W_HAS_FLAG (event->flags, W_EVENT_IN))
@@ -522,7 +522,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
             break;
 
         case W_EVENT_IO:
-            fd = W_IO_UNIX_FD (event->io);
+            fd = w_io_unix_get_fd ((w_io_unix_t*) event->io);
             break;
 
         case W_EVENT_TIMER:

@@ -248,6 +248,9 @@ W_EXPORT void _w_lmem_cleanup (void*);
     W_OBJ_DECL (_c); \
     W_OBJ_DEF  (_c)
 
+/*!
+ * Initializes a statically-allocated \ref w_obj_t.
+ */
 #define W_OBJ_STATIC(_dtor) \
     { (size_t) -1, (void (*)(void*)) (_dtor) }
 
@@ -2164,8 +2167,16 @@ W_OBJ (w_io_unix_t)
  * Obtain the Unix file descriptor used in an I/O stream.
  * \param _io Pointer to a \ref w_io_t
  */
-#define W_IO_UNIX_FD(_io) \
-    (((w_io_unix_t*) (_io))->fd)
+static inline int w_io_unix_get_fd (w_io_unix_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline int
+w_io_unix_get_fd (w_io_unix_t *io)
+{
+    w_assert (io);
+    return io->fd;
+}
 
 /*!
  * Create an I/O object to be used with an Unix file descriptor.
@@ -2201,6 +2212,7 @@ W_EXPORT bool w_io_unix_init (w_io_unix_t *io,
                               const char  *path,
                               int          mode,
                               unsigned     perm)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
 /*!
@@ -2251,16 +2263,20 @@ W_OBJ (w_io_socket_t)
     char               sa[W_IO_SOCKET_SA_LEN];
 };
 
-/*!
- * Obtain the Unix file descriptor associated to a socket.
- */
-#define W_IO_SOCKET_FD W_IO_UNIX_FD
 
 /*!
  * Obtain the kind of a socket.
  */
-#define W_IO_SOCKET_KIND(_io) \
-    ((_io)->kind)
+static inline w_io_socket_kind_t w_io_socket_get_kind (w_io_socket_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline w_io_socket_kind_t
+w_io_socket_get_kind (w_io_socket_t *io)
+{
+    w_assert (io);
+    return io->kind;
+}
 
 /*!
  * Create a new socket. Sockets can be used both for clients and servers,
@@ -2398,7 +2414,7 @@ W_OBJ (w_io_buf_t)
  * Create an I/O object to be used with a buffer.
  * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
  *            \ref w_buf_t internally which can be retrieved with
- *            \ref W_IO_BUF_BUF. If you pass a non-NULL buffer, then
+ *            \ref w_io_buf_get_buffer. If you pass a non-NULL buffer, then
  *            you will be responsible to call \ref w_buf_clear on it.
  */
 W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf)
@@ -2421,15 +2437,30 @@ W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, bool append)
 /*!
  * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.
  */
-#define W_IO_BUF_BUF(_p) \
-    ((_p)->bufp)
+static inline w_buf_t* w_io_buf_get_buffer (w_io_buf_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL_RETURN
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline w_buf_t*
+w_io_buf_get_buffer (w_io_buf_t *io)
+{
+    w_assert (io);
+    return io->bufp;
+}
 
 /*!
  * Obtain a string representation of a \ref w_io_buf_t I/O object.
  */
-#define W_IO_BUF_STR(_p) \
-    (w_io_buf_str (W_IO_BUF_BUF (_p)))
+static inline char* w_io_buf_str (w_io_buf_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
 
+static inline char* w_io_buf_str (w_io_buf_t *io)
+{
+    w_assert (io);
+    return w_buf_str (io->bufp);
+}
 
 /*!
  * Perform input/output on fixed-size memory regions.
@@ -2534,22 +2565,23 @@ static inline size_t w_io_mem_size (w_io_mem_t *io)
 /*! Possible types to be stored in a \ref w_variant_t */
 enum w_variant_type
 {
-    W_VARIANT_INVALID, /*!< Invalid / no value    */
-    W_VARIANT_NULL,    /*!< Null                  */
-    W_VARIANT_STRING,  /*!< String                */
-    W_VARIANT_NUMBER,  /*!< Number                */
-    W_VARIANT_FLOAT,   /*!< Floating point number */
-    W_VARIANT_BOOL,    /*!< Boolean               */
-    W_VARIANT_DICT,    /*!< Dictionary            */
-    W_VARIANT_LIST,    /*!< List                  */
-    W_VARIANT_OBJECT,  /*!< Object                */
+    W_VARIANT_TYPE_INVALID, /*!< Invalid / no value    */
+    W_VARIANT_TYPE_NULL,    /*!< Null                  */
+    W_VARIANT_TYPE_STRING,  /*!< String                */
+    W_VARIANT_TYPE_NUMBER,  /*!< Number                */
+    W_VARIANT_TYPE_FLOAT,   /*!< Floating point number */
+    W_VARIANT_TYPE_BOOL,    /*!< Boolean               */
+    W_VARIANT_TYPE_DICT,    /*!< Dictionary            */
+    W_VARIANT_TYPE_LIST,    /*!< List                  */
+    W_VARIANT_TYPE_OBJECT,  /*!< Object                */
 
     /*
-     * Note that this is used as a convenience that allows to easily
-     * instantiate W_VARIANT_STRING values from a w_buf_t, but the
-     * actual type of the created value will be always W_VARIANT_STRING.
+     * Note that this is used as a convenience that allows to
+     * easily instantiate W_VARIANT_TYPE_STRING values from a
+     * w_buf_t, but the actual type of the created value will
+     * be always W_VARIANT_TYPE_STRING.
      */
-    W_VARIANT_BUFFER,
+    W_VARIANT_TYPE_BUFFER,
 };
 
 typedef enum w_variant_type w_variant_type_t;
@@ -2596,171 +2628,91 @@ W_OBJ (w_variant_t)
  * Variants initialized this way will have invalid type until a
  * value of some type is stored in them.
  */
-#define W_VARIANT \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_INVALID, { W_BUF } }
+#define W_VARIANT                                            \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_INVALID,                \
+        .value.stringbuf = W_BUF,                            \
+     })
 
 /*! Statically initilizes a variant with a null value. */
-#define W_VARIANT_INIT_NULL \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_NULL, { W_BUF } }
+#define W_VARIANT_NULL                                       \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_NULL,                   \
+        .value.stringbuf = W_BUF,                            \
+     })
 
 /*! Statically initilizes a variant with a string value. */
-#define W_VARIANT_INIT_STRING(str) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_STRING, \
-      { { w_str_dup (str), strlen (str) } } }
+#define W_VARIANT_STRING(str)                                \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_STRING,                 \
+        .value.stringbuf = { w_str_dup (str), strlen (str) } \
+     })
 
 /*! Statically initilizes a variant with a numeric value. */
-#define W_VARIANT_NUMBER_INIT(num) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_NUMBER, \
-      { .number = (num) } }
+#define W_VARIANT_NUMBER(num)                                \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_NUMBER,                 \
+        .value.number    = (num),                            \
+     })
 
 /*! Statically initilizes a variant with a float value. */
-#define W_VARIANT_FLOAT_INIT(num) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_FLOAT, \
-      { .fpnumber (num) } }
+#define W_VARIANT_FLOAT(num)                                 \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_FLOAT,                  \
+        .value.fpnumber  = (num),                            \
+     })
 
 /*! Statically initilizes a variant with a boolean value. */
-#define W_VARIANT_BOOL_INIT(val) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_BOOL, \
-      { .boolean = (val) } }
+#define W_VARIANT_BOOL(val)                                  \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_BOOL,                   \
+        .value.boolean   = (val),                            \
+     })
 
 /*! Statically initilizes a variant with a dictionary value. */
-#define W_VARIANT_DICT_INIT(val) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_DICT, \
-      { .dict = w_obj_ref (val) } }
+#define W_VARIANT_DICT(val)                                  \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_DICT,                   \
+        .value.dict       w_obj_ref (val),                   \
+     })
 
 /*! Statically initilizes a variant with a list value. */
-#define W_VARIANT_LIST_INIT(val) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_LIST, \
-      { .list = w_obj_ref (val) } }
+#define W_VARIANT_LIST(val)                                  \
+    ((w_variant_t) {                                         \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_LIST,                   \
+        .value.list      = w_obj_ref (val),                  \
+     })
 
 /*! Statically initilizes a variant with an object value. */
-#define W_VARIANT_OBJECT_INIT(val) \
-    { W_OBJ_STATIC (w_variant_clear), W_VARIANT_OBJECT, \
-      { .obj = w_obj_ref (val) } }
+#define W_VARIANT_OBJECT(val)                                \
+    ((w_variant_t*) {                                        \
+        .parent          = W_OBJ_STATIC (w_variant_clear),   \
+        .type            = W_VARIANT_OBJECT,                 \
+        .value.obj       = w_obj_ref (val),                  \
+     })
 
 /*! Obtains the type of the value stored in a variant. */
-#define w_variant_type(_v) \
-    ((_v)->type)
+static inline w_variant_type_t w_variant_type (const w_variant_t *v)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Checks whether a variant contains a numeric value. */
-#define w_variant_is_number(_v) \
-    ((_v)->type == W_VARIANT_NUMBER)
-
-/*! Checks whether a variant contains a string value. */
-#define w_variant_is_string(_v) \
-    ((_v)->type == W_VARIANT_STRING)
-
-/*! Checks whether a variant contains a floating point numeric value. */
-#define w_variant_is_float(_v) \
-    ((_v)->type == W_VARIANT_FLOAT)
-
-/*! Checks whether a variant contains a boolean value. */
-#define w_variant_is_bool(_v) \
-    ((_v)->type == W_VARIANT_BOOL)
-
-/*! Checks whether a variant is a null value. */
-#define w_variant_is_null(_v) \
-    ((_v)->type == W_VARIANT_NULL)
-
-/*! Checks whether a variant contains a dictionary. */
-#define w_variant_is_dict(_v) \
-    ((_v)->type == W_VARIANT_DICT)
-
-/*! Checks whether a variant contains a list. */
-#define w_variant_is_list(_v) \
-    ((_v)->type == W_VARIANT_LIST)
-
-/*! Checks wether a variant contains an object. */
-#define w_variant_is_object(_v) \
-    ((_v)->type == W_VARIANT_OBJECT)
-
-/*! Checks whether a variant is invalid. */
-#define w_variant_is_invalid(_v) \
-    ((_v)->type == W_VARIANT_INVALID)
-
-/*! Obtains the numeric value stored in a variant. */
-#define w_variant_number(_v) \
-    ((_v)->value.number)
-
-/*! Obtains the floating point numeric value stored in a variant. */
-#define w_variant_float(_v) \
-    ((_v)->value.fpnumber)
-
-/*! Obtains the boolean value stored in a variant. */
-#define w_variant_bool(_v) \
-    ((_v)->value.boolean)
-
-/*! Obtains the dictionary stored in a variant. */
-#define w_variant_dict(_v) \
-    ((_v)->value.dict)
-
-/*! Obtains the list stored in a variant. */
-#define w_variant_list(_v) \
-    ((_v)->value.list)
-
-/*! Obtains the object stored in a variant. */
-#define w_variant_object(_v) \
-    ((_v)->value.obj)
-
-/*! Obtains the string value stored in a variant. */
-#define w_variant_string(_v) \
-    (w_buf_str (&((_v)->value.stringbuf)))
-
-/*! Obtains the string value stored in a variant, as a buffer. */
-#define w_variant_buffer(_v) \
-    (&(_v)->value.stringbuf)
-
-/*! Obtains a pointer to the buffer used to store a string. */
-#define w_variant_string_buf(_v) \
-    (&((_v)->value.stringbuf))
-
-/*! Assigns buffer contents as string value to a variant, mutating it if needed. */
-#define w_variant_set_buffer(_v, _b)               \
-    (w_variant_clear(_v)->type = W_VARIANT_STRING, \
-     w_buf_append_buf (&((_v)->value.stringbuf), (_b)))
-
-/*! Assigns a string value to a variant, mutating it if needed. */
-#define w_variant_set_string(_v, _s)               \
-    (w_variant_clear(_v)->type = W_VARIANT_STRING, \
-     w_buf_set_str (&((_v)->value.stringbuf), (_s)))
-
-/*! Assigns a numeric value to a variant, mutating it if needed. */
-#define w_variant_set_number(_v, _n)               \
-    (w_variant_clear(_v)->type = W_VARIANT_NUMBER, \
-     (_v)->value.number = (_n))
-
-/*! Assigns a floating point number value to a variant, mutating it if needed. */
-#define w_variant_set_float(_v, _f)               \
-    (w_variant_clear(_v)->type = W_VARIANT_FLOAT, \
-     (_v)->value.fpnumber = (_f))
-
-/*! Assigns a boolean value to a variant, mutating it if needed. */
-#define w_variant_set_bool(_v, _b)               \
-    (w_variant_clear(_v)->type = W_VARIANT_BOOL, \
-     (_v)->value.boolean  = (_b))
-
-/*! Assigns a list to a variant, mutating it if needed. */
-#define w_variant_set_list(_v, _l)               \
-    (w_variant_clear(_v)->type = W_VARIANT_LIST, \
-     (_v)->value.list = w_obj_ref (_l))
-
-/*! Assigns a dictionary to a variant, mutating it if needed. */
-#define w_variant_set_dict(_v, _d)               \
-    (w_variant_clear(_v)->type = W_VARIANT_DICT, \
-     (_v)->value.dict = w_obj_ref (_d))
-
-/*! Assigns an object to a variant, mutating it if needed. */
-#define w_variant_set_object(_v, _o)               \
-    (w_variant_clear(_v)->type = W_VARIANT_OBJECT, \
-     (_v)->value.obj = w_obj_ref (_o))
-
-/*! Assigns \e null to a variant, mutating it if needed. */
-#define w_variant_set_null(_v) \
-    (w_variant_clear(_v)->type = W_VARIANT_NULL)
-
-/*! Makes a variant to be invalid. */
-#define w_variant_set_invalid w_variant_clear
-
+/*!
+ * Obtains the type of the value stored in the variant.
+ */
+static inline w_variant_type_t
+w_variant_type (const w_variant_t *v)
+{
+    w_assert (v);
+    return v->type;
+}
 
 /*!
  * Create a new variant and assign it a value.
@@ -2788,6 +2740,194 @@ W_EXPORT w_variant_t* w_variant_new (w_variant_type_t type, ...)
 W_EXPORT w_variant_t* w_variant_clear (w_variant_t *variant)
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
+
+
+#define W__VARIANTS_SIMPLE(F)                  \
+    F (number, NUMBER, long,   value.number  ) \
+    F (float,  FLOAT,  double, value.fpnumber) \
+    F (bool,   BOOL,   bool,   value.boolean )
+
+#define W__VARIANTS_OBJREF(F)                  \
+    F (dict,   DICT,   w_dict_t*, value.dict ) \
+    F (list,   LIST,   w_list_t*, value.list ) \
+    F (object, OBJECT, w_obj_t*,  value.obj  )
+
+#define W__VARIANTS_OTHERS(F) \
+    F (string,  STRING,  , )  \
+    F (null,    NULL,    , )  \
+    F (invalid, INVALID, , )
+
+#define W__VARIANTS(F)     \
+    W__VARIANTS_SIMPLE (F) \
+    W__VARIANTS_OBJREF (F) \
+    W__VARIANTS_OTHERS (F)
+
+
+#define W__VARIANT_IS(N, U, T, F)                            \
+    static inline bool w_variant_is_ ## N (w_variant_t *v)   \
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT                   \
+        W_FUNCTION_ATTR_NOT_NULL ((1));                      \
+    static inline bool w_variant_is_ ## N (w_variant_t *v) { \
+        w_assert (v);                                        \
+        return v->type == W_VARIANT_TYPE_ ## U;              \
+    }
+
+W__VARIANTS (W__VARIANT_IS)
+
+
+#define W__VARIANT_GET_SIMPLE(N, U, T, F)                    \
+    static inline T w_variant_ ## N (const w_variant_t *v)   \
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT                   \
+        W_FUNCTION_ATTR_NOT_NULL ((1));                      \
+    static inline T w_variant_ ## N (const w_variant_t *v) { \
+        w_assert (v);                                        \
+        return v->F;                                         \
+    }
+
+W__VARIANTS_SIMPLE (W__VARIANT_GET_SIMPLE)
+W__VARIANTS_OBJREF (W__VARIANT_GET_SIMPLE)
+
+
+#define W__VARIANT_SET_SIMPLE(N, U, T, F)                              \
+    static inline void w_variant_set_ ## N (w_variant_t *v, T value)   \
+        W_FUNCTION_ATTR_NOT_NULL ((1));                                \
+    static inline void w_variant_set_ ## N (w_variant_t *v, T value) { \
+        w_assert (v);                                                  \
+        w_variant_clear (v);                                           \
+        v->type = W_VARIANT_TYPE_ ## U;                                \
+        v->F = value;                                                  \
+    }
+
+W__VARIANTS_SIMPLE (W__VARIANT_SET_SIMPLE)
+
+
+#define W__VARIANT_SET_OBJREF(N, U, T, F)                              \
+    static inline void w_variant_set_ ## N (w_variant_t *v, T value)   \
+        W_FUNCTION_ATTR_NOT_NULL ((1, 2));                             \
+    static inline void w_variant_set_ ## N (w_variant_t *v, T value) { \
+        w_assert (v);                                                  \
+        w_variant_clear (v);                                           \
+        v->type = W_VARIANT_TYPE_ ## U;                                \
+        v->F = w_obj_ref (value);                                      \
+    }
+
+W__VARIANTS_OBJREF (W__VARIANT_SET_OBJREF)
+
+/*!
+ * \fn long w_variant_number (w_variant_t *v)
+ *      Obtains the numeric value stored in a variant.
+ *
+ * \fn double w_variant_float (w_variant_t *v)
+ *      Obtains the floating point numeric value stored in a variant.
+ *
+ * \fn bool w_variant_bool (w_variant_t *v)
+ *      Obtains the boolean value stored in a variant.
+ *
+ * \fn w_dict_t* w_variant_dict (w_variant_t *v)
+ *      Obtains the dictionary stored in a variant.
+ *
+ * \fn w_ list_t* w_variant_list (w_variant_t *v)
+ *      Obtains the list stored in a variant.
+ *
+ * \fn w_obj_t* w_variant_object (w_variant_t *v)
+ *      Obtains the object stored in a variant.
+ */
+
+/*! Obtains the string value stored in a variant. */
+static inline char* w_variant_string (w_variant_t *v)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline char*
+w_variant_string (w_variant_t *v)
+{
+    w_assert (v);
+    return w_buf_str (&v->value.stringbuf);
+}
+
+/*! Obtains the string value stored in a variant, as a buffer. */
+static inline const w_buf_t* w_variant_buffer (const w_variant_t *v)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL_RETURN
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline const w_buf_t*
+w_variant_buffer (const w_variant_t *v)
+{
+    w_assert (v);
+    return &v->value.stringbuf;
+}
+
+
+/*! Assigns buffer contents as string value to a variant, mutating it if needed. */
+static inline void w_variant_set_buffer (w_variant_t *v, const w_buf_t *b)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+static inline void
+w_variant_set_buffer (w_variant_t *v, const w_buf_t *b)
+{
+    w_assert (v);
+    w_assert (b);
+    w_variant_clear (v);
+    v->type = W_VARIANT_TYPE_STRING;
+    w_buf_append_buf (&v->value.stringbuf, b);
+}
+
+/*! Assigns a string value to a variant, mutating it if needed. */
+static inline void w_variant_set_string (w_variant_t *v, const char *s)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+static inline void
+w_variant_set_string (w_variant_t *v, const char *s)
+{
+    w_assert (v);
+    w_assert (s);
+    w_variant_clear (v);
+    v->type = W_VARIANT_TYPE_STRING;
+    w_buf_set_str (&v->value.stringbuf, s);
+}
+
+/*! Assigns \e null to a variant, mutating it if needed. */
+static inline void w_variant_set_null (w_variant_t *v)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline void
+w_variant_set_null (w_variant_t *v)
+{
+    w_assert (v);
+    w_variant_clear (v);
+    v->type = W_VARIANT_TYPE_NULL;
+}
+
+/*! Makes a variant to be invalid. */
+static inline void w_variant_set_invalid (w_variant_t *v)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline void w_variant_set_invalid (w_variant_t *v)
+{
+    w_assert (v);
+    w_variant_clear (v);  // Also sets the type to invalid.
+}
+
+/*!
+ * \fn void w_variant_set_number (w_variant_t *v, long value)
+ *      Assigns a numeric value to a variant, mutating it if needed.
+ *
+ * \fn void w_variant_set_float (w_variant_t *v, double value)
+ *      Assigns a floating point number value to a variant, mutating it if needed.
+ *
+ * \fn void w_variant_set_bool (w_variant_t *v, bool value)
+ *      Assigns a boolean value to a variant, mutating it if needed.
+ *
+ * \fn void w_variant_set_list (w_variant_t *v, w_list_t *value)
+ *      Assigns a list to a variant, mutating it if needed.
+ *
+ * \fn void w_variant_set_dict (w_variant_t *v, w_dict_t *value)
+ *      Assigns a dictionary to a variant, mutating it if needed.
+ *
+ * \fn void w_variant_set_object (w_variant_t *v, w_obj_t *value)
+ *      Assigns an object to a variant, mutating it if needed.
+ */
 
 /*\}*/
 
@@ -3089,11 +3229,11 @@ typedef w_dict_t w_cfg_t;
  */
 enum w_cfg_type
 {
-	W_CFG_END    = W_VARIANT_NULL,    /*!< Marks end of parameter lists. */
-	W_CFG_NONE   = W_VARIANT_INVALID, /*!< Invalid node.                 */
-	W_CFG_STRING = W_VARIANT_STRING,  /*!< Node containing a string.     */
-	W_CFG_NUMBER = W_VARIANT_FLOAT,   /*!< Node containing a number.     */
-	W_CFG_NODE   = W_VARIANT_DICT,    /*!< Node containing a subnode.    */
+	W_CFG_END    = W_VARIANT_TYPE_NULL,    /*!< Marks end of parameter lists. */
+	W_CFG_NONE   = W_VARIANT_TYPE_INVALID, /*!< Invalid node.                 */
+	W_CFG_STRING = W_VARIANT_TYPE_STRING,  /*!< Node containing a string.     */
+	W_CFG_NUMBER = W_VARIANT_TYPE_FLOAT,   /*!< Node containing a number.     */
+	W_CFG_NODE   = W_VARIANT_TYPE_DICT,    /*!< Node containing a subnode.    */
 };
 
 typedef enum w_cfg_type w_cfg_type_t;

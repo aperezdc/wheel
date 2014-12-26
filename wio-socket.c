@@ -160,7 +160,7 @@ w_io_socket_open (w_io_socket_kind_t kind, ...)
     bool ret;
 
     /* Start with an invalid socket fd */
-    W_IO_SOCKET_FD (io) = -1;
+    io->parent.fd = -1;
 
     va_start (args, kind);
     ret = w_io_socket_initv (io, kind, args);
@@ -276,7 +276,7 @@ w_io_socket_connect (w_io_socket_t *io)
 {
     w_assert (io);
 
-    return (connect (W_IO_SOCKET_FD (io),
+    return (connect (w_io_unix_get_fd (&io->parent),
                      (struct sockaddr*) io->sa,
                      io->slen) != -1);
 }
@@ -324,17 +324,17 @@ w_io_socket_serve (w_io_socket_t *io,
     }
     w_assert (mode_handler);
 
-    if (bind (W_IO_SOCKET_FD (io), (struct sockaddr*) io->sa, io->slen) == -1) {
+    if (bind (w_io_unix_get_fd (&io->parent), (struct sockaddr*) io->sa, io->slen) == -1) {
         return false;
     }
     io->bound = true;
 
-    if (listen (W_IO_SOCKET_FD (io), W_IO_SOCKET_BACKLOG) == -1) {
+    if (listen (w_io_unix_get_fd (&io->parent), W_IO_SOCKET_BACKLOG) == -1) {
         return false;
     }
 
     slen = W_IO_SOCKET_SA_LEN;
-    while ((fd = accept (W_IO_SOCKET_FD(io), &sa, &slen)) != -1) {
+    while ((fd = accept (w_io_unix_get_fd (&io->parent), &sa, &slen)) != -1) {
         w_io_socket_t *nio = w_obj_new (w_io_socket_t);
 
         w_io_unix_init_fd ((w_io_unix_t*) nio, fd);
@@ -358,7 +358,7 @@ bool
 w_io_socket_send_eof (w_io_socket_t *io)
 {
     w_assert (io);
-    return shutdown (W_IO_SOCKET_FD (io), SHUT_WR) != -1;
+    return shutdown (w_io_unix_get_fd (&io->parent), SHUT_WR) != -1;
 }
 
 
