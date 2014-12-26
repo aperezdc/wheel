@@ -218,8 +218,8 @@ W_EXPORT void* w_realloc (void *ptr, size_t sz)
 	((_t *) w_realloc (_p, sizeof (_t) * (_n)))
 
 #ifdef __GNUC__
-# define w_lobj __attribute__((cleanup(_w_lobj_cleanup))
-# define w_lmem __attribute__((cleanup(_w_lmem_cleanup))
+# define w_lobj __attribute__((cleanup(_w_lobj_cleanup)))
+# define w_lmem __attribute__((cleanup(_w_lmem_cleanup)))
 W_EXPORT void _w_lobj_cleanup (void*);
 W_EXPORT void _w_lmem_cleanup (void*);
 #else
