@@ -2948,26 +2948,62 @@ W_EXPORT w_io_result_t w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value
 W_EXPORT w_io_result_t w_tnetstr_dump_null (w_buf_t *buffer)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-W_EXPORT w_io_result_t w_tnetstr_dump_float (w_buf_t *buffer, double value)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
+#define W__TNS_INLINE_WRITER_TYPES(F)                    \
+    F (static inline, float,  double,          double)   \
+    F (static inline, number, long,            long)     \
+    F (static inline, list,   const w_list_t*, w_list_t) \
+    F (static inline, dict,   const w_dict_t*, w_dict_t)
 
-W_EXPORT w_io_result_t w_tnetstr_dump_number (w_buf_t *buffer, long value)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
+#define W__TNS_PARSER_TYPES(F)                           \
+    F (W_EXPORT,      bool,   bool,            bool)     \
+    F (W_EXPORT,      string, const char*,     w_buf_t)  \
+    W__TNS_INLINE_WRITER_TYPES (F)
 
-W_EXPORT w_io_result_t w_tnetstr_dump_string (w_buf_t *buffer, const char *value)
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+#define W__TNS_DUMP_TYPES(F)                             \
+    F (W_EXPORT,      buffer, const w_buf_t*,  w_buf_t)  \
+    W__TNS_PARSER_TYPES (F)
 
-W_EXPORT w_io_result_t w_tnetstr_dump_buffer (w_buf_t *buffer, const w_buf_t *value)
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+#define W__TNS_READ_TYPES(F) \
+    F (, string, , w_buf_t ) \
+    F (, bool  , , bool    ) \
+    W__TNS_INLINE_WRITER_TYPES (F)
 
-W_EXPORT w_io_result_t w_tnetstr_dump_boolean (w_buf_t *buffer, bool value)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
 
-W_EXPORT w_io_result_t w_tnetstr_dump_list (w_buf_t *buffer, const w_list_t *value)
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+#define W__TNS_DECLARE_DUMPER(D, N, T, WT)          \
+    W_EXPORT w_io_result_t                          \
+    w_tnetstr_dump_ ## N (w_buf_t *buffer, T value) \
+        W_FUNCTION_ATTR_NOT_NULL ();
 
-W_EXPORT w_io_result_t w_tnetstr_dump_dict (w_buf_t *buffer, const w_dict_t *value)
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+W__TNS_DUMP_TYPES (W__TNS_DECLARE_DUMPER)
+
+
+#define W__TNS_DECLARE_WRITER(D, N, T, WT)      \
+    D w_io_result_t                             \
+    w_tnetstr_write_ ## N (w_io_t *io, T value) \
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT      \
+        W_FUNCTION_ATTR_NOT_NULL ();
+
+W__TNS_DUMP_TYPES (W__TNS_DECLARE_WRITER)
+
+
+#define W__TNS_DECLARE_PARSER(D, N, T, WT)                                 \
+    W_EXPORT bool w_tnetstr_parse_ ## N (const w_buf_t *buffer, WT *value) \
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT                                 \
+        W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+W__TNS_PARSER_TYPES (W__TNS_DECLARE_PARSER)
+
+
+#define W__TNS_DEFINE_INLINE_WRITER(D, N, T, WT)                  \
+    D w_io_result_t w_tnetstr_write_ ## N (w_io_t *io, T value) { \
+        w_assert (io);                                            \
+        w_buf_t buf = W_BUF;                                      \
+        W_IO_CHECK_BYTES (w_tnetstr_dump_ ## N (&buf, value),     \
+                          return,                                 \
+                          w_io_write (io, buf.data, buf.size)); }
+
+W__TNS_INLINE_WRITER_TYPES (W__TNS_DEFINE_INLINE_WRITER)
+
 
 W_EXPORT w_io_result_t w_tnetstr_write (w_io_t *io, const w_variant_t *value)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
@@ -2977,84 +3013,6 @@ W_EXPORT w_io_result_t w_tnetstr_write_null (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-W_EXPORT w_io_result_t w_tnetstr_write_string (w_io_t *io, const char *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT w_io_result_t w_tnetstr_write_buffer (w_io_t *io, const w_buf_t *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT w_io_result_t w_tnetstr_write_boolean (w_io_t *io, bool value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1));
-
-
-static inline w_io_result_t w_tnetstr_write_float (w_io_t *io, double value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1));
-
-static inline w_io_result_t
-w_tnetstr_write_float (w_io_t *io, double value)
-{
-    w_assert (io);
-
-    w_buf_t buf = W_BUF;
-    W_IO_CHECK_BYTES (w_tnetstr_dump_float (&buf, value),
-                      return,
-                      w_io_write (io, buf.data, buf.size));
-}
-
-
-static inline w_io_result_t w_tnetstr_write_number (w_io_t *io, long value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1));
-
-static inline w_io_result_t
-w_tnetstr_write_number (w_io_t *io, long value)
-{
-    w_assert (io);
-
-    w_buf_t buf = W_BUF;
-    W_IO_CHECK_BYTES (w_tnetstr_dump_number (&buf, value),
-                      return,
-                      w_io_write (io, buf.data, buf.size));
-}
-
-
-static inline w_io_result_t w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-static inline w_io_result_t
-w_tnetstr_write_list (w_io_t *io, const w_list_t *value)
-{
-    w_assert (io);
-    w_assert (value);
-
-    w_buf_t buf = W_BUF;
-    W_IO_CHECK_BYTES (w_tnetstr_dump_list (&buf, value),
-                      return,
-                      w_io_write (io, buf.data, buf.size));
-}
-
-
-static inline w_io_result_t w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-static inline w_io_result_t
-w_tnetstr_write_dict (w_io_t *io, const w_dict_t *value)
-{
-    w_assert (io);
-    w_assert (value);
-
-    w_buf_t buf = W_BUF;
-    W_IO_CHECK_BYTES (w_tnetstr_dump_dict (&buf, value),
-                      return,
-                      w_io_write (io, buf.data, buf.size));
-}
-
 W_EXPORT w_variant_t* w_tnetstr_parse (const w_buf_t *buffer)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
@@ -3063,38 +3021,14 @@ W_EXPORT bool w_tnetstr_parse_null (const w_buf_t *buffer)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-W_EXPORT bool w_tnetstr_parse_float (const w_buf_t *buffer, double *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT bool w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT bool w_tnetstr_parse_string (const w_buf_t *buffer, w_buf_t *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT bool w_tnetstr_parse_boolean (const w_buf_t *buffer, bool *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT bool w_tnetstr_parse_list (const w_buf_t *buffer, w_list_t *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-W_EXPORT bool w_tnetstr_parse_dict (const w_buf_t *buffer, w_dict_t *value)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
 W_EXPORT bool w_tnetstr_read_to_buffer (w_io_t *io, w_buf_t *buffer)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-
 static inline w_variant_t* w_tnetstr_read (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
+
 
 static inline w_variant_t*
 w_tnetstr_read (w_io_t *io)
@@ -3108,30 +3042,24 @@ E:  w_buf_clear (&buf);
     return variant;
 }
 
-#define _W_TNS_READF(_name, _type)                           \
-    static inline bool                                       \
-    w_tnetstr_read_ ## _name (w_io_t *io, _type *value)      \
-        W_FUNCTION_ATTR_WARN_UNUSED_RESULT                   \
-        W_FUNCTION_ATTR_NOT_NULL ((1, 2));                   \
-    static inline bool                                       \
-    w_tnetstr_read_ ## _name (w_io_t *io, _type *value) {    \
-        w_assert (io);                                       \
-        w_assert (value);                                    \
-        w_buf_t buf = W_BUF;                                 \
-        if (w_tnetstr_read_to_buffer (io, &buf)) goto E;     \
-        if (w_tnetstr_parse_ ## _name (&buf, value)) goto E; \
-        w_buf_clear (&buf); return false;                    \
-    E:  w_buf_clear (&buf); return true;                     \
+
+#define W__TNS_DEFINE_INLINE_READER(D, N, T, WT)         \
+    static inline bool                                   \
+    w_tnetstr_read_ ## N (w_io_t *io, WT *value)         \
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT               \
+        W_FUNCTION_ATTR_NOT_NULL ((1, 2));               \
+    static inline bool                                   \
+    w_tnetstr_read_ ## N (w_io_t *io, WT *value) {       \
+        w_assert (io);                                   \
+        w_assert (value);                                \
+        w_buf_t buf = W_BUF;                             \
+        if (w_tnetstr_read_to_buffer (io, &buf)) goto E; \
+        if (w_tnetstr_parse_ ## N (&buf, value)) goto E; \
+        w_buf_clear (&buf); return false;                \
+    E:  w_buf_clear (&buf); return true;                 \
     }
 
-_W_TNS_READF (float,   double  )
-_W_TNS_READF (number,  long int)
-_W_TNS_READF (string,  w_buf_t )
-_W_TNS_READF (boolean, bool    )
-_W_TNS_READF (list,    w_list_t)
-_W_TNS_READF (dict,    w_dict_t)
-
-#undef _W_TNS_READF
+W__TNS_READ_TYPES (W__TNS_DEFINE_INLINE_READER)
 
 /*\}*/
 

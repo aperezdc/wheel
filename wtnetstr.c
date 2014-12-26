@@ -49,7 +49,7 @@ w_tnetstr_write_null (w_io_t *io)
 
 
 w_io_result_t
-w_tnetstr_dump_boolean (w_buf_t *buffer, bool value)
+w_tnetstr_dump_bool (w_buf_t *buffer, bool value)
 {
     w_assert (buffer);
 
@@ -66,7 +66,7 @@ w_tnetstr_dump_boolean (w_buf_t *buffer, bool value)
 
 
 w_io_result_t
-w_tnetstr_write_boolean (w_io_t *io, bool value)
+w_tnetstr_write_bool (w_io_t *io, bool value)
 {
     w_assert (io);
     if (value) {
@@ -250,7 +250,7 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
             return w_tnetstr_dump_null (buffer);
 
         case W_VARIANT_TYPE_BOOL:
-            return w_tnetstr_dump_boolean (buffer, w_variant_bool (value));
+            return w_tnetstr_dump_bool (buffer, w_variant_bool (value));
 
         case W_VARIANT_TYPE_STRING:
             return w_tnetstr_dump_buffer (buffer, w_variant_buffer (value));
@@ -304,7 +304,7 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
             return w_tnetstr_write_null (io);
 
         case W_VARIANT_TYPE_BOOL:
-            return w_tnetstr_write_boolean (io, w_variant_bool (value));
+            return w_tnetstr_write_bool (io, w_variant_bool (value));
 
         case W_VARIANT_TYPE_STRING:
             return w_tnetstr_write_buffer (io, w_variant_buffer (value));
@@ -472,7 +472,7 @@ w_tnetstr_parse_number (const w_buf_t *buffer, long *value)
 
 
 bool
-w_tnetstr_parse_boolean (const w_buf_t *buffer, bool *value)
+w_tnetstr_parse_bool (const w_buf_t *buffer, bool *value)
 {
     w_assert (buffer);
     w_assert (value);
@@ -642,7 +642,7 @@ w_tnetstr_parse (const w_buf_t *buffer)
             break;
 
         case _W_TNS_TAG_BOOLEAN:
-            if (!w_tnetstr_parse_boolean (buffer, &v.vbool))
+            if (!w_tnetstr_parse_bool (buffer, &v.vbool))
                 ret = w_variant_new (W_VARIANT_TYPE_BOOL, v.vbool);
             break;
 

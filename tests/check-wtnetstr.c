@@ -20,13 +20,13 @@ START_TEST (test_wtnetstr_dump_basetypes)
     ck_assert_int_eq (3, w_buf_size (&b));
     w_buf_clear (&b);
 
-    fail_if (w_io_failed (w_tnetstr_dump_boolean (&b, true)),
+    fail_if (w_io_failed (w_tnetstr_dump_bool (&b, true)),
              "could not dump boolean");
     ck_assert_str_eq ("4:true!", w_buf_str (&b));
     ck_assert_int_eq (7, w_buf_size (&b));
     w_buf_clear (&b);
 
-    fail_if (w_io_failed (w_tnetstr_dump_boolean (&b, false)),
+    fail_if (w_io_failed (w_tnetstr_dump_bool (&b, false)),
              "could not dump boolean");
     ck_assert_str_eq ("5:false!", w_buf_str (&b));
     ck_assert_int_eq (8, w_buf_size (&b));
@@ -155,21 +155,21 @@ START_TEST (test_wtnetstr_parse_bool)
     w_buf_t b = W_BUF;
 
     w_buf_set_str (&b, "4:true!");
-    fail_if (w_tnetstr_parse_boolean (&b, &value),
+    fail_if (w_tnetstr_parse_bool (&b, &value),
              "Could not parse valid boolean");
     ck_assert_int_eq (true, value);
 
     w_buf_set_str (&b, "5:false!");
-    fail_if (w_tnetstr_parse_boolean (&b, &value),
+    fail_if (w_tnetstr_parse_bool (&b, &value),
              "Could not parse valid boolean");
     ck_assert_int_eq (false, value);
 
     w_buf_set_str (&b, "4:burp!");
-    fail_unless (w_tnetstr_parse_boolean (&b, &value),
+    fail_unless (w_tnetstr_parse_bool (&b, &value),
                  "Parsed invalid boolean as valid");
 
     w_buf_set_str (&b, "4:true,");
-    fail_unless (w_tnetstr_parse_boolean (&b, &value),
+    fail_unless (w_tnetstr_parse_bool (&b, &value),
                  "Parsed invalid boolean as valid");
 
     w_buf_clear (&b);
