@@ -40,7 +40,8 @@ START_TEST (test_wio_buf_open_nonempty)
     w_buf_set_str (&b, msg);
     io = w_io_buf_open (&b);
 
-    fail_unless (w_io_buf_get_buffer ((w_io_buf_t*) io) != NULL,
+    w_buf_t *buf;
+    fail_unless (buf = w_io_buf_get_buffer ((w_io_buf_t*) io),
                 "I/O has no buffer");
     fail_unless (w_io_buf_get_buffer ((w_io_buf_t*) io) == &b,
                  "I/O buffer is not the same as the specified one");

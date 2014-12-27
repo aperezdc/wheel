@@ -184,7 +184,6 @@ START_TEST (test_wdict_iter)
 {
     unsigned count = 0;
     w_dict_t *d = w_dict_new (false);
-    w_iterator_t i;
 
     w_dict_set (d, "no.1", (void*) 1);
     w_dict_set (d, "no.2", (void*) 2);
