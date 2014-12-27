@@ -228,20 +228,17 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
 {
     w_assert (buffer);
     w_assert (value);
-
-    /* This should *never* happen. */
     w_assert (w_variant_type (value) != W_VARIANT_TYPE_BUFFER);
 
     switch (w_variant_type (value)) {
         case W_VARIANT_TYPE_BUFFER:
-            W_IO_NORESULT (w_io_format (w_stderr,
-                                        "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
-                                        "This is a bug, execution aborted!\n"));
-            W_IO_NORESULT (w_io_flush (w_stderr));
-            abort ();
+            W_FATAL ("Invalid variant with type W_VARIANT_BUFFER.\n"
+                     "This is a programming error.\n");
+            break;
 
         case W_VARIANT_TYPE_OBJECT:  /* Can't serialize object values. */
         case W_VARIANT_TYPE_INVALID: /* Can't serialize invalid values. */
+            W_WARN ("Cannot dump variant of type INVALID or OBJECT.\n");
             return W_IO_RESULT_ERROR (EINVAL);
 
         case W_VARIANT_TYPE_NULL:
@@ -266,12 +263,7 @@ w_tnetstr_dump (w_buf_t *buffer, const w_variant_t *value)
             return w_tnetstr_dump_dict (buffer, w_variant_dict (value));
     }
 
-    /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
-    W_IO_NORESULT (w_io_format (w_stderr,
-                                "w_variant_t with unhandled type.\n"
-                                "This is a bug, execution aborted!\n"));
-    W_IO_NORESULT (w_io_flush (w_stderr));
-    abort ();
+    W_BUG ("w_variant_t with unhandled type.\n");
     return W_IO_RESULT_ERROR (EINVAL);  /* Keep compiler happy */
 }
 
@@ -281,21 +273,17 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
 {
     w_assert (io);
     w_assert (value);
-
-    /* This should *never* happen. */
     w_assert (w_variant_type (value) != W_VARIANT_TYPE_BUFFER);
 
     switch (w_variant_type (value)) {
         case W_VARIANT_TYPE_BUFFER:
-            /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
-            W_IO_NORESULT (w_io_format (w_stderr,
-                                        "w_variant_t with type = W_VARIANT_BUFFER detected.\n"
-                                        "This is a bug, execution aborted!\n"));
-            W_IO_NORESULT (w_io_flush (w_stderr));
-            abort();
+            W_FATAL ("Invalid variant with type W_VARIANT_BUFFER.\n"
+                     "This is a programming error.\n");
+            break;
 
         case W_VARIANT_TYPE_OBJECT:  /* Can't serialize object values. */
         case W_VARIANT_TYPE_INVALID: /* Can't serialize invalid values. */
+            W_WARN ("Cannot dump variant of type INVALID or OBJECT.\n");
             return W_IO_RESULT_ERROR (EINVAL);
 
         case W_VARIANT_TYPE_NULL:
@@ -320,12 +308,7 @@ w_tnetstr_write (w_io_t *io, const w_variant_t *value)
             return w_tnetstr_write_dict (io, w_variant_dict (value));
     }
 
-    /* TODO: Handle I/O errors, or have a nicer w_abort() function. */
-    W_IO_NORESULT (w_io_format (w_stderr,
-                                "w_variant_t with unhandled type.\n"
-                                "This is a bug, execution aborted!\n"));
-    W_IO_NORESULT (w_io_flush (w_stderr));
-    abort ();
+    W_BUG ("w_variant_t with unhandled type.\n");
     return W_IO_RESULT_ERROR (EINVAL);  /* Keep compiler happy */
 }
 

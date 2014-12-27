@@ -56,10 +56,10 @@ static unsigned  s_num_system_tasks = 0;
 static unsigned  s_num_tasks        = 0;
 
 
-#define CHECK_SCHEDULER( )                                                       \
-    do {                                                                         \
-        if (!s_current_task)                                                     \
-            w_die ("$s() used without starting the task scheduler\n", __func__); \
+#define CHECK_SCHEDULER( )                                       \
+    do {                                                         \
+        if (!s_current_task)                                     \
+            W_FATAL ("Called without a running task scheduler"); \
     } while (0)
 
 
@@ -122,7 +122,7 @@ allocate_task_and_stack (size_t stack_size)
                        -1,
                        0);
     if (addr == MAP_FAILED)
-        w_die ("Cannot allocate stack: mmap() failed: $E\n");
+        W_FATAL ("mmap() failed: $E\n");
 
     memset (addr, 0x00, sizeof (w_task_t));
     w_task_t* t = (w_task_t*) addr;
@@ -135,7 +135,7 @@ allocate_task_and_stack (size_t stack_size)
 
     /* Initialize with the current context. */
     if (getcontext (&t->context) < 0)
-        w_die ("Cannot initialize task: getcontext: $E");
+        W_FATAL ("getcontext() failed: $E");
 
     t->context.uc_stack.ss_size = alloc_size - sizeof (w_task_t);
     t->context.uc_stack.ss_sp   = (void*) (t + 1); /* Point _after_ the task struct */
@@ -158,7 +158,7 @@ free_task_and_stack (w_task_t *t)
     w_assert (t);
     w_free (t->name);
     if (munmap ((void*) t, t->context.uc_stack.ss_size + sizeof (w_task_t)) < 0)
-        w_die ("$s: munmap() failed: $E\n", __func__);
+        W_WARN ("munmap() failed: $E (trying to continue)\n");
 }
 
 
@@ -169,7 +169,7 @@ switch_context (ucontext_t *from, ucontext_t *to)
     w_assert (to);
 
     if (swapcontext (from, to) < 0)
-        w_die ("$s: swapcontext() failed: $E\n", __func__);
+        W_FATAL ("swapcontext() failed: $E\n");
 }
 
 
@@ -251,7 +251,7 @@ void
 w_task_run_scheduler (void)
 {
     if (s_num_tasks == 0)
-        w_die ("$s: No tasks. Missing w_task_prepare() calls?\n", __func__);
+        W_FATAL ("No tasks. Missing w_task_prepare() calls?");
 
     while (s_num_tasks > 0) {
         w_assert (!TAILQ_EMPTY (&s_runqueue));

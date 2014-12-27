@@ -309,15 +309,16 @@ w_io_socket_serve (w_io_socket_t *io,
 #ifdef W_CONF_PTHREAD
         case W_IO_SOCKET_THREAD:
             mode_handler = w_io_socket_serve_thread;
+            break;
 #else /* !W_CONF_PTHREAD */
-            w_die ("libwheel was built without pthread support\n");
+            W_WARN ("libwheel was built without pthread support. "
+                    "Using forking mode instead as a fall-back.\n");
 #endif /* W_CONF_PTHREAD */
+        case W_IO_SOCKET_FORK:
+            mode_handler = w_io_socket_serve_fork;
             break;
         case W_IO_SOCKET_SINGLE:
             mode_handler = w_io_socket_serve_single;
-            break;
-        case W_IO_SOCKET_FORK:
-            mode_handler = w_io_socket_serve_fork;
             break;
         default:
             mode_handler = NULL;

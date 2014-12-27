@@ -459,7 +459,7 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
             break;
 
         case W_EVENT_IDLE:
-            w_die ("Fatal: $s called with event opf type W_EVENT_IDLE\n", __func__);
+            W_BUG ("Called with event of type W_EVENT_IDLE.\n");
     }
     w_assert (fd >= 0);
 
@@ -530,7 +530,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
             break;
 
         case W_EVENT_IDLE:
-            w_die ("Fatal: $s called with event opf type W_EVENT_IDLE\n", __func__);
+            W_BUG ("Called with event of type W_EVENT_IDLE.\n");
     }
     w_assert (fd >= 0);
 

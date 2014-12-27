@@ -17,8 +17,8 @@ w_malloc(size_t sz)
 {
     void *p = malloc(sz);
     if (w_unlikely (p == NULL)) {
-        w_die("virtual memory exhausted (tried to allocate $L bytes)\n",
-              (unsigned long) sz);
+        W_FATAL ("virtual memory exhausted (tried to allocate $L bytes)\n",
+                 (unsigned long) sz);
     }
 
     /* FIXME This should be removed */
@@ -37,8 +37,8 @@ w_realloc(void *ptr, size_t sz)
         else {
             ptr = realloc(ptr, sz);
             if (w_unlikely (ptr == NULL)) {
-                w_die("virtual memory exhausted (tried to allocate $L bytes)\n",
-                      (unsigned long) sz);
+                W_FATAL ("virtual memory exhausted (tried to allocate $L bytes)\n",
+                         (unsigned long) sz);
             }
             return ptr;
         }

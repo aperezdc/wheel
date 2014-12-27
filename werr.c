@@ -14,38 +14,85 @@
 
 
 void
-w_die(const char *fmt, ...)
+w_die (const char *fmt, ...)
 {
 	va_list al;
+    va_start (al, fmt);
 
-	va_start(al, fmt);
-	w_diev(fmt, al);
-	va_end(al);
-}
-
-
-void
-w_diev(const char *fmt, va_list al)
-{
-    if (fmt) {
-        /* Unfortunately, errors cannot be reported from here. */
+	if (fmt)
         W_IO_NORESULT (w_io_formatv (w_stderr, fmt, al));
-        fsync (w_io_unix_get_fd ((w_io_unix_t*) w_stderr));
+    va_end (al);
+
+    W_IO_NORESULT (w_io_flush (w_stderr));
+
+    exit (EXIT_FAILURE);
+}
+
+
+static void
+print_message (const char *kind,
+               const char *func,
+               const char *file,
+               unsigned    line,
+               const char *fmt,
+               va_list     args)
+{
+    if (func) {
+        W_IO_NORESULT (w_io_format (w_stderr,
+                                    "%s (at %s, %s:%u): ",
+                                    kind,
+                                    func,
+                                    file,
+                                    line));
     }
-    exit(EXIT_FAILURE);
+
+    W_IO_NORESULT (w_io_formatv (w_stderr, fmt, args));
+    W_IO_NORESULT (w_io_flush (w_stderr));
 }
 
 
 void
-__w_debug(const char *fmt, ...)
+w__debug (const char *func,
+          const char *file,
+          unsigned    line,
+          const char *fmt,
+          ...)
 {
     va_list al;
-
     va_start(al, fmt);
-    /* Unfortunately, errors cannot be reported from here. */
-    W_IO_NORESULT (w_io_format  (w_stderr, "DEBUG: "));
-    W_IO_NORESULT (w_io_formatv (w_stderr, fmt, al));
-    W_IO_NORESULT (w_io_putchar (w_stderr, '\n'));
+    print_message ("DEBUG", func, file, line, fmt, al);
     va_end(al);
 }
 
+
+void
+w__fatal (const char *func,
+          const char *file,
+          unsigned    line,
+          const char *fmt,
+          ...)
+{
+    va_list al;
+    va_start(al, fmt);
+    print_message ("FATAL", func, file, line, fmt, al);
+    va_end(al);
+    abort ();
+}
+
+
+void
+w__warning (const char *func,
+            const char *file,
+            unsigned    line,
+            const char *fmt,
+            ...)
+{
+    va_list al;
+    va_start(al, fmt);
+    print_message ("WARNING", func, file, line, fmt, al);
+    va_end(al);
+
+    const char *envvar = getenv ("W_FATAL_WARNINGS");
+    if (envvar && *envvar && *envvar != '0')
+        abort ();
+}

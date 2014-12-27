@@ -388,27 +388,52 @@ typedef struct w_io_result w_io_result_t;
  * \param fmt Format string for the message. If \c NULL is passed, then no
  *            message is written to stderr.
  */
-W_EXPORT void w_die (const char *fmt, ...)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
+W_EXPORT void w_die (const char *fmt, ...);
 
-/*!
- * Prints a message to stderr and aborts execution.
- *
- * \param fmt Format string for the message. If \c NULL is passed, then no
- *            message is written to stderr.
- * \param al  List of arguments to be consumed as specified in the format
- *            string.
- */
-W_EXPORT void w_diev (const char *fmt, va_list al)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
 
+W_EXPORT void w__warning (const char *func,
+                          const char *file,
+                          unsigned    line,
+                          const char *fmt,
+                          ...)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2, 4));
+
+W_EXPORT void w__fatal (const char *func,
+                        const char *file,
+                        unsigned    line,
+                        const char *fmt,
+                        ...)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2, 4))
+    W_FUNCTION_ATTR_NORETURN;
+
+W_EXPORT void w__debug (const char *func,
+                        const char *file,
+                        unsigned    line,
+                        const char *fmt,
+                        ...)
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2, 4));
+
+#define W_WARN(...) \
+    w__warning (__func__, __FILE__, __LINE__, __VA_ARGS__)
+
+#define W_FATAL(...) \
+    w__fatal (__func__, __FILE__, __LINE__, __VA_ARGS__)
+
+#define W_BUG(...) \
+    W_FATAL (__VA_ARGS__                                             \
+             "This is a BUG. Please report this to the developer.\n" \
+             "Build date: " __DATE__ " " __TIME__ "\n")
 
 #ifdef _DEBUG_PRINT
-# define w_debug(_x) __w_debug _x
-W_EXPORT void __w_debug (const char *fmt, ...)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
+# define W_DEBUG(...) \
+    w__debug (__func__, __FILE__, __LINE__, __VA_ARGS__)
+# define W_DEBUGC(...) \
+    w__debug (NULL, NULL, 0, __VA_ARGS__)
 #else
-# define w_debug(_x) ((void)0)
+# define W_DEBUG(...) \
+    ((void)0)
+# define W_DEBUGC(...) \
+    ((void)0)
 #endif
 
 /*\}*/

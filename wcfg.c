@@ -369,8 +369,8 @@ dump_value (const w_variant_t *value, w_io_t *stream, unsigned indent)
             W_IO_CHAIN (r, w_io_putchar (stream, '\n'));
             break;
         default:
-            // TODO: Handle errors better than aborting.
-            w_die ("%s: Invalid variant type in w_cfg_t container\n", __func__);
+            W_WARN ("Invalid variant type in w_cfg_t container. Not dumping.\n");
+            return W_IO_RESULT_ERROR (errno = EINVAL);
     }
 
     return r;
