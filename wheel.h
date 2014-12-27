@@ -1668,7 +1668,7 @@ struct w_buf
 /*!
  * Initializer for \ref w_buf_t
  */
-#define W_BUF ((w_buf_t) { NULL, 0, 0 })
+#define W_BUF { NULL, 0, 0 }
 
 
 /*!
