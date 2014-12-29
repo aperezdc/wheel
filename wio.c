@@ -28,6 +28,7 @@ w_io_init (w_io_t *io)
 {
     w_assert (io);
 
+    memset (io, 0x00, sizeof (w_io_t));
     io->backch = W_IO_EOF;
     w_obj_dtor (io, w_io_cleanup);
 }
@@ -141,6 +142,20 @@ w_io_flush (w_io_t *io)
         return (*io->flush) (io);
     } else {
         return W_IO_RESULT_ERROR (errno = EBADF);
+    }
+}
+
+
+int
+w_io_get_fd (w_io_t *io)
+{
+    w_assert (io);
+
+    if (io->getfd) {
+        return (*io->getfd) (io);
+    } else {
+        errno = EBADF;
+        return -1;
     }
 }
 

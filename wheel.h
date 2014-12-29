@@ -1935,6 +1935,7 @@ W_OBJ_DEF (w_io_t)
     w_io_result_t (*write) (w_io_t *io, const void *buf, size_t size);
     w_io_result_t (*read ) (w_io_t *io, void       *buf, size_t size);
     w_io_result_t (*flush) (w_io_t *io);
+    int           (*getfd) (w_io_t *io);
 };
 
 
@@ -2188,6 +2189,10 @@ W_EXPORT w_io_result_t w_io_flush (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
+W_EXPORT int w_io_get_fd (w_io_t *io)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
 /*!
  * Input/output object on Unix file descriptors.
  */
@@ -2196,21 +2201,6 @@ W_OBJ (w_io_unix_t)
     w_io_t parent;
     int    fd;
 };
-
-/*!
- * Obtain the Unix file descriptor used in an I/O stream.
- * \param _io Pointer to a \ref w_io_t
- */
-static inline int w_io_unix_get_fd (w_io_unix_t *io)
-    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
-    W_FUNCTION_ATTR_NOT_NULL ((1));
-
-static inline int
-w_io_unix_get_fd (w_io_unix_t *io)
-{
-    w_assert (io);
-    return io->fd;
-}
 
 /*!
  * Create an I/O object to be used with an Unix file descriptor.

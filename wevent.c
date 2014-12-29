@@ -408,16 +408,16 @@ w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
     switch (event->type) {
         case W_EVENT_IO:
         case W_EVENT_FD:
-            fd = (event->type == W_EVENT_IO)
-               ? w_io_unix_get_fd ((w_io_unix_t*) event->io)
-               : event->fd;
-
             if (W_HAS_FLAG (event->flags, W_EVENT_IN))
                 ep_ev.events |= EPOLLIN;
             if (W_HAS_FLAG (event->flags, W_EVENT_OUT))
                 ep_ev.events |= EPOLLOUT;
 
-            if (fd_set_nonblocking (fd))
+            fd = (event->type == W_EVENT_IO)
+               ? w_io_get_fd (event->io)
+               : event->fd;
+
+            if (fd < 0 || fd_set_nonblocking (fd))
                 return true;
             break;
 
@@ -520,7 +520,7 @@ w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
             break;
 
         case W_EVENT_IO:
-            fd = w_io_unix_get_fd ((w_io_unix_t*) event->io);
+            fd = w_io_get_fd (event->io);
             break;
 
         case W_EVENT_TIMER:

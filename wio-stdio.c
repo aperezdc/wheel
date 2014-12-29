@@ -68,6 +68,13 @@ w_io_stdio_flush (w_io_t *io)
 }
 
 
+static int
+w_io_stdio_getfd (w_io_t *io)
+{
+    return fileno (((w_io_stdio_t*) io)->fp);
+}
+
+
 void
 w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
 {
@@ -80,6 +87,7 @@ w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
     io->parent.write = w_io_stdio_write;
     io->parent.read  = w_io_stdio_read;
     io->parent.flush = w_io_stdio_flush;
+    io->parent.getfd = w_io_stdio_getfd;
     io->fp = fp;
 }
 

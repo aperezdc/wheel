@@ -73,6 +73,13 @@ w_io_unix_flush (w_io_t *io)
 }
 
 
+static int
+w_io_unix_getfd (w_io_t *io)
+{
+    return ((w_io_unix_t*) io)->fd;
+}
+
+
 w_io_t*
 w_io_unix_open (const char *path,
                 int         mode,
@@ -110,6 +117,7 @@ w_io_unix_init (w_io_unix_t *io,
     return true;
 }
 
+
 void
 w_io_unix_init_fd (w_io_unix_t *io, int fd)
 {
@@ -122,56 +130,54 @@ w_io_unix_init_fd (w_io_unix_t *io, int fd)
     io->parent.write = w_io_unix_write;
     io->parent.read  = w_io_unix_read;
     io->parent.flush = w_io_unix_flush;
+    io->parent.getfd = w_io_unix_getfd;
     io->fd = fd;
 }
 
 
 static w_io_unix_t stdout_data =
 {
-    /* w_io_t */
-    {
-        W_OBJ_STATIC (w_io_unix_close),
-
-        W_IO_EOF,        /* backch */
-        w_io_unix_close, /* close  */
-        w_io_unix_write, /* write  */
-        w_io_unix_read,  /* read   */
-        w_io_unix_flush, /* flush  */
+    .parent = {
+        .parent = W_OBJ_STATIC (w_io_unix_close),
+        .backch = W_IO_EOF,
+        .close  = w_io_unix_close,
+        .write  = w_io_unix_write,
+        .read   = w_io_unix_read,
+        .flush  = w_io_unix_flush,
+        .getfd  = w_io_unix_getfd,
     },
-    STDOUT_FILENO,       /* fd     */
+    .fd = STDOUT_FILENO,
 };
 
 static w_io_unix_t stderr_data =
 {
-    /* w_io_t */
-    {
-        W_OBJ_STATIC (w_io_unix_close),
-
-        W_IO_EOF,        /* backch */
-        w_io_unix_close, /* close  */
-        w_io_unix_write, /* write  */
-        w_io_unix_read,  /* read   */
-        w_io_unix_flush, /* flush  */
+    .parent = {
+        .parent = W_OBJ_STATIC (w_io_unix_close),
+        .backch = W_IO_EOF,
+        .close  = w_io_unix_close,
+        .write  = w_io_unix_write,
+        .read   = w_io_unix_read,
+        .flush  = w_io_unix_flush,
+        .getfd  = w_io_unix_getfd,
     },
-    STDERR_FILENO,       /* fd     */
+    .fd = STDERR_FILENO,
 };
 
 static w_io_unix_t stdin_data =
 {
-    /* w_io_t */
-    {
-        W_OBJ_STATIC (w_io_unix_close),
-
-        W_IO_EOF,        /* backch */
-        w_io_unix_close, /* close  */
-        w_io_unix_write, /* write  */
-        w_io_unix_read,  /* read   */
-        w_io_unix_flush, /* flush  */
+    .parent = {
+        .parent = W_OBJ_STATIC (w_io_unix_close),
+        .backch = W_IO_EOF,
+        .close  = w_io_unix_close,
+        .write  = w_io_unix_write,
+        .read   = w_io_unix_read,
+        .flush  = w_io_unix_flush,
+        .getfd  = w_io_unix_getfd,
     },
-    STDIN_FILENO,        /* fd     */
+    .fd = STDIN_FILENO,
 };
 
 /* Public standard I/O objects */
-w_io_t *w_stdout = (w_io_t*) &stdout_data;
-w_io_t *w_stderr = (w_io_t*) &stderr_data;
-w_io_t *w_stdin  = (w_io_t*) &stdin_data;
+w_io_t *w_stdout = &stdout_data.parent;
+w_io_t *w_stderr = &stderr_data.parent;
+w_io_t *w_stdin  = &stdin_data.parent;

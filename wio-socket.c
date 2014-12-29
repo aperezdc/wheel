@@ -25,7 +25,7 @@
 
 #ifndef SUN_LEN
 #define SUN_LEN(ptr) ((size_t) (((struct sockaddr_un *) 0)->sun_path) + \
-		             strlen ((ptr)->sun_path))
+                      strlen ((ptr)->sun_path))
 #endif /* SUN_LEN */
 
 
@@ -275,10 +275,8 @@ bool
 w_io_socket_connect (w_io_socket_t *io)
 {
     w_assert (io);
-
-    return (connect (w_io_unix_get_fd (&io->parent),
-                     (struct sockaddr*) io->sa,
-                     io->slen) != -1);
+    int fd = w_io_get_fd ((w_io_t*) io);
+    return fd >= 0 && (connect (fd, (struct sockaddr*) io->sa, io->slen) != -1);
 }
 
 
@@ -291,7 +289,6 @@ w_io_socket_serve (w_io_socket_t *io,
     struct sockaddr sa;
     socklen_t slen;
     bool ret;
-    int fd;
 
 #ifdef W_CONF_PTHREAD
     w_assert (mode == W_IO_SOCKET_SINGLE ||
@@ -325,20 +322,25 @@ w_io_socket_serve (w_io_socket_t *io,
     }
     w_assert (mode_handler);
 
-    if (bind (w_io_unix_get_fd (&io->parent), (struct sockaddr*) io->sa, io->slen) == -1) {
+    int fd = w_io_get_fd ((w_io_t*) io);
+    if (fd < 0)
+        return false;
+
+    if (bind (fd, (struct sockaddr*) io->sa, io->slen) == -1) {
         return false;
     }
     io->bound = true;
 
-    if (listen (w_io_unix_get_fd (&io->parent), W_IO_SOCKET_BACKLOG) == -1) {
+    if (listen (fd, W_IO_SOCKET_BACKLOG) == -1) {
         return false;
     }
 
+    int new_fd = -1;
     slen = W_IO_SOCKET_SA_LEN;
-    while ((fd = accept (w_io_unix_get_fd (&io->parent), &sa, &slen)) != -1) {
+    while ((new_fd = accept (fd, &sa, &slen)) != -1) {
         w_io_socket_t *nio = w_obj_new (w_io_socket_t);
 
-        w_io_unix_init_fd ((w_io_unix_t*) nio, fd);
+        w_io_unix_init_fd ((w_io_unix_t*) nio, new_fd);
         memcpy (io->sa, &sa, slen);
         nio->kind = io->kind;
         nio->slen = slen;
@@ -359,7 +361,8 @@ bool
 w_io_socket_send_eof (w_io_socket_t *io)
 {
     w_assert (io);
-    return shutdown (w_io_unix_get_fd (&io->parent), SHUT_WR) != -1;
+    int fd = w_io_get_fd ((w_io_t*) io);
+    return fd >= 0 && shutdown (fd, SHUT_WR) != -1;
 }
 
 
