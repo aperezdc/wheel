@@ -39,7 +39,7 @@ print_message (const char *kind,
 {
     if (func) {
         W_IO_NORESULT (w_io_format (w_stderr,
-                                    "%s (at %s, %s:%u): ",
+                                    "$s (at $s, $s:$I): ",
                                     kind,
                                     func,
                                     file,
