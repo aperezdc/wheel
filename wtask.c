@@ -68,6 +68,7 @@ enum task_state
     TASK_READY,
     TASK_RUN,
     TASK_YIELD,
+    TASK_WAITIO,
     TASK_EXIT,
 };
 
@@ -276,14 +277,14 @@ w_task_run_scheduler (void)
 }
 
 
-void
-w_task_yield (void)
+static inline void
+yield_to_scheduler (enum task_state next_state)
 {
-    CHECK_SCHEDULER ();
-
     /* Put the current task back in the run queue. */
-    s_current_task->state = TASK_YIELD;
-    TAILQ_INSERT_TAIL (&s_runqueue, s_current_task, tailq);
+    s_current_task->state = next_state;
+
+    if (next_state != TASK_EXIT)
+        TAILQ_INSERT_TAIL (&s_runqueue, s_current_task, tailq);
 
     /* Switch to the scheduler. */
     switch_context (&s_current_task->context, &s_scheduler_uctx);
@@ -291,12 +292,81 @@ w_task_yield (void)
 
 
 void
+w_task_yield (void)
+{
+    CHECK_SCHEDULER ();
+    yield_to_scheduler (TASK_YIELD);
+}
+
+
+void
 w_task_exit (void)
 {
     CHECK_SCHEDULER ();
+    yield_to_scheduler (TASK_EXIT);
+}
 
-    s_current_task->state = TASK_EXIT;
 
-    /* Switch to the scheduler, which will reap the task. */
-    switch_context (&s_current_task->context, &s_scheduler_uctx);
+w_io_result_t
+w_task_yield_io_read (w_io_t *io, void *buf, size_t len)
+{
+    CHECK_SCHEDULER ();
+    w_assert (io);
+
+    w_io_result_t ret = W_IO_RESULT (len);
+    while (len) {
+        w_assert (buf);
+        w_io_result_t r = w_io_read (io, buf, len);
+
+        if (w_io_failed (r)) {
+            int err = w_io_result_error (r);
+            if (err == EAGAIN || err == EWOULDBLOCK) {
+                yield_to_scheduler (TASK_WAITIO);
+            } else {
+                return r;
+            }
+        }
+
+        if (w_io_eof (r)) {
+            return r;
+        }
+
+        len -= w_io_result_bytes (r);
+        buf += w_io_result_bytes (r);
+    }
+    return ret;
+}
+
+
+w_io_result_t
+w_task_yield_io_write (w_io_t *io, const void *buf, size_t len)
+{
+    CHECK_SCHEDULER ();
+    w_assert (io);
+
+    w_io_result_t ret = W_IO_RESULT (len);
+    while (len) {
+        w_assert (buf);
+        w_io_result_t r = w_io_write (io, buf, len);
+
+        if (w_io_failed (r)) {
+            int err = w_io_result_error (r);
+            if (err == EAGAIN || err == EWOULDBLOCK) {
+                yield_to_scheduler (TASK_WAITIO);
+            } else {
+                return r;
+            }
+        }
+
+        if (w_io_eof (r)) {
+            return r;
+        }
+
+        len -= w_io_result_bytes (r);
+        buf += w_io_result_bytes (r);
+    }
+    return ret;
+}
+
+
 }

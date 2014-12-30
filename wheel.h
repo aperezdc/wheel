@@ -811,6 +811,15 @@ W_EXPORT void w_task_run_scheduler (void);
  */
 W_EXPORT void w_task_yield (void);
 
+
+W_EXPORT w_io_result_t w_task_yield_io_read (w_io_t *io, void *buf, size_t len)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+W_EXPORT w_io_result_t w_task_yield_io_write (w_io_t *io, const void *buf, size_t len)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
 /*\}*/
 
 /*----------------------------------------------------------[ lists ]-----*/
