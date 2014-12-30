@@ -764,6 +764,7 @@ w_task_system (void)
  * \return Whether the task is a system task.
  */
 W_EXPORT bool w_task_get_is_system (w_task_t *task)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 /*!
