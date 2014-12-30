@@ -191,6 +191,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
         w_buf_t      *vbufp;
         intptr_t      vpointer;
         double        vfpnum;
+        w_io_result_t viores;
     } v;
 
     w_io_result_t r = W_IO_RESULT (0);
@@ -259,6 +260,19 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
             case 'E':
                 v.vcharp = strerror (last_errno);
                 W_IO_CHAIN (r, w_io_write (io, v.vcharp, strlen (v.vcharp)));
+                break;
+            case 'R':
+                v.viores = va_arg (args, w_io_result_t);
+                W_IO_CHAIN (r, w_io_write (io, "IO<", 3));
+                if (w_io_failed (v.viores)) {
+                    v.vcharp = strerror (w_io_result_error (v.viores));
+                    W_IO_CHAIN (r, w_io_write (io, v.vcharp, strlen (v.vcharp)));
+                } else if (w_io_eof (v.viores)) {
+                    W_IO_CHAIN (r, w_io_write (io, "EOF", 3));
+                } else {
+                    W_IO_CHAIN (r, w_io_format_ulong (io, w_io_result_bytes (v.viores)));
+                }
+                W_IO_CHAIN (r, w_io_putchar (io, '>'));
                 break;
             default:
                 W_IO_CHAIN (r, w_io_putchar (io, *fmt));
