@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <ucontext.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 
@@ -369,4 +370,90 @@ w_task_yield_io_write (w_io_t *io, const void *buf, size_t len)
 }
 
 
+static int
+w_io_task_getfd (w_io_t *iobase)
+{
+    w_io_task_t *io = (w_io_task_t*) iobase;
+    return io->wrapped ? w_io_get_fd (io->wrapped) : -1;
+}
+
+
+static w_io_result_t
+w_io_task_flush (w_io_t *iobase)
+{
+    w_io_task_t *io = (w_io_task_t*) iobase;
+    return io->wrapped
+        ? w_io_flush (io->wrapped)
+        : W_IO_RESULT_ERROR (errno = EBADF);
+}
+
+
+static w_io_result_t
+w_io_task_close (w_io_t *iobase)
+{
+    w_io_task_t *io = (w_io_task_t*) iobase;
+
+    if (!io->wrapped)
+        return W_IO_RESULT_ERROR (errno = EBADF);
+
+    w_obj_unref (io->wrapped);
+    io->wrapped = NULL;
+    return W_IO_RESULT_SUCCESS;
+}
+
+
+static w_io_result_t
+w_io_task_read (w_io_t *iobase, void *buf, size_t len)
+{
+    w_io_task_t *io = (w_io_task_t*) iobase;
+    return io->wrapped
+        ? w_task_yield_io_read (io->wrapped, buf, len)
+        : W_IO_RESULT_ERROR (errno = EBADF);
+}
+
+
+static w_io_result_t
+w_io_task_write (w_io_t *iobase, const void *buf, size_t len)
+{
+    w_io_task_t *io = (w_io_task_t*) iobase;
+    return io->wrapped
+        ? w_task_yield_io_write (io->wrapped, buf, len)
+        : W_IO_RESULT_ERROR (errno = EBADF);
+}
+
+
+bool
+w_io_task_init (w_io_task_t *io, w_io_t *wrapped)
+{
+    w_assert (io);
+    w_assert (wrapped);
+
+    int fd = w_io_get_fd (wrapped);
+    if (fd < 0)
+        return false;
+
+    int flags = fcntl (fd, F_GETFL);
+    if (flags < 0 || fcntl (fd, F_SETFL, flags | O_NONBLOCK) == -1)
+        return false;
+
+    w_io_init (&io->parent);
+
+    io->parent.write = w_io_task_write;
+    io->parent.read  = w_io_task_read;
+    io->parent.flush = w_io_task_flush;
+    io->parent.getfd = w_io_task_getfd;
+    io->parent.close = w_io_task_close;
+    io->wrapped = w_obj_ref (wrapped);
+    return true;
+}
+
+
+w_io_t*
+w_io_task_open (w_io_t *wrapped)
+{
+    w_io_task_t *io = w_obj_new (w_io_task_t);
+    if (w_io_task_init (io, wrapped))
+        return (w_io_t*) io;
+    w_obj_destroy (io);
+    return NULL;
 }

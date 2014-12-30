@@ -2566,6 +2566,23 @@ static inline size_t w_io_mem_size (w_io_mem_t *io)
     return io->size;
 }
 
+
+W_OBJ (w_io_task_t)
+{
+    w_io_t  parent;
+    w_io_t *wrapped;
+};
+
+
+W_EXPORT w_io_t* w_io_task_open (w_io_t *wrapped)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+W_EXPORT bool w_io_task_init (w_io_task_t *io, w_io_t *wrapped)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+
 /*\}*/
 
 
