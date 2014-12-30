@@ -56,10 +56,10 @@ static unsigned  s_num_system_tasks = 0;
 static unsigned  s_num_tasks        = 0;
 
 
-#define CHECK_SCHEDULER( )                                       \
-    do {                                                         \
-        if (!s_current_task)                                     \
-            W_FATAL ("Called without a running task scheduler"); \
+#define CHECK_SCHEDULER( )                                          \
+    do {                                                            \
+        if (!s_current_task)                                        \
+            W_FATAL ("Called without a running task scheduler.\n"); \
     } while (0)
 
 
@@ -135,7 +135,7 @@ allocate_task_and_stack (size_t stack_size)
 
     /* Initialize with the current context. */
     if (getcontext (&t->context) < 0)
-        W_FATAL ("getcontext() failed: $E");
+        W_FATAL ("getcontext() failed: $E\n");
 
     t->context.uc_stack.ss_size = alloc_size - sizeof (w_task_t);
     t->context.uc_stack.ss_sp   = (void*) (t + 1); /* Point _after_ the task struct */
@@ -251,7 +251,7 @@ void
 w_task_run_scheduler (void)
 {
     if (s_num_tasks == 0)
-        W_FATAL ("No tasks. Missing w_task_prepare() calls?");
+        W_FATAL ("No tasks. Missing w_task_prepare() calls?\n");
 
     while (s_num_tasks > 0) {
         w_assert (!TAILQ_EMPTY (&s_runqueue));
