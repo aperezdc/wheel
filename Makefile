@@ -22,13 +22,32 @@ examples/%: examples/%.o $(libwheel)
 	$(CC) $(LDFLAGS) -o $@ $^ -lm
 
 
+wdoc: wdoc.o $(libwheel)
+	$(CC) $(LDFLAGS) -o $@ $^ -lm
+
+clean-wdoc:
+	$(RM) wdoc wdoc.o
+
+clean: clean-wdoc
+
+.PHONY: clean-wdoc
+
+libwheel_DOCS := $(patsubst %.c,doc/%.rst,$(libwheel_SRCS))
+extract-doc: $(libwheel_DOCS)
+
+doc: extract-doc
+	$(MAKE) -C doc html
+
+doc/%.rst: %.c wdoc
+	./wdoc -v $(filter-out wdoc,$^) > $@
+
 clean: clean-examples
 
 clean-examples:
 	$(RM) $(EXAMPLES)
 	$(RM) $(EX_OBJS)
 
-.PHONY: examples clean-examples
+.PHONY: examples clean-examples extract-doc doc
 
 
 ## Unit tests

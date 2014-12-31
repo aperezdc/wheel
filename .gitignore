@@ -8,3 +8,5 @@
 *.old
 .*.sw[op]
 tests/test-*
+doc/_build/
+wdoc

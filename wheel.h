@@ -87,7 +87,7 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
  * the "-fvisibility=hidden" flag for GCC >= 4.1.
  */
 #if defined(__ELF__) && defined(__GNUC__) && \
-	  (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 1)
+     (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 1)
 # define W_EXPORT __attribute__((visibility("default")))
 # define W_HIDDEN __attribute__((visibility("hidden")))
 # define W_UNUSED __attribute__((unused))
@@ -593,7 +593,7 @@ static inline char*
 w_str_dup (const char *str)
 {
 	if (str == NULL)
-	    return NULL;
+        return NULL;
 	return w_str_dupl (str, strlen (str));
 }
 
@@ -669,32 +669,10 @@ typedef struct w_task w_task_t;
 
 typedef void (*w_task_func_t) (void*);
 
-/*!
- * Prepares a task for running. The task will start running ready when
- * the task scheduler (see \ref w_task_run_scheduler()) schedules it.
- *
- * \param func Function called to start the task. Receives the value passed
- *      as \data as its only argument.
- * \param data Pointer passed to the task function. May be \c NULL.
- * \param stack_size Size of the stack allocated for the task. The value
- *      is always rounded up to the size of a memory page, which means
- *      it is possible to pass \c 0 to get the smallest possible stack
- *      (usually 4 kB).
- * \return The newly created task.
- */
 W_EXPORT w_task_t* w_task_prepare (w_task_func_t func, void *data, size_t stack_size)
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Obtains the task currently running.
- *
- * This function \m must be called from inside a task, once the task scheduler
- * has been started by using \ref w_task_run_scheduler(). Otherwise, calling
- * this function is an error and the execution of the program will be aborted.
- *
- * \return The current task.
- */
 W_EXPORT w_task_t* w_task_current (void)
     W_FUNCTION_ATTR_NOT_NULL_RETURN;
 
@@ -875,7 +853,7 @@ w_list_size (w_list_t *list)
     return list->size;
 }
 
-/*! 
+/*!
  * Checks whether a list is empty.
  */
 static inline bool w_list_is_empty (w_list_t *list)
@@ -1626,78 +1604,30 @@ w_parse_match (w_parse_t *p, int c)
 
 /*--------------------------------------------------[ data buffers ]------*/
 
-/*!
- * \defgroup buffers Generic data buffers
- * \addtogroup buffers
- * \{
- *
- * Buffers provide a variable-length area of memory in which data may be
- * held and manipulated. Contained data is not interpreted, and length of
- * it is tracked, so it is even possible to add null bytes to a buffer.
- * Allocating a buffer is done in the stack, so it is very fast, the macro
- * \ref W_BUF is provided to intialize them; once that is done all buffer
- * functions can be used, and once working with the buffer has finished,
- * its contents must be deallocated using \ref w_buf_clear:
- *
- * \code
- * w_buf_t b = W_BUF;
- *
- * w_buf_append_str (&b, "Too much work ");
- * w_buf_append_str (&b, "and no joy makes");
- * w_buf_append_str (&b, " Jack a dull boy");
- *
- * printf ("%s\n", w_buf_str (&b));
- *
- * w_buf_clear (&b);
- * \endcode
- *
- * In the above example, a buffer is created, some strings appended to it
- * (there are convenience functions to use them as string buffers) and
- * finally the resulting string is printed and the buffer-held resources
- * freed.
- */
-
 typedef struct w_buf w_buf_t;
-
-/*!
- * \brief A variable-length buffer for arbitrary data.
- * Can hold any kind of data, including null characters, as data length is
- * tracked separately. To initialize a buffer, do something like this:
- * \code
- *   w_buf_t mybuffer = W_BUF;
- * \endcode
- */
 struct w_buf
 {
-    char  *data;  /*!< Actual data */
-    size_t size;  /*!< Data length */
-    size_t alloc; /*!< Allocated buffer size */
+    char  *data;
+    size_t size;
+    size_t alloc;
 };
 
 
-/*!
- * Initializer for \ref w_buf_t
- */
 #define W_BUF { NULL, 0, 0 }
 
 
-/*!
- * Get the length of a buffer.
- */
 static inline size_t w_buf_size (const w_buf_t *buf)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-static inline size_t w_buf_size (const w_buf_t *buf)
+static inline
+size_t w_buf_size (const w_buf_t *buf)
 {
     w_assert (buf);
     return buf->size;
 }
 
-/*!
- * Get a pointer to the internal data stored by the buffer.
- * Note that this may be \c NULL.
- */
+
 static inline char* w_buf_data (w_buf_t *buf)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
@@ -1708,6 +1638,7 @@ w_buf_data (w_buf_t *buf)
     w_assert (buf);
     return buf->data;
 }
+
 
 static inline const char* w_buf_const_data (const w_buf_t *buf)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
@@ -1720,9 +1651,7 @@ w_buf_const_data (const w_buf_t *buf)
     return buf->data;
 }
 
-/*!
- * Checks whether a buffer is empty.
- */
+
 static inline bool w_buf_is_empty (const w_buf_t *buf)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
@@ -1734,98 +1663,38 @@ w_buf_is_empty (const w_buf_t *buf)
     return buf->size == 0;
 }
 
-/*!
- * Adjust the size of a buffer keeping contents.
- * This is mostly useful for trimming contents, when shrinking the buffer.
- * When a buffer grows, random data is liklely to appear at the end.
- * \param buf A \ref w_buf_t buffer
- * \param size New size of the buffer
- */
 W_EXPORT void w_buf_resize (w_buf_t *buf, size_t size)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Set the contents of a buffer to a C string.
- * \param buf A \ref w_buf_t buffer
- * \param str String to set the buffer to
- */
-W_EXPORT void w_buf_set_str (w_buf_t    *buf,
-                             const char *str)
+W_EXPORT void w_buf_set_str (w_buf_t *buf, const char *str)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Appends the contents of a memory block to a buffer.
- * \param buf A \ref w_buf_t buffer
- * \param ptr Pointer to the block of memory
- * \param size Length of the memory block
- */
-W_EXPORT void w_buf_append_mem (w_buf_t    *buf,
-                                const void *ptr,
-                                size_t      size)
+W_EXPORT void w_buf_append_mem (w_buf_t *buf, const void *ptr, size_t size)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Appends a character to a buffer
- * \param buf A \ref w_buf_t buffer
- * \param chr A character
- */
-W_EXPORT void w_buf_append_char (w_buf_t *buf,
-                                 int      chr)
+W_EXPORT void w_buf_append_char (w_buf_t *buf, int chr)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Appends a string to a buffer.
- * \param buf A \ref w_buf_t buffer
- * \param str A string
- */
-W_EXPORT void w_buf_append_str (w_buf_t    *buf,
-                                const char *str)
+W_EXPORT void w_buf_append_str (w_buf_t *buf, const char *str)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Appends a buffer to another buffer
- * \param buf A \ref w_buf_t buffer
- * \param src Another \ref w_buf_t which contains the data to be appended
- */
-W_EXPORT void w_buf_append_buf (w_buf_t       *buf,
-                                const w_buf_t *src)
+W_EXPORT void w_buf_append_buf (w_buf_t *buf, const w_buf_t *src)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Appends formatted text into a buffer. Available formatting options are
- * the same as for \ref w_io_format.
- * \param buf A \ref w_buf_t buffer.
- * \param fmt Format string.
- */
-W_EXPORT w_io_result_t w_buf_format (w_buf_t    *buf,
-                                     const char *fmt,
-                                     ...)
+W_EXPORT w_io_result_t w_buf_format (w_buf_t *buf, const char *fmt, ...)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-W_EXPORT w_io_result_t w_buf_formatv (w_buf_t    *buf,
-                                      const char *fmt,
-                                      va_list     args)
+W_EXPORT w_io_result_t w_buf_formatv (w_buf_t *buf, const char *fmt, va_list args)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Frees the contents of a buffer.
- * \param buf A \ref w_buf_t buffer
- */
 W_EXPORT void w_buf_clear (w_buf_t *buf)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Get the buffer as a C string.
- * Note that if the buffer contains embedded null characters, functions like
- * \c strlen() will not report the full length of the buffer.
- * \param buf A \ref w_buf_t buffer
- */
 W_EXPORT char* w_buf_str (w_buf_t *buf)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*\}*/
 
 /*--------------------------------------------------[ input/output ]------*/
 
@@ -1949,45 +1818,18 @@ W_OBJ_DEF (w_io_t)
 };
 
 
-/*!
- * Initializes a base I/O stream.
- */
 W_EXPORT void w_io_init (w_io_t *io)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Closes an input/output descriptor. If the \c close callback of the
- * descriptor is \c NULL, then no action is performed.
- *
- * \param io An input/output descriptor.
- */
 W_EXPORT w_io_result_t w_io_close (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Writes data to an input/output descriptor. If the descriptor has no
- * \c write callback, then \c -1 is returned and \c errno is set to
- * \c EBADF.
- *
- * \param io  An input/output descriptor.
- * \param buf Pointer to the data to be written.
- * \param size Result of the operation.
- */
-W_EXPORT w_io_result_t w_io_write (w_io_t     *io,
-                                   const void *buf,
-                                   size_t      size)
+W_EXPORT w_io_result_t w_io_write (w_io_t *io, const void *buf, size_t size)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Reads data from an input/output descriptor. If the descriptor has no
- * \c read callback, then \c -1 is returned and \c errno is set to
- * \c EBADF.
- */
-W_EXPORT w_io_result_t w_io_read (w_io_t *io,
-                                  void   *buf,
-                                  size_t  size)
+W_EXPORT w_io_result_t w_io_read (w_io_t *io, void *buf, size_t size)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -2165,36 +2007,17 @@ W_EXPORT bool w_io_fscan_word (w_io_t *io, char **result)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Reads a single character from an I/O object.
- * \param io An input/output descriptor.
- * \return   The read character, or either \ref W_IO_EOF if the end of file
- *           was reached, or \ref W_IO_ERR if there was some error.
- */
 W_EXPORT int w_io_getchar (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Writes a single character to an I/O object.
- * \param io An input/output descriptor.
- * \param ch Character.
- * \return   Number of bytes written, or a negative value on error.
- */
 W_EXPORT w_io_result_t w_io_putchar (w_io_t *io, int ch)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- */
 W_EXPORT void w_io_putback (w_io_t *io, int ch)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Flushes pending buffered data.
- * \param io An input/output descriptor.
- * \return   Whether there was some error.
- */
 W_EXPORT w_io_result_t w_io_flush (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
@@ -2203,58 +2026,24 @@ W_EXPORT int w_io_get_fd (w_io_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Input/output object on Unix file descriptors.
- */
+
 W_OBJ (w_io_unix_t)
 {
     w_io_t parent;
     int    fd;
 };
 
-/*!
- * Create an I/O object to be used with an Unix file descriptor.
- * This is a convenience function that calls \c open() and then uses
- * \ref w_io_unix_open_fd.
- * \param path File path.
- * \param mode Open mode flags (\c O_CREAT, \c O_RDWR...)
- * \param perm Permissions.
- */
-W_EXPORT w_io_t* w_io_unix_open (const char *path,
-                                 int         mode,
-                                 unsigned    perm)
+W_EXPORT w_io_t* w_io_unix_open (const char *path, int mode, unsigned perm)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Create an I/O object to be used with an Unix file descriptor.
- * This function allows initialization from an existing, valid file
- * descriptor.
- * \param fd Unix file descriptor.
- * \sa W_IO_UNIX_FD
- */
 W_EXPORT w_io_t* w_io_unix_open_fd (int fd)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT;
 
-/*!
- * Initialize an I/O object to be used with an Unix file descriptor.
- * This calls \c open() and then uses \ref w_io_unix_init_fd.
- * This function is not intended to be used directly, but it is provided as
- * a convenience for code extending \ref w_io_unix_t
- */
-W_EXPORT bool w_io_unix_init (w_io_unix_t *io,
-                              const char  *path,
-                              int          mode,
-                              unsigned     perm)
+W_EXPORT bool w_io_unix_init (w_io_unix_t *io, const char *path, int mode, unsigned perm)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Initialize an I/O object to be used with an Unix file descriptor.
- * This function is not inteded to be used directly, but it is provided as
- * a convenience for code extending \ref w_io_unix_t.
- * \sa W_IO_UNIX_FD
- */
 W_EXPORT void w_io_unix_init_fd (w_io_unix_t *io, int fd)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -3326,8 +3115,8 @@ W_EXPORT w_cfg_t* w_cfg_load_file (const char *path, char **msg)
 #define _W_G(func_name, conf_type, c_type)             \
 	static inline c_type w_cfg_get_ ## func_name        \
 	(w_cfg_t *cf, const char *key, c_type defval)        \
-	    W_FUNCTION_ATTR_WARN_UNUSED_RESULT                \
-	    W_FUNCTION_ATTR_NOT_NULL ((1, 2));                 \
+        W_FUNCTION_ATTR_WARN_UNUSED_RESULT                \
+        W_FUNCTION_ATTR_NOT_NULL ((1, 2));                 \
 	static inline c_type w_cfg_get_ ## func_name            \
 	(w_cfg_t *cf, const char *key, c_type defval)            \
 	{ c_type value;                                           \
