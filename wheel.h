@@ -377,17 +377,6 @@ typedef struct w_io_result w_io_result_t;
 
 /*---------------------------------------------------[ errors/debug ]-----*/
 
-/*!
- * \defgroup debug Debugging support
- * \addtogroup debug
- * \{
- */
-
-/*!
- * Prints a message to stderr and aborts execution.
- * \param fmt Format string for the message. If \c NULL is passed, then no
- *            message is written to stderr.
- */
 W_EXPORT void w_die (const char *fmt, ...);
 
 
