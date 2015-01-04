@@ -140,88 +140,37 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 
 /*------------------------------------------------[ memory handling ]-----*/
 
-/*!
- * \defgroup wmem Memory handling
- * \addtogroup wmem
- * \{
- */
-
-/*!
- * Wrapper around malloc(). This will abort and print a message when the
- * pointer returned by malloc() is NULL.
- */
 W_EXPORT void* w_malloc (size_t sz)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_MALLOC;
 
-/*!
- * Wrapper around realloc(). This will abort and print a message when the
- * pointer returned by realloc() is NULL. Plus, it is possible to pass
- * a NULL pointer and/or a zero size, and it will behave consistently:
- *
- *  - <tt>w_realloc(NULL, 42)</tt> is equivalent to <tt>malloc(42)</tt>
- *  - <tt>w_relloac(ptr, 0)</tt> is equivalent to <tt>free(ptr)</tt>
- */
 W_EXPORT void* w_realloc (void *ptr, size_t sz)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT;
 
-/*!
- * Frees memory and sets the pointer to \c NULL.
- * \param _x A pointer.
- */
 #define w_free(_x) \
 	(free(_x), (_x) = NULL)
 
-/*!
- * Allocates a new chunk of memory suitable for a value of some type.
- * \param _t Type name for which the chunk will be allocated.
- * \sa w_new0(), w_alloc(), w_alloc0(), w_free()
- */
 #define w_new(_t) \
 	((_t *) w_malloc (sizeof(_t)))
 
-/*!
- * Allocates a zero-filled chunk of memory suitable for a value of some type.
- * \param _t Type name for which the chunk will be allocated.
- * \sa w_new(), w_alloc(), w_alloc0(), w_free()
- */
 #define w_new0(_t) \
     ((_t *) memset (w_new (_t), 0x00, sizeof (_t)))
 
-/*!
- * Allocate an array of memory for items of some type.
- * \param _t Type name of the elements.
- * \param _n Number of elements to allocate memory for.
- * \sa w_new(), w_new0(), w_alloc0(), w_free(), w_resize()
- */
 #define w_alloc(_t, _n) \
 	((_t *) w_malloc (sizeof (_t) * (_n)))
 
-/*!
- * Allocate a zero-filled array of memory for items of some type.
- * \param _t Type name of the elements.
- * \param _n Number of elements to allocate memory for.
- * \sa w_new(), w_new0(), w_alloc(), w_free(), w_resize()
- */
 #define w_alloc0(_t, _n) \
     ((_t *) memset (w_alloc ((_t), (_n)), 0x00, sizeof (_t) * (_n)))
 
-/*!
- * Resize a chunk of memory containing items of some type.
- * \param _p Valid pointer to a memory area.
- * \param _t Type name of the elements.
- * \param _n Number of elements to allocate memory for.
- * \sa w_new(), w_new0(), w_alloc(), w_alloc0(), w_free()
- */
 #define w_resize(_p, _t, _n) \
 	((_t *) w_realloc (_p, sizeof (_t) * (_n)))
 
 #ifdef __GNUC__
-# define w_lobj __attribute__((cleanup(_w_lobj_cleanup)))
-# define w_lmem __attribute__((cleanup(_w_lmem_cleanup)))
-W_EXPORT void _w_lobj_cleanup (void*);
-W_EXPORT void _w_lmem_cleanup (void*);
+# define w_lobj __attribute__((cleanup(w__lobj_cleanup)))
+# define w_lmem __attribute__((cleanup(w__lmem_cleanup)))
+W_EXPORT void w__lobj_cleanup (void*);
+W_EXPORT void w__lmem_cleanup (void*);
 #else
 # define w_lobj - GCC is needed for w_lobj to work -
 # define w_lobj - GCC is needed for w_lmem to work -

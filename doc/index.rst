@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    werr
+   wmem
    wbuf
    wio
    wio-unix
