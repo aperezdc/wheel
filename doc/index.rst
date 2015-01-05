@@ -19,6 +19,7 @@ Contents:
    wio
    wio-buf
    wio-mem
+   wio-stdio
    wio-unix
    wtask
 

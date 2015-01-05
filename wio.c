@@ -15,6 +15,7 @@
  *
  * - :ref:`wio-buf`
  * - :ref:`wio-mem`
+ * - :ref:`wio-stdio`
  * - :ref:`wio-unix`
  *
  *

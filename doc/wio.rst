@@ -8,6 +8,7 @@ The following kinds of streams are provided:
 
 - :ref:`wio-buf`
 - :ref:`wio-mem`
+- :ref:`wio-stdio`
 - :ref:`wio-unix`
 
 

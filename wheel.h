@@ -1828,31 +1828,18 @@ W_EXPORT const char* w_io_socket_unix_path (w_io_socket_t *io)
 
 
 #ifdef W_CONF_STDIO
-/*!
- * Perform input/output in standard C file descriptors.
- */
 W_OBJ (w_io_stdio_t)
 {
     w_io_t parent;
     FILE  *fp;
 };
 
-/*!
- * Initialize an I/O object to be used with a C standard file descriptor.
- * \param fp Standard C file descriptor.
- */
 W_EXPORT w_io_t* w_io_stdio_open (FILE *fp)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Initialize an I/O object to be used with a C standard file descriptor.
- * This function is not meant to be used directly, but is provided as
- * a convenience for other code extending \ref w_io_stdio_t.
- */
 W_EXPORT void w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
 #endif /* W_CONF_STDIO */
 
 

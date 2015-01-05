@@ -1,12 +1,36 @@
 /*
  * wio-stdio.c
- * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2015 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
+/**
+ * .. _wio-stdio:
+ *
+ * Input/Output on ``FILE*`` streams
+ * =================================
+ *
+ * Provides support for using the :ref:`stream functions <wio-functions>` to
+ * read and write to and from ``FILE*`` streams as provided by the C standard
+ * library.
+ *
+ * Types
+ * -----
+ */
+
+/*~t w_io_stdio_t
+ *
+ * Performs input/output on a ``FILE*`` stream.
+ */
+
+/**
+ * Functions
+ * ---------
+ */
+
 /*
- * In this particular compilation unit we always want to incllude the
+ * In this particular compilation unit we always want to include the
  * declarations for the C library stdio-related functions.
  */
 #ifndef W_CONF_STDIO
@@ -75,6 +99,11 @@ w_io_stdio_getfd (w_io_t *io)
 }
 
 
+/*~f void w_io_stdio_init (w_io_stdio_t *stream, FILE *stdio_stream)
+ *
+ * Initializes a `stream` object (possibly allocated in the stack) to be used
+ * with a given `stdio_stream`.
+ */
 void
 w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
 {
@@ -92,6 +121,10 @@ w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
 }
 
 
+/*~f w_io_t* w_io_stdio_open (FILE *stdio_stream)
+ *
+ * Creates a stream object to be used with a given `stdio_stream`.
+ */
 w_io_t*
 w_io_stdio_open (FILE *fp)
 {
