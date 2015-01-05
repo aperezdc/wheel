@@ -10,6 +10,7 @@ The following kinds of streams are provided:
 - :ref:`wio-mem`
 - :ref:`wio-stdio`
 - :ref:`wio-unix`
+- :ref:`wio-socket`
 
 
 .. _formatted-output:

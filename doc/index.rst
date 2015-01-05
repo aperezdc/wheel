@@ -21,6 +21,7 @@ Contents:
    wio-mem
    wio-stdio
    wio-unix
+   wio-socket
    wtask
 
 

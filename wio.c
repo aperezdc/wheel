@@ -17,6 +17,7 @@
  * - :ref:`wio-mem`
  * - :ref:`wio-stdio`
  * - :ref:`wio-unix`
+ * - :ref:`wio-socket`
  *
  *
  * .. _formatted-output:

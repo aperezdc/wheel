@@ -1,7 +1,7 @@
 /*
  * Main include file for libwheel.
  *
- * Copyright (C) 2010-2014 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2015 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
@@ -1683,14 +1683,10 @@ W_EXPORT void w_io_unix_init_fd (w_io_unix_t *io, int fd)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 
-/*!
- * Socket kinds.
- * \see w_io_socket_open
- */
 enum w_io_socket_kind
 {
-    W_IO_SOCKET_UNIX, /*!< Unix named socket.    */
-    W_IO_SOCKET_TCP4, /*!< IPv4 TCP socket.      */
+    W_IO_SOCKET_UNIX,
+    W_IO_SOCKET_TCP4,
 };
 typedef enum w_io_socket_kind w_io_socket_kind_t;
 
@@ -1709,9 +1705,6 @@ typedef enum w_io_socket_serve_mode w_io_socket_serve_mode_t;
 
 #define W_IO_SOCKET_SA_LEN 1024
 
-/*!
- * Performs input/output on sockets.
- */
 W_OBJ (w_io_socket_t)
 {
     w_io_unix_t        parent;
@@ -1736,91 +1729,24 @@ w_io_socket_get_kind (w_io_socket_t *io)
     return io->kind;
 }
 
-/*!
- * Create a new socket. Sockets can be used both for clients and servers,
- * as this function only performs basic initialization. Calling \ref
- * w_io_socket_serve will start serving request, and for client use \ref
- * w_io_socket_connect should be called. Parameters other than the socket
- * kind are dependant on the particular kind of socket being created. For
- * the moment the following are supported:
- *
- * - \ref W_IO_SOCKET_UNIX will create an Unix domain socket. A path in
- *   the file system must be given, at which the socket will be created.
- * - \ref W_IO_SOCKET_TCP4 will create a TCP socket using IPv4, arguments
- *   are the IP address as a string for binding (in the case of calling
- *   \ref w_io_socket_serve afterwards) or connecting to (when using \ref
- *   w_io_socket_connect). The second argument is the port number.
- *
- * \param kind Socket kind.
- * \return When socket creation fails, \c NULL is returned and \c errno
- *         is set accordingly.
- * \sa w_io_socket_init.
- */
 W_EXPORT w_io_t* w_io_socket_open (w_io_socket_kind_t kind, ...)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT;
 
-/*!
- * Perform basic socket initialization. In general applications should use
- * \ref w_io_socket_open instead of this function, but it is provided to be
- * used from code extending \ref w_io_socket_t.
- * \param io   An input/output object.
- * \param kind Socket kind.
- * \return Whether initialization was successful.
- * \sa w_io_socket_open
- */
 W_EXPORT bool w_io_socket_init (w_io_socket_t *io,
                                 w_io_socket_kind_t kind, ...)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Serves requests using a socket. This function will start a loop accepting
- * connections, and for each connection an open socket will be passed to the
- * given handler function. The way in which each request is served can be
- * specified:
- *
- * - \ref W_IO_SOCKET_SINGLE: Each request is served by calling directly and
- *   waiting for it to finish. This makes impossible to serve more than one
- *   request at a time.
- * - \ref W_IO_SOCKET_THREAD: Each request is served in a new thread. The
- *   handler is invoked in that thread.
- * - \ref W_IO_SOCKET_FORK: A new process is forked for each request. The
- *   handler is invoked in the child process.
- *
- * \param io      An input/output object.
- * \param mode    How to serve each request.
- * \param handler Callback invoked to serve requests.
- */
 W_EXPORT bool w_io_socket_serve (w_io_socket_t *io,
                                  w_io_socket_serve_mode_t mode,
                                  bool (*handler) (w_io_socket_t*))
     W_FUNCTION_ATTR_NOT_NULL ((1, 3));
 
-/*!
- * Connect a socket to a server. This makes a connection to the host
- * specified when creating the socket with \ref w_io_socket_open, and
- * puts it in client mode. Once the socket is successfully connected,
- * read and write operations can be performed in the socket.
- * \return Whether the connection was setup successfully.
- */
 W_EXPORT bool w_io_socket_connect (w_io_socket_t *io)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Perform a half-close on the write direction. This closes the socket,
- * but only in writing one direction, so other endpoint will think that
- * the end of the stream was reached (thus the operation is conceptually
- * equivalent to sending and “end of file marker”). Read operations can
- * still be performing in a socket which was half-closed using this
- * function. Note that for completely closing the socket, \ref w_io_close
- * should be used instead.
- * \return Whether performing the half-close was successful.
- */
 W_EXPORT bool w_io_socket_send_eof (w_io_socket_t *io)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Obtain the path in the filesystem for an Unix socket.
- */
 W_EXPORT const char* w_io_socket_unix_path (w_io_socket_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
