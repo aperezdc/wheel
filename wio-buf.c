@@ -6,6 +6,8 @@
  */
 
 /**
+ * .. _wio-buf:
+ *
  * Input/Output on Buffers
  * =======================
  *

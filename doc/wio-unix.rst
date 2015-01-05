@@ -1,4 +1,6 @@
 
+.. _wio-unix:
+
 Input/Output on Unix file descriptors
 =====================================
 

@@ -11,6 +11,13 @@
  * Input/Output Streams
  * ====================
  *
+ * The following kinds of streams are provided:
+ *
+ * - :ref:`wio-buf`
+ * - :ref:`wio-mem`
+ * - :ref:`wio-unix`
+ *
+ *
  * .. _formatted-output:
  *
  * Formatted output

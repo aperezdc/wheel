@@ -18,6 +18,7 @@ Contents:
    wlist
    wio
    wio-buf
+   wio-mem
    wio-unix
    wtask
 
