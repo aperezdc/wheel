@@ -1856,9 +1856,6 @@ W_EXPORT void w_io_stdio_init (w_io_stdio_t *io, FILE *fp)
 #endif /* W_CONF_STDIO */
 
 
-/*!
- * Perform input/output on memory buffers.
- */
 W_OBJ (w_io_buf_t)
 {
     w_io_t   parent;
@@ -1867,34 +1864,13 @@ W_OBJ (w_io_buf_t)
     w_buf_t *bufp;
 };
 
-
-/*!
- * Create an I/O object to be used with a buffer.
- * \param buf Pointer to a w_buf_t. Passing NULL will initialize a new
- *            \ref w_buf_t internally which can be retrieved with
- *            \ref w_io_buf_get_buffer. If you pass a non-NULL buffer, then
- *            you will be responsible to call \ref w_buf_clear on it.
- */
 W_EXPORT w_io_t* w_io_buf_open (w_buf_t *buf)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN;
 
-/*!
- * Initialize an I/O object in the stack to be used with a buffer.
- * This function is not meant to be used directly, but is provided as
- * a convenience for other code extending \ref w_io_buf_t, or wanting to
- * quickly allocate a \ref w_io_buf_t in the stack.
- *
- * \param io I/O buffer object.
- * \param buf Buffer with optional initial data.
- * \param append Whether \i buf will be used for appending data.
- */
 W_EXPORT void w_io_buf_init (w_io_buf_t *io, w_buf_t *buf, bool append)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Obtain a pointer to the buffer being used by a \ref w_io_buf_t.
- */
 static inline w_buf_t* w_io_buf_get_buffer (w_io_buf_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
@@ -1907,9 +1883,6 @@ w_io_buf_get_buffer (w_io_buf_t *io)
     return io->bufp;
 }
 
-/*!
- * Obtain a string representation of a \ref w_io_buf_t I/O object.
- */
 static inline char* w_io_buf_str (w_io_buf_t *io)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));

@@ -17,6 +17,7 @@ Contents:
    wbuf
    wlist
    wio
+   wio-buf
    wio-unix
    wtask
 
