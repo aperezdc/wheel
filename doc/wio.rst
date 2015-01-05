@@ -1,4 +1,6 @@
 
+.. _wio:
+
 Input/Output Streams
 ====================
 

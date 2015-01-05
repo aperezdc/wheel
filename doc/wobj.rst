@@ -1,4 +1,6 @@
 
+.. _wobj:
+
 Objects
 =======
 
@@ -28,6 +30,11 @@ object model has the following features:
 - Optionally, when using GCC or Clang, the reference count for an object
   can be automatically decreased when a pointer to it goes out of scope,
   by marking it with the :macro:`w_lobj` macro.
+
+A number of features included in ``libwheel`` make use of the object
+system (for example, the :ref:`wio`), or includes support to seamlessly
+integrate with the object system (for example, the :ref:`wlist` can update
+the reference counter when objects are added to it).
 
 
 Usage

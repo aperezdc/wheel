@@ -572,35 +572,6 @@ w_task_system (void)
 
 /*----------------------------------------------------------[ lists ]-----*/
 
-/*!
- * \defgroup wlist Lists
- * \addtogroup wlist
- * \{
- *
- * List data structure. The implementation uses a doubly-linked list,
- * meaning that most operations are very efficient, and the list can be
- * traversed both forward and backward. Slow operations are those that
- * use numeric indexes to refer to elements in the list: \ref w_list_at,
- * \ref w_list_insert_at and \ref w_list_del_at. The later should be
- * avoided if possible, but still they are provided as a convenience.
- *
- * Negative numeric indexes may be passed to functions, with the same
- * meaning as in Python: \c -1 refers to the last element, \c -2 to the
- * element before the last, and so on.
- *
- * <b>Lists of objects</b>
- *
- * If a list is meant to contain objects (see \ref wobj), it is possible
- * to let the list reference-count the objects (using \ref w_obj_ref and
- * \ref w_obj_unref) by passing \c true when creating a list with
- * \ref w_list_new. If enabled, whenever an item is added to the list,
- * its reference count will be increased, and it will be decreased when
- * the item is removed from the list.
- */
-
-/*!
- * List type.
- */
 W_OBJ (w_list_t)
 {
     w_obj_t parent;
@@ -609,204 +580,92 @@ W_OBJ (w_list_t)
     /* actual data is stored in the private area of the list */
 };
 
-/*!
- * Get the number of elements in a list.
- */
-static inline size_t w_list_size (w_list_t *list)
+static inline size_t w_list_size (const w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 static inline size_t
-w_list_size (w_list_t *list)
+w_list_size (const w_list_t *list)
 {
     w_assert (list);
     return list->size;
 }
 
-/*!
- * Checks whether a list is empty.
- */
-static inline bool w_list_is_empty (w_list_t *list)
+static inline bool w_list_is_empty (const w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 static inline bool
-w_list_is_empty (w_list_t *list)
+w_list_is_empty (const w_list_t *list)
 {
     w_assert (list);
     return list->size > 0;
 }
 
-/*!
- * Creates a new list.
- * \param refs Whether to handle references to objects in the list.
- * \return A new, empty list.
- */
 W_EXPORT w_list_t* w_list_new (bool refs)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN;
 
-/*! Clears all elements from a list. */
 W_EXPORT void w_list_clear (w_list_t *list)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Obtains the value stored at a given position.
- * \param index Position in the list. Negative indexes count from the end of
- *              the list, i.e. \c -1 would be the last element.
- */
 W_EXPORT void* w_list_at (const w_list_t *list, long index)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Appends an element to the end of a list. */
 W_EXPORT void w_list_push_head (w_list_t *list, void *item)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Inserts an element in the beginning of the list. */
 W_EXPORT void w_list_push_tail (w_list_t *list, void *item)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Removes the element from the beginning of the list and returns it.
- * Note that this will \b not decrease the reference counter when reference
- * counting is enabled: it is assumed that the caller will use the returned
- * item.
- */
 W_EXPORT void* w_list_pop_head (w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Removes the element from the end of the list and returns it.
- * Note that this will \b not decrease the reference counter when reference
- * counting is enabled: it is assumed that the caller will use the returned
- * item.
- */
 W_EXPORT void* w_list_pop_tail (w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Obtains the element at the first position in the list. */
 W_EXPORT void* w_list_head (const w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Obtains the element at the last position in the list. */
 W_EXPORT void* w_list_tail (const w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Obtains a pointer to the first element in the list. */
 W_EXPORT w_iterator_t w_list_first (const w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Obtains a pointer to the last element in the list. */
 W_EXPORT w_iterator_t w_list_last (const w_list_t *list)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Obtains a pointer to the next element. */
 W_EXPORT w_iterator_t w_list_next (const w_list_t *list, w_iterator_t i)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*! Obtains a pointer to the previous element. */
 W_EXPORT w_iterator_t w_list_prev (const w_list_t *list, w_iterator_t i)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Applies a function to each element in a list, in forward order.
- *
- * Each element in the list, in forward order, will be passed to function
- * \e f. The function can mutate the element and return a different one,
- * which will replace the original element in the list. An optional context
- * (\e ctx) pointer will be passed to \e f every time it is called.
- */
-W_EXPORT void w_list_traverse (const w_list_t *list, w_traverse_fun_t f, void *ctx)
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-/*!
- * Applies a function to each element in a list, in reverse order.
- *
- * \see w_list_traverse
- */
-W_EXPORT void w_list_traverse_rev (const w_list_t *list, w_traverse_fun_t f, void *ctx)
-    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
-
-/*!
- * Defines a loop over all items in a list. This can be used as an
- * alternative to \ref w_list_traverse. Typical usage:
- * \code
- * w_list_t *list = make_string_list ();
- * w_iterator_t i;
- *
- * w_list_foreach (list, i)
- *    w_io_format (w_stdout, "$s\n", (const char*) *i);
- * \endcode
- *
- * \see w_list_foreach_rev, w_list_traverse.
- */
-#define w_list_foreach(_v, _l)                \
-    for (w_iterator_t _v = w_list_first (_l); \
-         _v != NULL;                          \
-         _v = w_list_next ((_l), _v))
-
-/*!
- * Defines a loop, in reverse order, over all items in a list. This can be
- * used as an alternative to \ref w_list_traverse_rev.
- *
- * \see w_list_foreach, w_list_traverse_reverse.
- */
-#define w_list_foreach_reverse(_v, _l)       \
-    for (w_iterator_t _v = w_list_last (_l); \
-         _v != NULL;                         \
-         _v = w_list_prev ((_l), _v))
-
-/*!
- * Inserts an element in a list before a particular position.
- * The \e item is inserted in the \e list before the position pointed by
- * \e i.
- */
 W_EXPORT void w_list_insert_before (w_list_t *list, w_iterator_t i, void *item)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Inserts an element in a list after a particular position.
- * The \e item is inserted in the \e list after the position pointed by
- * \e i.
- */
 W_EXPORT void w_list_insert_after (w_list_t *list, w_iterator_t i, void *item)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Inserts an element in a list at a given position.
- * The \e item is inserted at the given numeric \e index. Note that some
- * particular indexes like \c 0 (first position) and \c -1 (last position)
- * will be optimized out, but in general this function runs in \e O(n).
- */
 W_EXPORT void w_list_insert_at (w_list_t *list, long index, void *item)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Deletes the element at a given position in a list.
- */
 W_EXPORT void w_list_del (w_list_t *list, w_iterator_t i)
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Deletes the element at a given (numeric) position in a list.
- */
 W_EXPORT void w_list_del_at (w_list_t *list, long index)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Deletes the element at the beginning of the list. Contrary to
- * \ref w_list_pop_head, the element is \b not returned, and the
- * reference counter decresed (if reference counting enabled).
- */
 static inline void w_list_del_head (w_list_t *list)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -817,11 +676,6 @@ w_list_del_head (w_list_t *list)
     w_list_del (list, w_list_first (list));
 }
 
-/*!
- * Deletes the element at the end of the list. Contrary to
- * \ref w_list_pop_tail, the element is \b not returned, and the
- * reference counter decresed (if reference counting enabled).
- */
 static inline void w_list_del_tail (w_list_t *list)
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -865,7 +719,18 @@ w_list_pop (w_list_t *list)
     return w_list_pop_tail (list);
 }
 
-/*\}*/
+
+#define w_list_foreach(_v, _l)                \
+    for (w_iterator_t _v = w_list_first (_l); \
+         _v != NULL;                          \
+         _v = w_list_next ((_l), _v))
+
+#define w_list_foreach_reverse(_v, _l)       \
+    for (w_iterator_t _v = w_list_last (_l); \
+         _v != NULL;                         \
+         _v = w_list_prev ((_l), _v))
+
+
 
 /*---------------------------------------------------[ dictionaries ]-----*/
 

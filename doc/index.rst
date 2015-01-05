@@ -15,6 +15,7 @@ Contents:
    wmem
    wobj
    wbuf
+   wlist
    wio
    wio-unix
    wtask
