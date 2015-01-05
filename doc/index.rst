@@ -13,6 +13,7 @@ Contents:
 
    werr
    wmem
+   wobj
    wbuf
    wio
    wio-unix

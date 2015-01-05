@@ -35,7 +35,7 @@ w_list_new (bool refs)
     list->refs = refs;
     list->size = 0;
     TAILQ_INIT (h);
-    return w_obj_dtor (list, (w_obj_dtor_t) w_list_clear);
+    return w_obj_dtor (list, (void (*)(void*)) w_list_clear);
 }
 
 

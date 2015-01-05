@@ -176,16 +176,8 @@ W_EXPORT void w__lmem_cleanup (void*);
 # define w_lobj - GCC is needed for w_lmem to work -
 #endif /* __GNUC__ */
 
-/*\}*/
-
 
 /*------------------------------------------------[ simple objects ]------*/
-
-/*!
- * \defgroup wobj Poor man's object orientation
- * \addtogroup wobj
- * \{
- */
 
 #define W_OBJ_DECL(_c) \
     typedef struct _c ## __class _c
@@ -197,9 +189,6 @@ W_EXPORT void w__lmem_cleanup (void*);
     W_OBJ_DECL (_c); \
     W_OBJ_DEF  (_c)
 
-/*!
- * Initializes a statically-allocated \ref w_obj_t.
- */
 #define W_OBJ_STATIC(_dtor) \
     { (size_t) -1, (void (*)(void*)) (_dtor) }
 
@@ -211,112 +200,40 @@ W_OBJ (w_obj_t)
 };
 
 
-/*!
- * Initializes an object.
- * Subclasses should do not need to call this base initializer. It will be
- * automatically called when using \ref w_obj_new().
- */
-static inline void* w_obj_init (w_obj_t *obj)
+static inline void* w__obj_init (w_obj_t *obj)
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
 static inline void*
-w_obj_init (w_obj_t *obj)
+w__obj_init (w_obj_t *obj)
 {
     w_assert (obj);
     obj->__refs = 1;
     return obj;
 }
 
-/*!
- * Instantiates an object, with space allocated for a private data area.
- */
-#define w_obj_new_with_priv_sized(_t, _s) \
-    ((_t *) w_obj_init (w_malloc (sizeof (_t) + (_s))))
 
-/*!
- * Instantiates an object, with space allocated for a private data area.
- * The size of the private area will be that of a type names after the
- * object type, with a \c _p suffix added to it.
- */
+#define w_obj_new_with_priv_sized(_t, _s) \
+    ((_t *) w__obj_init (w_malloc (sizeof (_t) + (_s))))
+
 #define w_obj_new_with_priv(_t) \
     w_obj_new_with_priv_sized (_t, sizeof (_t ## _p))
 
-/*!
- * Instantiates an object.
- */
 #define w_obj_new(_t) \
-    ((_t *) w_obj_init (w_malloc (sizeof (_t))))
+    ((_t *) w__obj_init (w_malloc (sizeof (_t))))
 
-/*!
- * Obtains a pointer to the private data area of an object.
- */
 #define w_obj_priv(_p, _t) \
     ((void*) (((char*) (_p)) + sizeof (_t)))
 
-/*!
- * Increases the reference counter of an object, returns the object itself.
- */
+
 void* w_obj_ref (void *obj);
-
-/*!
- * Decreases the reference counter of an object, returns the object itself.
- * Once the reference count for an object reaches zero, it is destroyed by
- * calling \ref w_obj_destroy().
- */
 void* w_obj_unref (void *obj);
-
-/*!
- * Destroys an object. If a destructor function was set for the object
- * (using \ref w_obj_dtor()), then it will be run prior to the memory
- * used by the object being freed.
- */
 void w_obj_destroy (void *obj)
     W_FUNCTION_ATTR_NOT_NULL ((1));
-
-/*!
- * Type of object destructors.
- */
-typedef void (*w_obj_dtor_t) (void*);
-
-/*!
- * Registers a destructor to be called when an object is destroyed.
- */
-void* w_obj_dtor (void *obj, w_obj_dtor_t fini)
+void* w_obj_dtor (void *obj, void (*dtor)(void*))
     W_FUNCTION_ATTR_NOT_NULL ((1));
-
-/*!
- * Mark an object as static.
- *
- * When the last reference to an object marked as static is lost, its destructor
- * will be called, but the area of memory occupied by the object will not be
- * freed. This is the same behaviour as for objects initialized with \ref
- * W_OBJ_STATIC. The typical use-case for this function to mark objects that
- * are allocated as part of others, and the function is called during their
- * initialization, like this:
- *
- * \code
- * W_OBJ (my_type) {
- *   w_obj_t     parent;
- *   w_io_unix_t unix_io;
- * };
- *
- * void my_type_free (void *objptr) {
- *   w_obj_destroy (&self->unix_io);
- * }
- *
- * my_type* my_type_new (void) {
- *   my_type *self = w_obj_new (my_type);
- *   w_io_unix_init_fd (&self->unix_io, 0);
- *   w_obj_mark_static (&self->unix_io);
- *   return w_obj_dtor (self, _my_type_free);
- * }
- * \endcode
- */
 void w_obj_mark_static (void *obj)
     W_FUNCTION_ATTR_NOT_NULL ((1));
-
-/*\}*/
 
 
 /*------------------------------------------[ forward declarations ]------*/
