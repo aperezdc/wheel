@@ -1509,47 +1509,12 @@ static inline w_io_result_t w_io_read_line (w_io_t  *io,
     return w_io_read_until (io, data, overflow, '\n', maxbytes);
 }
 
-/*!
- * Formats text and writes it to an I/O object. Implements naïve (but
- * effective) formatting, providing the most common options of the
- * \c printf() family of functions. Because behavior is different from
- * those, format specifications use <tt>$</tt> as prefix. The recognized
- * specifiers are:
- *
- *  - \b c : <tt>char</tt>, a single character.
- *  - \b l : <tt>long int</tt> number.
- *  - \b L : <tt>unsigned long int</tt> number.
- *  - \b i : <tt>int</tt> number.
- *  - \b I : <tt>unsigned int</tt> number.
- *  - \b X : <tt>unsigned long int</tt> number, formatted in hexadecimal.
- *  - \b O : <tt>unsigned long int</tt> number, formatted in octal.
- *  - \b p : <tt>void*</tt> pointer, formatted in hexadecimal.
- *  - \b f : <tt>float</tt> number.
- *  - \b F : <tt>double</tt> number.
- *  - \b s : <tt>const char*</tt>, a zero-terminated string.
- *  - \b B : <tt>w_buf_t*</tt>, a buffer.
- *  - \b S : <tt>size_t</tt> and <tt>const char*</tt>, prints a given
- *    amount of characters from a string.
- *  - \b e : Last value of <tt>errno</tt>, as an integer.
- *  - \b E : Last value of <tt>errno</tt>, as a string.
- *
- * \param io  An input/output descriptor.
- * \param fmt Format string.
- */
 W_EXPORT w_io_result_t w_io_format (w_io_t     *io,
                                     const char *fmt,
                                     ...)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
-/*!
- * Formats text and writes it to an I/O object. This version accepts
- * a standard variable argument list. For the available formatting options,
- * read the documentation for \ref w_io_format().
- * \param io   An input/output descriptor.
- * \param fmt  Format string.
- * \param args Argument list.
- */
 W_EXPORT w_io_result_t w_io_formatv (w_io_t     *io,
                                      const char *fmt,
                                      va_list     args)
