@@ -20,6 +20,126 @@
  * - Unix sockets.
  *
  *
+ * Usage
+ * -----
+ *
+ * Client
+ * ~~~~~~
+ *
+ * To connect a socket to a remote server (and use it as a client), the usual
+ * procedure is as follows:
+ *
+ * #. Create the socket with :func:`w_io_socket_open()`.
+ *
+ * #. Connect to the remote endpoint using :func:`w_io_socket_connect()`.
+ *
+ * #. Exchange data using :func:`w_io_write()` and :func:`w_io_read()`, or any
+ *    other of the :ref:`stream functions <wio-functions>`.
+ *
+ * #. *(Optional)* Once no more data needs to be written, a half-close can be
+ *    performed using :func:`w_io_socket_send_eof()`. It will still be
+ *    possible to read data from the stream.
+ *
+ * #. Close the socket, using :func:`w_io_close()` or calling
+ *    :func:`w_obj_unref()` on it and letting it be closed and destroyed when
+ *    no more references to the socket are held.
+ *
+ * The following code will make an HTTP request and read the response back
+ * into a :type:`w_buf_t`:
+ *
+ * .. code-block:: c
+ *
+ *      w_buf_t
+ *      http_get (const char *ip_address, unsigned port, const char *resource)
+ *      {
+ *          w_lobj w_io_t *stream = w_io_socket_open (W_IO_SOCKET_TCP4,
+ *                                                    ip_address,
+ *                                                    port);
+ *          if (!stream || !w_io_socket_connect ((w_io_socket_t*) stream))
+ *              w_die ("Cannot create socket and connect to $s\n", ip_address);
+ *
+ *          W_IO_NORESULT (w_io_format (stream, "GET $s HTTP/1.0\r\n", resource));
+ *          w_io_socket_send_eof ((w_io_socket_t*) stream);
+ *
+ *          w_buf_t response = W_BUF;
+ *          char buf[512];
+ *
+ *          for (;;) {
+ *              w_io_result_t r = w_io_read (stream, buf, w_lengthof (buf));
+ *              if (w_io_failed (r))
+ *                  w_die ("Error reading from $s: $R\n", ip_address, r);
+ *              if (w_io_result_bytes (r) > 0)
+ *                  w_buf_append_mem (&response, buf, w_io_result_bytes (r));
+ *              else if (w_io_eof (r))
+ *                  break;
+ *          }
+ *
+ *          return response;
+ *      }
+ *
+ *
+ * Server
+ * ~~~~~~
+ *
+ * Using a socket to server requests is a bit more convoluted, but still
+ * much easier than using the sockets API directly. The overall procedure
+ * is:
+ *
+ * #. Define a request handler function which conforms to the following
+ *    signature:
+ *
+ *    .. code-block:: c
+ *
+ *          bool (*request_handler) (w_io_socket_t *socket)
+ *
+ * #. Create the socket with :func:`w_io_socket_open()`.
+ *
+ * #. Start serving requests with :func:`w_io_socket_serve()`. The function
+ *    will bind to the address specified when creating the socket and start
+ *    serving requests. For each request, the request handler function will
+ *    be called with a socket that can be used to handle the request.
+ *
+ * The following code implements a simple TCP echo server:
+ *
+ * .. code-block:: c
+ *
+ *      static bool
+ *      handle_echo_request (w_io_socket_t *socket)
+ *      {
+ *          char buf[512];
+ *          for (;;) {
+ *              w_io_result_t r = w_io_read ((w_io_t*) socket, buf, w_lengthof (buf));
+ *              if (w_io_failed (r))
+ *                  w_die ("Error reading from client: $R\n", r);
+ *              if (w_io_eof (r))
+ *                  break;
+ *
+ *              r = w_io_write ((w_io_t*) socket, buf, w_io_result_bytes (r));
+ *              if (w_io_failed (r))
+ *                  w_die ("Error writing to client: $R\n", r);
+ *          }
+ *          w_io_socket_send_eof (socket);
+ *
+ *          return true;  // Keep accepting more requests.
+ *      }
+ *
+ *      int main (void)
+ *      {
+ *          w_lobj w_io_t *socket = w_io_socket_open (W_IO_SOCKET_TCP4,
+ *                                                    "0.0.0.0",  // Address.
+ *                                                    4242);      // Port.
+ *          if (!socket)
+ *              w_die ("Cannot create socket: $E\n");
+ *
+ *          if (!w_io_socket_serve ((w_io_socket_t*) socket,
+ *                                  W_IO_SOCKET_FORK,  // Handle each request in a child process.
+ *                                  handle_echo_request))
+ *              w_dir ("Cannot accept connections: $E\n");
+ *
+ *          return 0;
+ *      }
+ *
+ *
  * Types
  * -----
  */
