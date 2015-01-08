@@ -3,8 +3,8 @@ compiler:
     - clang
     - gcc
 install:
+    - sudo pip install cpp-coveralls
     - sudo apt-get install -y check
-    - pip install cpp-coveralls
 script:
     - test "$CC" = gcc && export CC="$CC -fprofile-arcs -ftest-coverage -O0 -g"
     - make all run-tests doc
