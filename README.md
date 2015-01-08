@@ -1,6 +1,8 @@
 # libwheel - A library to avoid reinventing the wheel
 
-[![Build Status](https://drone.io/github.com/aperezdc/wheel/status.png)](https://drone.io/github.com/aperezdc/wheel/latest)
+[![Build Status](https://img.shields.io/travis/aperezdc/wheel.svg?style=flat)](https://travis-ci.org/aperezdc/wheel)
+[![Code Coverage](https://img.shields.io/coveralls/aperezdc/wheel/master.svg?style=flat)](https://coveralls.io/r/aperezdc/wheel?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/libwheel/badge/?version=latest)](https://libwheel.readthedocs.org/en/latest)
 
 The “wheel” library aims to provide basic (and some not-that-basic)
 facilities that one would expect to have in C. For the moment it contains:
