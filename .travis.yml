@@ -7,7 +7,7 @@ env:
     - COVERAGE=true
 install:
     - $COVERAGE && sudo pip install cpp-coveralls || true
-    - sudo apt-get install -y check
+    - sudo apt-get install -y check python-sphinx
 script:
     - $COVERAGE && export CC="${CC} -fprofile-arcs -ftest-coverage -O0 -g" || true
     - make all run-tests doc
