@@ -2,11 +2,14 @@ language: c
 compiler:
     - clang
     - gcc
+env:
+    - COVERAGE=false
+    - COVERAGE=true
 install:
-    - sudo pip install cpp-coveralls
+    - $COVERAGE && sudo pip install cpp-coveralls || true
     - sudo apt-get install -y check
 script:
-    - if [[ $CC = gcc ]] ; then export CC="${CC} -fprofile-arcs -ftest-coverage -O0 -g" ; endif
+    - $COVERAGE && export CC="${CC} -fprofile-arcs -ftest-coverage -O0 -g" || true
     - make all run-tests doc
 after_success:
-    - coveralls --include 'w*.c' --include wheel.h --gcov-options '\-lp'
+    - $COVERAGE && coveralls --include 'w*.c' --include wheel.h --gcov-options '\-lp' || true
