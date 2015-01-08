@@ -110,7 +110,7 @@ handle_source_file (void *filenamep, void *ctx)
 
             if (bpos < blen) {
                 if (objtype) {
-                    w_printerr (" - $S\n", blen - bpos, bdata + bpos);
+                    VERBOSE (" - $S\n", blen - bpos, bdata + bpos);
                     w_print (".. c:$s:: ", map_objtype (objtype));
                     objtype = 0;
                 } else if (indent) {

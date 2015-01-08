@@ -39,7 +39,7 @@ doc: extract-doc
 	$(MAKE) -C doc html
 
 doc/%.rst: %.c wdoc
-	./wdoc -v $(filter-out wdoc,$^) > $@
+	./wdoc $(filter-out wdoc,$^) > $@
 
 clean: clean-examples
 
