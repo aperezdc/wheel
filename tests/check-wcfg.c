@@ -114,7 +114,7 @@ START_TEST (test_wcfg_invalid_input__loop)
 
     char *message = NULL;
     w_cfg_t *cf = w_cfg_load ((w_io_t*) &iomem, &message);
-    fail_unless (message, "Loading of invalid input [%i:<%s>] must fail", _i, input);
+    fail_unless (message != NULL, "Loading of invalid input [%i:<%s>] must fail", _i, input);
     fail_if (cf, "Returned value for invalid input [%i:<%s>] is not NULL", _i, input);
 }
 END_TEST
