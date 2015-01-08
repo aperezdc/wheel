@@ -12,4 +12,4 @@ script:
     - $COVERAGE && export CC="${CC} -fprofile-arcs -ftest-coverage -O0 -g" || true
     - make all run-tests doc
 after_success:
-    - $COVERAGE && coveralls --include 'w*.c' --include wheel.h --gcov-options '\-lp' || true
+    - $COVERAGE && coveralls --exclude examples --exclude tests --gcov-options '\-lp' || true
