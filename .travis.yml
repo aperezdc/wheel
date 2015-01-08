@@ -1,0 +1,8 @@
+language: c
+compiler:
+    - clang
+    - gcc
+install:
+    - sudo apt-get install -y check
+script:
+    - make all run-tests doc
