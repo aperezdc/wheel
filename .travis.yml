@@ -6,7 +6,7 @@ install:
     - sudo pip install cpp-coveralls
     - sudo apt-get install -y check
 script:
-    - test "$CC" = gcc && export CC="$CC -fprofile-arcs -ftest-coverage -O0 -g"
+    - if [[ $CC = gcc ]] ; then export CC="${CC} -fprofile-arcs -ftest-coverage -O0 -g" ; endif
     - make all run-tests doc
 after_success:
     - coveralls --include 'w*.c' --include wheel.h --gcov-options '\-lp'

@@ -98,10 +98,12 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
     __attribute__((noreturn))
 # define W_FUNCTION_ATTR_NOT_NULL(_p) \
     __attribute__((nonnull _p))
-# define W_FUNCTION_ATTR_NOT_NULL_RETURN \
-    __attribute__((returns_nonnull))
 # define W_FUNCTION_ATTR_WARN_UNUSED_RESULT \
     __attribute__((warn_unused_result))
+# if __GNUC_MINOR__ > 6
+#  define W_FUNCTION_ATTR_NOT_NULL_RETURN \
+    __attribute__((returns_nonnull))
+# endif // __GNUC_MINOR__ > 6
 #else
 # define W_EXPORT
 # define W_HIDDEN
@@ -110,9 +112,12 @@ typedef void  (*w_action_fun_t)(void *object, void *context);
 # define W_FUNCTION_ATTR_MALLOC
 # define W_FUNCTION_ATTR_NORETURN
 # define W_FUNCTION_ATTR_NOT_NULL
-# define W_FUNCTION_ATTR_NOT_NULL_RETURN
 # define W_FUNCTION_ATTR_WARN_UNUSED_RESULT
 #endif
+
+#ifndef W_FUNCTION_ATTR_NOT_NULL_RETURN
+#define W_FUNCTION_ATTR_NOT_NULL_RETURN
+#endif // !W_FUNCTION_ATTR_NOT_NULL_RETURN
 
 /*\}*/
 
