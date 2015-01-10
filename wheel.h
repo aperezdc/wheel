@@ -296,25 +296,19 @@ W_EXPORT void w__debug (const char *func,
     ((void)0)
 #endif
 
-/*\}*/
 
 /*-----------------------------------------------[ string functions ]-----*/
 
-/*!
- * \defgroup wstr String functions
- * \addtogroup wstr
- * \{
- */
-
-W_EXPORT char* w_strfmtv (const char *fmt, va_list argl)
+W_EXPORT char* w_cstr_format (const char *format, ...)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-W_EXPORT char* w_strfmt (const char *fmt, ...)
+W_EXPORT char* w_cstr_formatv (const char *format, va_list args)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN
     W_FUNCTION_ATTR_NOT_NULL ((1));
+
 
 /*!
  * Hashes the start of a string.
@@ -515,7 +509,6 @@ w_strncpy (char *dst, const char *src, size_t n)
 	return result;
 }
 
-/*\}*/
 
 /*----------------------------------------------------------[ tasks ]-----*/
 

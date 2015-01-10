@@ -1,11 +1,20 @@
 /*
  * wioformat.c
- * Copyright (C) 2011-2014 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2011-2015 Adrian Perez <aperez@igalia.com>
  *
  * Distributed under terms of the MIT license.
  */
 
 #include "wheel.h"
+
+/*
+ * Define FPCONV_H to avoid fpconv/src/fpconv.h being included. That way,
+ * it is possible to make our own definition of the function that is private
+ * to libwheel.
+ */
+#define FPCONV_H
+static inline int fpconv_dtoa(double fp, char dest[24]);
+#include "fpconv/src/fpconv.c"
 
 
 static inline int
@@ -80,11 +89,8 @@ w_io_format_double (w_io_t *io, double value)
 {
     w_assert (io);
 
-    /*
-     * FIXME Avoid head allocation of the temporary string.
-     */
-    char *str = w_strfmt ("%g", value);
-    w_io_result_t r = w_io_write (io, str, strlen (str));
-    w_free (str);
+    char buf[24];
+    int nchars = fpconv_dtoa (value, buf);
+    w_io_result_t r = w_io_write (io, buf, nchars);
     return r;
 }

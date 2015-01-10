@@ -1,6 +1,6 @@
 /*
  * wstr.c
- * Copyright (C) 2010-2011 Adrian Perez <aperez@igalia.com>
+ * Copyright (C) 2010-2015 Adrian Perez <aperez@igalia.com>
  * Copyright (C) 2006 Adrian Perez <the.lightman@gmail.com>
  *
  * Distributed under terms of the MIT license.
@@ -16,37 +16,31 @@
 
 
 char*
-w_strfmtv(const char *fmt, va_list argl)
+w_cstr_format (const char *format, ...)
 {
-	char *ret;
-	int len;
-#if defined(__APPLE__) && defined(__MACH__)
-# define args_copy argl
-#else
-	va_list args_copy;
-	va_copy(args_copy, argl);
-#endif
-	w_assert(fmt != NULL);
+    w_assert (format);
 
-	len = vsnprintf(NULL, 0, fmt, argl);
-	ret = w_alloc(char, ++len);
-	vsnprintf(ret, len, fmt, args_copy);
+    w_io_buf_t buffer_stream;
+    w_io_buf_init (&buffer_stream, NULL, false);
 
-	return ret;
+    va_list args;
+    va_start (args, format);
+    W_IO_NORESULT (w_io_formatv (&buffer_stream.parent, format, args));
+    va_end (args);
+
+    return w_io_buf_str (&buffer_stream);
 }
 
 
 char*
-w_strfmt(const char *fmt, ...)
+w_cstr_formatv (const char *format, va_list args)
 {
-	char *ret;
-	va_list argl;
-	w_assert(fmt != NULL);
+    w_assert (format);
 
-	va_start(argl, fmt);
-	ret = w_strfmtv(fmt, argl);
-	va_end(argl);
-	return ret;
+    w_io_buf_t buffer_stream;
+    w_io_buf_init (&buffer_stream, NULL, false);
+    W_IO_NORESULT (w_io_formatv (&buffer_stream.parent, format, args));
+    return w_io_buf_str (&buffer_stream);
 }
 
 

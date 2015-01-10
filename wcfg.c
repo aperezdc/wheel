@@ -542,7 +542,7 @@ w_cfg_load_file (const char *path, char **msg)
     w_assert (path);
 
     if (!(io = w_io_unix_open (path, O_RDONLY, 0))) {
-        if (msg) *msg = w_strfmt ("Could not open file '%s' for reading", path);
+        if (msg) *msg = w_cstr_format ("Could not open file '$s' for reading", path);
         return NULL;
     }
 

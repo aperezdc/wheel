@@ -93,14 +93,3 @@ START_TEST (test_wstr_cpy)
                  "copied string is not 'foo'");
 }
 END_TEST
-
-
-START_TEST (test_wstr_fmt)
-{
-    char *result = w_strfmt ("this is %i/%03u", 34, 56);
-    fail_unless (strcmp ("this is 34/056", result) == 0,
-                 "unexpected resulting formatted string");
-}
-END_TEST
-
-
