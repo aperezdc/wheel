@@ -1435,9 +1435,6 @@ w_io_eof (w_io_result_t r) {
 }
 
 
-/*!
- * Input/output descriptor.
- */
 W_OBJ_DEF (w_io_t)
 {
     w_obj_t parent;
@@ -1466,16 +1463,6 @@ W_EXPORT w_io_result_t w_io_read (w_io_t *io, void *buf, size_t size)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-/*!
- * Reads data, until a given character or end of file is reached.
- * \param io        An input/output object.
- * \param data      Buffer where the read data is stored.
- * \param overflow  Buffer where temporary extra data is stored.
- * \param stopchar  Character used to determine when to stop reading.
- * \param readbytes Maximum read chunk size. If zero, a default size
- *                  is used.
- * \return Number of bytes read. Negative value on error.
- */
 W_EXPORT w_io_result_t w_io_read_until (w_io_t  *io,
                                         w_buf_t *data,
                                         w_buf_t *overflow,
@@ -1484,11 +1471,6 @@ W_EXPORT w_io_result_t w_io_read_until (w_io_t  *io,
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2, 3));
 
-/*!
- * Reads a line from an input stream.
- * This is a convenience macro that calls \ref w_io_read_until passing \c
- * '\n' as stop character.
- */
 static inline w_io_result_t w_io_read_line (w_io_t  *io,
                                             w_buf_t *data,
                                             w_buf_t *overflow,

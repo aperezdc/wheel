@@ -545,6 +545,25 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 }
 
 
+/*~f void w_print (format, ...)
+ *
+ * Writes data in the given `format` to the standard output stream
+ * ``w_stdout``. The amount of consumed arguments depends on the
+ * `format` string.
+ *
+ * See :ref:`formatted-output` for more information.
+ */
+
+/*~f void w_printerr (format, ...)
+ *
+ * Writes data in the given `format` to the standard error stream
+ * ``w_stderr``. The amount of consumed arguments depends on the
+ * `format` string.
+ *
+ * See :ref:`formatted-output` for more information.
+ */
+
+
 ssize_t
 w_io_fscan (w_io_t *io, const char *fmt, ...)
 {
@@ -609,6 +628,45 @@ w_io_fscanv (w_io_t *io, const char *fmt, va_list args)
 }
 
 
+/*~f w_io_result_t w_io_read_until (w_io_t *stream, w_buf_t *buffer, w_buf_t *overflow, int character, unsigned read_bytes)
+ *
+ * Reads data from a `stream` until a certain `character` is read. Data is
+ * read in chunks of `read_bytes` size, and placed in a `buffer`, with the
+ * excess characters placed in an `overflow` buffer, which can be passed
+ * back to continue scanning for the stop `character` in subsequent calls.
+ *
+ * Passing zero for the `read_bytes` size will make the function use a default
+ * chunk size — usually the size of a memory page.
+ *
+ * This function is intended to read records of data of variable size which
+ * are separated using a certain character as a delimiter. For example,
+ * usually `fortune <https://en.wikipedia.org/wiki/Fortune_%28Unix%29>`__
+ * data files have items separated by ``%`` characters. The following
+ * function would read such a file:
+ *
+ * .. code-block:: c
+ *
+ *      void read_fortunes (w_io_t *input) {
+ *          w_buf_t fortune = W_BUF;
+ *          w_buf_t overflow = W_BUF;
+ *
+ *          for (;;) {
+ *              w_io_result_t r = w_io_read_line (input, &fortune, &overflow, 0);
+ *
+ *              if (w_io_failed (r)) {
+ *                  w_printerr ("Error reading fortunes: $R\n" r);
+ *                  break;
+ *              }
+ *              if (w_io_eof (r))
+ *                  break;
+ *
+ *              handle_fortune (&fortune);
+ *          }
+ *
+ *          w_buf_clear (&overflow);
+ *          w_buf_clear (&fortune);
+ *      }
+ */
 w_io_result_t
 w_io_read_until (w_io_t  *io,
                  w_buf_t *buffer,
@@ -700,4 +758,12 @@ w_io_read_until (w_io_t  *io,
  *
  * When the `result` signals a failed operation, or the end-of-file marker,
  * the returned value is always zero.
+ */
+
+/*~f w_io_result_t w_io_read_line (w_io_t *stream, w_buf_t *line, w_buf_t *overflow, unsigned read_bytes)
+ *
+ * Reads a `line` of text from an input `stream`.
+ *
+ * This is a convenience function that calls :func:`w_io_read_until()` passing
+ * ``'\n'`` as delimiter character.
  */

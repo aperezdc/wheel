@@ -138,6 +138,13 @@ Functions
 
    See :ref:`formatted-output` for the available formatting options.
 
+.. c:function:: w_io_result_t w_buf_formatv (w_buf_t *buffer, const char *format, va_list arguments)
+
+   Appends text with a given `format` into a `buffer`, consuming additional
+   `arguments` as needed by the `format`.
+
+   See :ref:`formatted-output` for the available formatting options.
+
 .. c:function:: bool w_buf_is_empty (const w_buf_t *buffer)
 
    Checks whether a `buffer` is empty.

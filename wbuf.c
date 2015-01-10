@@ -298,6 +298,13 @@ w_buf_format (w_buf_t *buf, const char *fmt, ...)
 }
 
 
+/*~f w_io_result_t w_buf_formatv (w_buf_t *buffer, const char *format, va_list arguments)
+ *
+ * Appends text with a given `format` into a `buffer`, consuming additional
+ * `arguments` as needed by the `format`.
+ *
+ * See :ref:`formatted-output` for the available formatting options.
+ */
 w_io_result_t
 w_buf_formatv (w_buf_t *buf, const char *fmt, va_list args)
 {
