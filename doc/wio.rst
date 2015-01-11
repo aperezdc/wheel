@@ -168,6 +168,96 @@ Macros
 
    Makes a :type:`w_io_result_t` value which indicates a successful operation.
 
+.. c:macro:: W_IO_CHAIN (result, expression)
+
+   This macro expands to code that evaluates an `expression`, which must
+   return a :type:`w_io_result_t` value. If the operation failed, it
+   will cause the current function to return the error, otherwise the
+   amount of bytes returned by :func:`w_io_result_bytes()` are added
+   to the amount in the variable of type :func:`w_io_result_t` passed
+   as the `result` parameter.
+
+   Typical usage involves using the macro is inside a function that
+   performs a number of reads (or writes), and the overall status of a
+   “chain” of input/output operations is to be reported back as a result.
+
+   The expanded macro is roughly equivalent to:
+
+   .. code-block:: c
+
+        w_io_result_t expr_result = expression;
+        if (w_io_failed (expr_result))
+            return expr_result;
+        result.bytes += w_io_result_bytes (expr_result);
+
+   As an example, consider a data stream which contains “messages” of the
+   form ``SIZE:DATA``, with the *SIZE* of the message encoded as a plain
+   text integer, followed by a colon, and *SIZE* bytes of arbitrary data.
+   The following function reads such messages, one at a time, returning
+   the result of reading from the `input` as a :type:`w_io_result_t` value
+   —which can be checked for end-of-file or errors—, and returning the
+   *DATA* in a `buffer` and its expected `size`:
+
+   .. code-block:: c
+
+        w_io_result_t
+        read_message (w_io_t *input, w_buf_t *message, unsigned long *size)
+        {
+            w_io_result_t bytes = W_IO_RESULT (0);
+
+            // Read the length of the record. If reading fails, the macro
+            // causes the function to return early with an error result.
+            // The amount of bytes read is added to "bytes".
+            W_IO_CHAIN (bytes, w_io_fscan_ulong (input, size));
+
+            // Read the separator. Again: the macro causes an early error
+            // return on failure, or incrementing "bytes" on success.
+            char separator = '\0';
+            W_IO_CHAIN (bytes, w_io_read (input, &separator, 1));
+            if (separator != ':')
+                return W_IO_RESULT_ERROR (EBADMSG);
+
+            // Read the message contents. Again: the macro causes an early
+            // error on failure, or incrementing "bytes" on success.
+            w_buf_resize (message, record_size);
+            W_IO_CHAIN (bytes, w_io_read (input, w_buf_data (message), *size);
+
+            return bytes;  // Returns the total amount of bytes read.
+        }
+
+
+.. c:macro:: W_IO_CHECK (expression)
+
+   This macro expands to code that evaluates an `expression`, which must
+   return a :type:`w_io_result_t` value. If the operation failed, it will
+   cause the current function to return the error. It is roughly equivalent
+   to:
+
+   .. code-block:: c
+
+        w_io_result_t expr_result = expression;
+        if (w_io_failed (expr_result))
+            return expr_result;
+
+.. c:macro:: W_IO_CHECK_RETURN (expression, value)
+
+   Similar to :macro:`W_IO_CHECK`, but instead of returning a
+   :type:`w_io_result_t` if the `expression` fails to perform input/output,
+   the given `value` is returned instead. It is roughly equivalent to:
+
+   .. code-block:: c
+
+        if (w_io_failed (expression))
+            return value;
+
+.. c:macro:: W_IO_NORESULT (expression)
+
+   This macro expands to code that evaluates an `expression`, which must
+   return a :type:`w_io_result_t` value, and ignoring that result value.
+   This is typically used when a an input/output operation is known to never
+   fail, and the result status will not be checked, or when the operation
+   might fail, but it does not matter whether it did.
+
 
 .. _wio-functions:
 
