@@ -249,7 +249,7 @@ Functions
 
    See :ref:`formatted-output` for more information.
 
-.. c:function:: void w_print (format, ...)
+.. c:function:: w_io_result_t w_print (format, ...)
 
    Writes data in the given `format` to the standard output stream
    ``w_stdout``. The amount of consumed arguments depends on the
@@ -257,7 +257,7 @@ Functions
 
    See :ref:`formatted-output` for more information.
 
-.. c:function:: void w_printerr (format, ...)
+.. c:function:: w_io_result_t w_printerr (format, ...)
 
    Writes data in the given `format` to the standard error stream
    ``w_stderr``. The amount of consumed arguments depends on the

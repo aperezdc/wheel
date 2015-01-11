@@ -1521,10 +1521,32 @@ W_EXPORT w_io_result_t w_io_format_ulong_oct (w_io_t *io, unsigned long value)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
-#define w_print(...) \
-        W_IO_NORESULT (w_io_format (w_stdout, __VA_ARGS__))
-#define w_printerr(...) \
-        W_IO_NORESULT (w_io_format (w_stderr, __VA_ARGS__))
+static inline w_io_result_t w_print (const char *format, ...)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline w_io_result_t
+w_print (const char *format, ...)
+{
+    va_list args;
+    va_start (args, format);
+    w_io_result_t r = w_io_formatv (w_stdout, format, args);
+    va_end (args);
+    return r;
+}
+
+static inline w_io_result_t w_printerr (const char *format, ...)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+static inline w_io_result_t
+w_printerr (const char *format, ...)
+{
+    va_list args;
+    va_start (args, format);
+    w_io_result_t r = w_io_formatv (w_stderr, format, args);
+    va_end (args);
+    return r;
+}
+
 
 /*!
  * Reads formatted input from an I/O object.

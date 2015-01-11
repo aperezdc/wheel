@@ -545,7 +545,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
 }
 
 
-/*~f void w_print (format, ...)
+/*~f w_io_result_t w_print (format, ...)
  *
  * Writes data in the given `format` to the standard output stream
  * ``w_stdout``. The amount of consumed arguments depends on the
@@ -554,7 +554,7 @@ w_io_formatv (w_io_t *io, const char *fmt, va_list args)
  * See :ref:`formatted-output` for more information.
  */
 
-/*~f void w_printerr (format, ...)
+/*~f w_io_result_t w_printerr (format, ...)
  *
  * Writes data in the given `format` to the standard error stream
  * ``w_stderr``. The amount of consumed arguments depends on the
