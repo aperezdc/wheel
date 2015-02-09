@@ -73,5 +73,5 @@ clean: libwheel-clean
 
 $(libwheel_PATH)/wioformat.o: $(libwheel_PATH)/fpconv/src/fpconv.c
 $(libwheel_PATH)/fpconv/src/fpconv.c: $(libwheel_PATH)/.gitmodules
-	git submodule init fpconv
-	git submodule update fpconv
+	cd $(libwheel_PATH) && git submodule init fpconv
+	cd $(libwheel_PATH) && git submodule update fpconv
