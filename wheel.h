@@ -551,6 +551,48 @@ W_EXPORT w_io_result_t w_task_yield_io_write (w_io_t *io, const void *buf, size_
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1, 2));
 
+
+W_OBJ_DECL (w_task_listener_t);
+typedef void (*w_task_listener_func_t) (w_task_listener_t *listener,
+                                        w_io_t            *socket);
+
+W_OBJ_DEF (w_task_listener_t) {
+    w_obj_t                parent;
+    w_task_listener_func_t handle_connection;
+    char                  *bind_spec;
+    char                  *socket_name;
+    unsigned               socket_port;
+    int                    fd;
+    void                  *userdata;
+    bool                   running;
+};
+
+W_EXPORT w_task_listener_t* w_task_listener_new (const char            *bind_spec,
+                                                 w_task_listener_func_t handler,
+                                                 void                  *userdata)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT
+    W_FUNCTION_ATTR_NOT_NULL ((1, 2));
+
+W_EXPORT void w_task_listener_run (void *listener)
+    W_FUNCTION_ATTR_NOT_NULL ((1));
+
+W_EXPORT void w_task_listener_stop (w_task_listener_t *listener);
+
+static inline unsigned
+w_task_listener_port (const w_task_listener_t *listener)
+{
+    w_assert (listener);
+    return listener->socket_port;
+}
+
+static inline const char*
+w_task_listener_host (const w_task_listener_t *listener)
+{
+    w_assert (listener);
+    return listener->socket_name;
+}
+
+
 static inline const char* w_task_name (void)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL_RETURN;

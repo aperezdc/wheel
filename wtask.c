@@ -36,6 +36,12 @@
  * - The :func:`w_io_task_open()` and :func:`w_io_task_init()` functions
  *   can be used to create a :type:`w_io_task_t` wrapper to ease using
  *   asynchronous I/O with tasks.
+ *
+ * - Socket listeners, which greatly simplify writing network servers using
+ *   a task to handle each client connection: :func:`w_task_listener_new()`
+ *   can be used to create  a :type:`w_task_listener_t`, which then can be
+ *   run in a task to start accepting connections using
+ *   :func:`w_task_prepare()`.
  */
 
 /**
@@ -58,6 +64,17 @@
  * Type of task functions.
  */
 
+/*~t w_task_listener_t
+ *
+ * Type of a task-based socket listener.
+ */
+
+/*~t w_task_listener_func_t
+ *
+ * Type of handler functions for connections served using a task-based socket
+ * listener.
+ */
+
 /*~t w_io_task_t
  *
  * Stream wrapper for asynchronous input/output.
@@ -77,6 +94,10 @@
 #include "wheel.h"
 #include "queue.h"
 #include <sys/types.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
 #include <sys/mman.h>
 #include <stdint.h>
 #include <ucontext.h>
@@ -654,4 +675,333 @@ w_io_task_open (w_io_t *wrapped)
  * Obtain the name of the current task.
  *
  * See also :func:`w_task_get_name()`.
+ */
+
+
+struct listener_conn_info
+{
+    w_task_listener_t *listener;
+    w_io_t            *socket;
+};
+
+
+static void
+listener_conn_trampoline (void *obj)
+{
+    struct listener_conn_info *conn_info = obj;
+    w_assert (conn_info);
+
+    /*
+     * Save values to the stack, to avoid leaking the heap-allocated
+     * struct when w_task_exit() gets called. The connection handler
+     * callback function is supplied by the user, who does not know
+     * about what the trampoline is doing under the hood.
+     */
+    w_task_listener_t *listener = conn_info->listener;
+    w_io_t *socket = conn_info->socket;
+    w_free (conn_info);
+
+    (*listener->handle_connection) (listener, socket);
+}
+
+
+/*~f void w_task_listener_run (void *listener)
+ *
+ * Implements the logic for listener tasks. This function is a
+ * :type:`w_task_func_t`, and **must** be used along with
+ * func:`w_task_prepare()`, in the following way:
+ *
+ * .. code-block:: c
+ *
+ *    w_task_listener_t *listener = w_task_listener_new ( … );
+ *    w_task_prepare (w_task_listener_run, listener, 0);
+ *
+ * This The task scheduler will take care of running the listener.
+ */
+void
+w_task_listener_run (void *arg)
+{
+    CHECK_SCHEDULER ();
+    w_assert (arg);
+
+    w_task_listener_t *listener = w_obj_ref (arg);
+    listener->running = true;
+
+    while (listener->running) {
+        struct sockaddr sa;
+        socklen_t slen = sizeof (sa);
+
+        int new_fd = accept (listener->fd, (void*) &sa, &slen);
+        if (new_fd >= 0) {
+            int n = 1;
+            setsockopt (new_fd, IPPROTO_TCP, TCP_NODELAY, (char*) &n, sizeof (int));
+            w_io_t *client_io = w_io_unix_open_fd (new_fd);
+
+            struct listener_conn_info *conn_info = w_new (struct listener_conn_info);
+            conn_info->socket   = w_io_task_open (client_io);
+            conn_info->listener = listener;
+            w_obj_unref (client_io);
+
+            w_task_t *task = w_task_prepare (listener_conn_trampoline,
+                                             conn_info,
+                                             16384);
+
+            unsigned task_name_len = strlen (w_task_name ());
+            union {
+                char name[task_name_len + 2 + INET_ADDRSTRLEN];
+#ifdef W_CONF_IPv6
+                char name6[task_name_len + 2 + INET6_ADDRSTRLEN];
+#endif /* W_CONF_IPv6 */
+            } name;
+            strncpy (name.name, w_task_name (), task_name_len);
+            name.name[task_name_len] = '(';
+            if (inet_ntop (sa.sa_family, (void*) &sa,
+                           name.name + task_name_len + 1,
+                           sizeof (name) - task_name_len - 1)) {
+                strcat (name.name, ")"); /* XXX: Inefficient. */
+            } else {
+                strncat (name.name + task_name_len + 1, "?)", 2);
+            }
+            w_task_set_name (task, name.name);
+        } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            yield_to_scheduler (TASK_WAITIO);
+            /*
+             * XXX: Currently, if all tasks are in waiting state
+             *      (including TASK_WAITIO), the scheduler will keep
+             *      scheduling tasks instead of sleeping, and the CPU
+             *      will be all the time busy. Sleeping 500µs here is
+             *      good enough, but it is still a kludge.
+             */
+            usleep (500);
+        } else {
+            w_printerr ("$s: Error accepting connection: $E\n", w_task_name ());
+        }
+    }
+
+    w_obj_unref (listener);
+}
+
+
+/*~f void w_task_listener_stop (w_task_listener *listener)
+ *
+ * Stops a task listener. This function can be used to make a listener
+ * stop accepting connections, and shut down its associated socket.
+ */
+void
+w_task_listener_stop (w_task_listener_t *listener)
+{
+    CHECK_SCHEDULER ();
+    w_assert (listener);
+    listener->running = false;
+}
+
+
+/*
+ * Input: proto[:host]:port
+ * proto: tcp | tcp4 | tcp6
+ *  host: * | ip-address | hostname
+ *  port: number
+ */
+static bool
+make_listener_socket (w_task_listener_t *listener,
+                      const char        *spec)
+{
+    char *lcolon = strchr (spec, ':');
+    char *rcolon = strchr (spec, ':');
+    unsigned proto_len = (unsigned) (lcolon - spec);
+    unsigned addr_len = (unsigned) (rcolon - lcolon);
+
+    if (!w_str_uint (rcolon + 1, &listener->socket_port))
+        return false;
+
+#ifdef W_CONF_IPv6
+    bool ipv4_in_ipv6 = false;
+    struct sockaddr_in6 sa;
+#else
+    struct sockaddr_in sa;
+#endif /* W_CONF_IPv6 */
+
+    memset (&sa, 0x00, sizeof (sa));
+    sa.sin_port = htons (listener->socket_port);
+
+    switch (proto_len) {
+        case 3:
+            if (!strncmp ("tcp", spec, 3)) {
+#ifdef W_CONF_IPv6
+                sa.sin_family = AF_INET6;
+                ipv4_in_ipv6  = true;
+#else
+                sa.sin_family = AF_INET;
+#endif /* W_CONF_IPv6 */
+            } else {
+                return false;
+            }
+            break;
+
+        case 4:
+            if (!strncmp ("tcp4", spec, 4)) {
+                sa.sin_family = AF_INET;
+#ifdef W_CONF_IPv6
+            } else if (!strncmp ("tcp6", spec, 4)) {
+                sa.sin_family = AF_INET6;
+#endif /* W_CONF_IPv6 */
+            } else {
+                return false;
+            }
+            break;
+
+        default:
+            return false;
+    }
+
+#ifdef W_CONF_IPv6
+    sa.sin6_addr.s_addr = in6addr_any;
+#else
+    sa.sin_addr.s_addr = INADDR_ANY;
+#endif /* W_CONF_IPv6 */
+
+    if (addr_len) {
+        char address[addr_len + 1];
+        strncpy (address, lcolon + 1, addr_len);
+#ifdef W_CONF_IPv6
+#else
+#endif /* W_CONF_IPv6 */
+    }
+
+    int fd = socket (sa.sin_family, SOCK_STREAM, 0);
+    if (fd < 0) return false;
+
+    socklen_t slen;
+    int n;
+    if (getsockopt (fd, SOL_SOCKET, SO_TYPE, (void*) &n, &slen) >= 0) {
+        n = 1;
+        setsockopt (fd, SOL_SOCKET, SO_REUSEADDR, (char*) &n, sizeof (int));
+    }
+
+    if (bind (fd, (struct sockaddr*) &sa, sizeof (sa)) == -1) {
+        close (fd);
+        return false;
+    }
+
+    if (listen (fd, 16) == -1) {
+        close (fd);
+        return false;
+    }
+
+    n = fcntl (fd, F_GETFL);
+    if (n < 0 || fcntl (fd, F_SETFL, n | O_NONBLOCK) == -1) {
+        close (fd);
+        return false;
+    }
+
+    listener->fd = fd;
+    return true;
+}
+
+
+static bool
+w_task_listener_init (w_task_listener_t     *listener,
+                      const char            *bind_spec,
+                      w_task_listener_func_t handler,
+                      void                  *userdata)
+{
+    w_assert (listener);
+    w_assert (bind_spec);
+    w_assert (handler);
+
+    listener->handle_connection = handler;
+    listener->userdata = userdata;
+
+    if (!make_listener_socket (listener, bind_spec))
+        return false;
+
+    listener->bind_spec = w_str_dup (bind_spec);
+    listener->socket_name = NULL; /* TODO */
+    return true;
+}
+
+
+static void
+w_task_listener_destroy (void *obj)
+{
+    w_task_listener_t *listener = obj;
+    w_free (listener->bind_spec);
+    w_free (listener->socket_name);
+}
+
+
+/*~f w_task_listener_t* w_task_listener_new(const char *bind_spec, w_task_listener_func_t handler, void* userdata)
+ *
+ * Creates a new task-based socket listener.
+ *
+ * A listener will create a socket bound to the protocol, address, and port
+ * specified by `bind_spec`; using the `handler` function to serve each
+ * connection. Once the listener is started, it will use a task for accepting
+ * connections, plus one new task to handle each client connection.
+ *
+ * The `bind_spec` is a string in the ``protocol:port``, or
+ * ``protocol:host:port`` formats, and it determines the address to which the
+ * listening socket is bound. The value for ``port`` must be numeric, ``host``
+ * can be an IP address, or a host name. If a ``host`` value is not supplied,
+ * the listener will use the wildcard address to listen on all interfaces. The
+ * recognized values for ``protocol`` are:
+ *
+ * - ``tcp4``: IPv4 TCP socket.
+ * - ``tcp6``: IPv6 TCP socket. Only available if the library is build with
+ *   ``W_CONF_IPv6``.
+ * - ``tcp``: If IPv6 support is built in the library, use a dual-stack
+ *   socket, which works both for IPv4 and IPv6; otherwise fall-back to
+ *   using IPv4 only.
+ *
+ * Once a listener has been created, a task for it needs to be created using
+ * :func:`w_task_prepare()` using the :func:`w_task_listener_run()` function
+ * as task implementation.
+ *
+ * The following example creates a task-based TCP server which will just
+ * accept connections, and write a single line of content to clients:
+ *
+ * .. code-block:: c
+ *
+ *    static void
+ *    handle_connection (w_task_listener_t *listener, w_io_t *socket) {
+ *      w_unused (listener);
+ *      w_printerr ("$s: Connection accepted!\n", w_task_name ());
+ *      W_IO_NORESULT (w_io_format ("Hello from task $s\n", w_task_name ()));
+ *      W_IO_NORESULT (w_io_close (socket));
+ *    }
+ *
+ *    int main () {
+ *      w_task_listener_t *listener =
+ *              w_task_listener_new ("tcp:9000", handle_connection, NULL);
+ *      w_task_prepare (w_task_listener_run, listener, 0);
+ *      w_task_run_scheduler ();
+ *      w_obj_unref (listener);
+ *      return 0;
+ *    }
+ */
+w_task_listener_t*
+w_task_listener_new (const char            *bind_spec,
+                     w_task_listener_func_t handler,
+                     void                  *userdata)
+{
+    w_assert (bind_spec);
+    w_assert (handler);
+
+    w_task_listener_t *listener = w_obj_new (w_task_listener_t);
+    if (w_task_listener_init (listener, bind_spec, handler, userdata))
+        return w_obj_dtor (listener, w_task_listener_destroy);
+
+    w_obj_unref (listener);
+    return NULL;
+}
+
+/*~f unsigned w_task_listener_port (const w_task_listener_t *listener)
+ *
+ * Returns the port to which a listener is bound.
+ */
+
+/*~f const char* w_task_listener_host (const w_task_listener_t *listener)
+ *
+ * Returns the address (or hostname, if available) to which the listener is
+ * bound. Do not free the returned string.
  */
