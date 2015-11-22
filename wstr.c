@@ -14,6 +14,13 @@
 #include <stdio.h>
 #include <math.h>
 
+#ifdef W_CONF_SIPHASH
+static inline int siphash (uint8_t *out, const uint8_t *in, uint64_t inlen, const uint8_t *k);
+#include "siphash/siphash24.c"
+#include <sys/time.h>
+#include <unistd.h>
+#include <fcntl.h>
+#endif /* W_CONF_SIPHASH */
 
 /*~f char* w_cstr_format (const char *format, ...)
  *
@@ -62,33 +69,65 @@ w_cstr_formatv (const char *format, va_list args)
 }
 
 
-unsigned
+uint64_t
 w_str_hash (const char *str)
 {
-	register unsigned ret = 0;
-	register unsigned ctr = 0;
+#ifdef W_CONF_SIPHASH
+    return w_str_hashl (str, strlen (str));
+#else
+	register uint64_t ret = 0;
+	register uint64_t ctr = 0;
 	w_assert(str != NULL);
 
 	while (*str) {
 		ret ^= *str++ << ctr;
-		ctr  = (ctr + 1) % sizeof(void*);
+		ctr  = (ctr + 1) % sizeof (void*);
 	}
 	return ret;
+#endif /* W_CONF_SIPHASH */
 }
 
 
-unsigned
+uint64_t
 w_str_hashl (const char *str, size_t len)
 {
-	register unsigned ret = 0;
-	register unsigned ctr = 0;
+#ifdef W_CONF_SIPHASH
+    static uint8_t key[16] = { 0, };
+    if (key[0] == 0) {
+        /* Try getting data from /dev/urandom if possible */
+        int fd = open ("/dev/urandom", O_RDONLY);
+        if (fd >= 0) {
+            int ret = read (fd, key, 16);
+            close (fd);
+            if (ret < 16)
+                fd = -1;
+        }
+        if (fd < 0) {
+            struct timeval tv;
+            gettimeofday (&tv, NULL);
+            uint32_t *words = (uint32_t*) key;
+            words[0] = tv.tv_sec ^ tv.tv_usec;
+            words[1] = tv.tv_sec;
+            words[2] = tv.tv_usec;
+            words[3] = getpid ();
+        }
+        key[0] |= 0x01;
+    }
+
+    uint8_t hash[8] = { 0, };
+    siphash (hash, (const uint8_t*) str, len, key);
+    return *((uint64_t*) hash);
+#else
+	register uint64_t ret = 0;
+	register uint64_t ctr = 0;
 	w_assert(str != NULL);
 
 	while (len-- && *str) {
 		ret ^= *str++ << ctr;
-		ctr  = (ctr + 1) % sizeof(void*);
+		ctr  = (ctr + 1) % sizeof (void*);
 	}
 	return ret;
+#endif /* W_CONF_SIPHASH */
 }
 
 

@@ -1,3 +1,6 @@
 [submodule "fpconv"]
 	path = fpconv
 	url = https://github.com/night-shift/fpconv/
+[submodule "siphash"]
+	path = siphash
+	url = https://github.com/veorq/SipHash

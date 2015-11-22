@@ -316,7 +316,7 @@ W_EXPORT char* w_cstr_formatv (const char *format, va_list args)
  * \param len Number of characters to hash.
  * \return Hash value.
  */
-W_EXPORT unsigned w_str_hashl (const char *str, size_t len)
+W_EXPORT uint64_t w_str_hashl (const char *str, size_t len)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 
@@ -325,7 +325,7 @@ W_EXPORT unsigned w_str_hashl (const char *str, size_t len)
  * \param str String to get the hash of.
  * \return Hash value.
  */
-W_EXPORT unsigned w_str_hash (const char *str)
+W_EXPORT uint64_t w_str_hash (const char *str)
     W_FUNCTION_ATTR_WARN_UNUSED_RESULT
     W_FUNCTION_ATTR_NOT_NULL ((1));
 

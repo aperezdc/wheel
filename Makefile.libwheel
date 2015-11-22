@@ -75,3 +75,14 @@ $(libwheel_PATH)/wioformat.o: $(libwheel_PATH)/fpconv/src/fpconv.c
 $(libwheel_PATH)/fpconv/src/fpconv.c: $(libwheel_PATH)/.gitmodules
 	cd $(libwheel_PATH) && git submodule init fpconv
 	cd $(libwheel_PATH) && git submodule update fpconv
+	touch $@
+
+ifneq ($(libwheel_SIPHASH),0)
+CPPFLAGS      += -DW_CONF_SIPHASH
+$(libwheel_PATH)/wstr.c: $(libwheel_PATH)/siphash/siphash24.c
+$(libwheel_PATH)/siphash/siphash24.c: $(libwheel_PATH)/.gitmodules
+	cd $(libwheel_PATH) && git submodule init siphash
+	cd $(libwheel_PATH) && git submodule update siphash
+	touch $@
+endif
+
