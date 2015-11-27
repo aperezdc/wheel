@@ -747,22 +747,21 @@ w_task_listener_run (void *arg)
                                              16384);
 
             unsigned task_name_len = strlen (w_task_name ());
-            union {
-                char name[task_name_len + 2 + INET_ADDRSTRLEN];
-#ifdef W_CONF_IPv6
-                char name6[task_name_len + 2 + INET6_ADDRSTRLEN];
-#endif /* W_CONF_IPv6 */
-            } name;
-            strncpy (name.name, w_task_name (), task_name_len);
-            name.name[task_name_len] = '(';
+#if defined(W_CONF_IPv6) && INET6_ADDRSTRLEN > INET_ADDRSTRLEN
+            char name[task_name_len + 2 + INET6_ADDRSTRLEN];
+#else
+            char name[task_name_len + 2 + INET_ADDRSTRLEN];
+#endif /* W_CONF_IPv6 && INET6_ADDRSTRLEN > INET_ADDRSTRLEN */
+            strncpy (name, w_task_name (), task_name_len);
+            name[task_name_len] = '(';
             if (inet_ntop (sa.sa_family, (void*) &sa,
-                           name.name + task_name_len + 1,
+                           name + task_name_len + 1,
                            sizeof (name) - task_name_len - 1)) {
-                strcat (name.name, ")"); /* XXX: Inefficient. */
+                strcat (name, ")"); /* XXX: Inefficient. */
             } else {
-                strncat (name.name + task_name_len + 1, "?)", 2);
+                strncat (name + task_name_len + 1, "?)", 2);
             }
-            w_task_set_name (task, name.name);
+            w_task_set_name (task, name);
         } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
             yield_to_scheduler (TASK_WAITIO);
             /*
