@@ -2869,8 +2869,7 @@ typedef void (*w_tty_notify_fun_t) (unsigned, unsigned, void*);
  * \note This functionality requires the \c SIGWINCH signal to be defined.
  */
 W_EXPORT bool w_tty_size_notify (w_tty_notify_fun_t function,
-                                 void              *context)
-    W_FUNCTION_ATTR_NOT_NULL ((1));
+                                 void              *context);
 
 /*\}*/
 
