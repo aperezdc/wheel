@@ -5,11 +5,15 @@ compiler:
 env:
     - COVERAGE=false
     - COVERAGE=true
-install:
-    - $COVERAGE && sudo pip install cpp-coveralls || true
-    - sudo apt-get install -y check python-sphinx
+sudo: false
+addons:
+    apt:
+        packages:
+            - check
+            - python-sphinx
 script:
     - $COVERAGE && export CC="${CC} -fprofile-arcs -ftest-coverage -O0 -g" || true
+    - $COVERAGE && pip install cpp-coveralls || true
     - make all run-tests doc
 after_success:
     - $COVERAGE && coveralls --exclude examples --exclude tests --gcov-options '\-lp' || true
