@@ -303,7 +303,7 @@ w_event_loop_backend_init (w_event_loop_t *loop)
     ep->fd = ep->signal_fd = -1;
     sigemptyset (&ep->signal_mask);
     ep->signal_events = w_list_new (false);
-    return 0;
+    return false;
 }
 
 
