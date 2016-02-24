@@ -34,7 +34,7 @@ w_tnetstr_dump_null (w_buf_t *buffer)
 {
     w_assert (buffer);
 
-    w_io_result_t r = { .bytes = w_lengthof (_w_tns_null) - 1 };
+    w_io_result_t r = W_IO_RESULT (w_lengthof (_w_tns_null) - 1);
     w_buf_append_mem (buffer, _w_tns_null, r.bytes);
     return r;
 }
@@ -54,11 +54,11 @@ w_tnetstr_dump_bool (w_buf_t *buffer, bool value)
     w_assert (buffer);
 
     if (value) {
-        w_io_result_t r = { .bytes = w_lengthof (_w_tns_true) - 1 };
+        w_io_result_t r = W_IO_RESULT (w_lengthof (_w_tns_true) - 1);
         w_buf_append_mem (buffer, _w_tns_true, r.bytes);
         return r;
     } else {
-        w_io_result_t r = { .bytes = w_lengthof (_w_tns_false) - 1 };
+        w_io_result_t r = W_IO_RESULT (w_lengthof (_w_tns_false) - 1);
         w_buf_append_mem (buffer, _w_tns_false, r.bytes);
         return r;
     }
