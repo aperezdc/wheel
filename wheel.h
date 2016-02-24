@@ -1391,18 +1391,18 @@ struct w_io_result {
 #define W__LCAT2(_name, _line) W__LCAT3(_name ## _, _line)
 #define W__LCAT(_name) W__LCAT2(_name, __LINE__)
 
+static inline w_io_result_t w__io_result_make (ssize_t bytes)
+    W_FUNCTION_ATTR_WARN_UNUSED_RESULT;
+static inline w_io_result_t w__io_result_make (ssize_t bytes)
+{
+    w_io_result_t r = { { bytes } };
+    return r;
+}
 
-#define W_IO_RESULT(_v) \
-    ((w_io_result_t) { .bytes = (_v) })
-
-#define W_IO_RESULT_ERROR(_v) \
-    ((w_io_result_t) { .error = - (_v) })
-
-#define W_IO_RESULT_EOF \
-    ((w_io_result_t) { .error = -W_IO_EOF })
-
-#define W_IO_RESULT_SUCCESS \
-    ((w_io_result_t) { .error = W_IO_SUCCESS })
+#define W_IO_RESULT(_v)        (w__io_result_make (_v))
+#define W_IO_RESULT_ERROR(_v)  (w__io_result_make (- (_v)))
+#define W_IO_RESULT_EOF        (w__io_result_make (-W_IO_EOF))
+#define W_IO_RESULT_SUCCESS    (w__io_result_make (W_IO_SUCCESS))
 
 
 #define W_IO_CHAIN(_r, _iocall)                           \
