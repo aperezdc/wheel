@@ -263,7 +263,7 @@ found:
 }
 
 
-#ifdef W_EVENT_BACKEND_EPOLL
+#if defined(W_EVENT_BACKEND_EPOLL)
 #include <sys/signalfd.h>
 #include <sys/timerfd.h>
 #include <sys/epoll.h>
@@ -588,4 +588,200 @@ w_event_loop_backend_stop (w_event_loop_t *loop)
     return false;
 }
 
+#elif defined(W_EVENT_BACKEND_KQUEUE)
+#include <sys/event.h>
+
+struct w_kqueue
+{
+    int fd;
+};
+typedef struct w_kqueue w_kqueue_t;
+
+
+static size_t
+w_event_loop_backend_size (void)
+{
+    return sizeof (w_kqueue_t);
+}
+
+
+static bool
+w_event_loop_backend_init (w_event_loop_t *loop)
+{
+    w_kqueue_t *kq = w_obj_priv (loop, w_event_loop_t);
+
+    w_assert (loop);
+    w_assert (kq);
+
+    /*
+     * The kqueue file descript will be created lazily when an event is first
+     * added to the event loop.
+     */
+    kq->fd = -1;
+    return false;
+}
+
+
+static void
+w_event_loop_backend_free (w_event_loop_t *loop)
+{
+    w_kqueue_t *kq = w_obj_priv (loop, w_event_loop_t);
+    w_assert (loop);
+    w_assert (kq);
+
+    if (kq->fd >= 0)
+        close (kq->fd);
+}
+
+
+static bool
+to_kevent (struct kevent *kev, w_event_t *event)
+{
+    w_assert (kev);
+    w_assert (event);
+
+    int fd = -1;
+    short filter = 0;
+
+    switch (event->type) {
+        case W_EVENT_IO:
+        case W_EVENT_FD:
+            /* ident, filter, flags, fflags, data, udata */
+            if (W_HAS_FLAG (event->flags, W_EVENT_IN))
+                filter |= EVFILT_READ;
+            if (W_HAS_FLAG (event->flags, W_EVENT_OUT))
+                filter |= EVFILT_WRITE;
+
+            fd = (event->type == W_EVENT_IO)
+               ? w_io_get_fd (event->io)
+               : event->fd;
+            if (fd < 0 || fd_set_nonblocking (fd))
+                return true;
+
+            EV_SET (kev, fd, filter, EV_CLEAR, 0, 0, event);
+            break;
+
+        case W_EVENT_SIGNAL:
+            /* EVFILT_SIGNAL implies EV_CLEAR */
+            EV_SET (kev, event->signum, EVFILT_SIGNAL, 0, 0, 0, event);
+            break;
+
+        case W_EVENT_TIMER:
+            return true; /* TODO */
+
+        case W_EVENT_IDLE:
+            W_BUG ("Called with event of type E_EVENT_IDLE\n");
+    }
+
+    return false;
+}
+
+
+static bool
+w_event_loop_backend_add (w_event_loop_t *loop, w_event_t *event)
+{
+    w_assert (loop);
+    w_assert (event);
+    w_assert (event->type != W_EVENT_IDLE);
+
+    w_kqueue_t *kq = w_obj_priv (loop, w_event_loop_t);
+    w_assert (kq);
+
+    if (kq->fd < 0 && (kq->fd = kqueue ()) == -1)
+        return true;
+
+    struct kevent kev;
+    if (to_kevent (&kev, event))
+        return true;
+
+    kev.flags |= EV_ADD;
+
+    return kevent (kq->fd, &kev, 1, NULL, 0, NULL) == -1;
+}
+
+
+static bool
+w_event_loop_backend_del (w_event_loop_t *loop, w_event_t *event)
+{
+    w_assert (loop);
+    w_assert (event);
+
+    w_kqueue_t *kq = w_obj_priv (loop, w_event_loop_t);
+    w_assert (kq);
+
+    struct kevent kev;
+    if (to_kevent (&kev, event))
+        return true;
+
+    kev.flags |= EV_DELETE;
+
+    return kevent (kq->fd, &kev, 1, NULL, 0, NULL) == -1;
+}
+
+
+static bool
+w_event_loop_backend_start (w_event_loop_t *loop)
+{
+    w_assert (loop);
+
+    /* TODO: Arm timers? */
+    return false;
+}
+
+
+static bool
+w_event_loop_backend_stop (w_event_loop_t *loop)
+{
+    w_assert (loop);
+
+    /* TODO: Disarm timers? */
+    return false;
+}
+
+
+static inline struct timespec*
+to_timespec (struct timespec *ts, w_timestamp_t timeout)
+{
+    w_assert (ts);
+
+    /* Add half epsilon to round the input */
+    timeout += 0.5e-9;
+
+    ts->tv_sec = (time_t) timeout;
+    ts->tv_nsec = (long) (timeout - ts->tv_sec) * 1000000000L;
+    return ts;
+}
+
+
+static bool
+w_event_loop_backend_poll (w_event_loop_t *loop, w_timestamp_t timeout)
+{
+    w_assert (loop);
+
+    w_kqueue_t *kq = w_obj_priv (loop, w_event_loop_t);
+    w_assert (kq);
+    w_assert (kq->fd >= 0);
+
+    struct timespec ts;
+    struct kevent events[W_EVENT_LOOP_NEVENTS];
+    int nevents = kevent (kq->fd,
+                          NULL, 0,
+                          events, W_EVENT_LOOP_NEVENTS,
+                          (timeout > 0.0) ? to_timespec (&ts, timeout) : NULL);
+
+    /* TODO: Check for errors on (nevents < 0) */
+
+    loop->now = w_timestamp_now ();
+
+    bool stop_loop = false;
+    for (int i = 0; i < nevents && !stop_loop; i++) {
+        w_event_t *event = events[i].udata;
+        if ((*event->callback) (loop, event))
+            stop_loop = true;
+    }
+    return stop_loop;
+}
+
+#else
+# error No events support available
 #endif /* W_EVENT_BACKEND_EPOLL */
