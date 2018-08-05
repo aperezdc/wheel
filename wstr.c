@@ -15,8 +15,10 @@
 #include <math.h>
 
 #ifdef W_CONF_SIPHASH
-static inline int siphash (uint8_t *out, const uint8_t *in, uint64_t inlen, const uint8_t *k);
-#include "siphash/siphash24.c"
+static inline int siphash (const uint8_t *in, size_t inlen,
+                           const uint8_t *k,
+                           uint8_t *out, const size_t outlen);
+#include "siphash/siphash.c"
 #include <sys/time.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -115,7 +117,7 @@ w_str_hashl (const char *str, size_t len)
     }
 
     uint8_t hash[8] = { 0, };
-    siphash (hash, (const uint8_t*) str, len, key);
+    siphash ((const uint8_t*) str, len, key, hash, sizeof (hash));
     return *((uint64_t*) hash);
 #else
 	register uint64_t ret = 0;
